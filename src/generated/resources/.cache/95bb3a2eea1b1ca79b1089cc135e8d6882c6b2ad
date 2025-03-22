@@ -1,0 +1,4 @@
+// 1.20.1	2025-03-08T09:07:32.091809	Global Loot Modifiers : tutorialmod
+d2b74f6865197f3ac276b67ca70fcd1b0d4d86d7 data/forge/loot_modifiers/global_loot_modifiers.json
+851ef40cf6f54f6d8b56b2de5bc31a642a20d39d data/tutorialmod/loot_modifiers/metal_detector_from_suspicious_sand.json
+864219d99b05d4cc0b541330bdaec0469669e9bc data/tutorialmod/loot_modifiers/tomato_from_grass.json
