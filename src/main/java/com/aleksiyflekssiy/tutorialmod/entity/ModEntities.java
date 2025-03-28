@@ -48,7 +48,7 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<DivineDogEntity>> DIVINE_DOG = ENTITIES.register("divine_dog",
             () -> EntityType.Builder.<DivineDogEntity>of(DivineDogEntity::new, MobCategory.CREATURE)
-                    .sized(0.5f,1.5f)
+                    .sized(1.5f,1.5f)
                     .build("tutorialmod:divine_dog"));
 
     public static void register(IEventBus bus) {

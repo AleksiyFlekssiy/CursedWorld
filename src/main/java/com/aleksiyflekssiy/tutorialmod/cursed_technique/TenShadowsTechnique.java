@@ -8,8 +8,8 @@ import java.util.List;
 public class TenShadowsTechnique extends CursedTechnique{
     private final List<Skill> skills = List.of(new DivineDogs());
 
-    public TenShadowsTechnique(boolean haveDomain) {
-        super(haveDomain);
+    public TenShadowsTechnique() {
+        super(true);
     }
 
     @Override

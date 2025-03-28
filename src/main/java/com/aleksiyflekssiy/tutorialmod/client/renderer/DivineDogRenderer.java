@@ -12,7 +12,8 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public class DivineDogRenderer extends MobRenderer<DivineDogEntity, DivineDogModel<DivineDogEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("tutorialmod", "textures/entity/divine_dog.png");
+    private static final ResourceLocation[] TEXTURES = {new ResourceLocation("tutorialmod", "textures/entity/divine_dog.png"),
+    new ResourceLocation("tutorialmod", "textures/entity/black_dog.png")};
 
     public DivineDogRenderer(EntityRendererProvider.Context context) {
         super(context, new DivineDogModel<>(context.bakeLayer(TutorialMod.ClientModEvents.DIVINE_DOG_LAYER)), 1.5f);
@@ -30,6 +31,6 @@ public class DivineDogRenderer extends MobRenderer<DivineDogEntity, DivineDogMod
 
     @Override
     public ResourceLocation getTextureLocation(DivineDogEntity entity) {
-        return TEXTURE;
+        return TEXTURES[entity.getColor().ordinal()];
     }
 }

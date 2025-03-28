@@ -2,6 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.capability;
 
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.CursedTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.LimitlessCursedTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -35,7 +36,7 @@ public class CursedTechniqueCapability {
         private Skill currentSkill;
 
         public TechniqueHolder() {
-            this.technique = new LimitlessCursedTechnique(); // По умолчанию
+            this.technique = new TenShadowsTechnique(); // По умолчанию
             this.currentSkill = technique.getSkillSet().get(0); // Первый скилл техники
         }
 
@@ -46,7 +47,7 @@ public class CursedTechniqueCapability {
 
         @Override
         public void setTechnique(CursedTechnique technique) {
-            this.technique = technique != null ? technique : new LimitlessCursedTechnique();
+            this.technique = technique != null ? technique : new TenShadowsTechnique();
             // При смене техники сбрасываем текущий скилл на первый в новом наборе
             this.currentSkill = this.technique.getSkillSet().isEmpty() ? null : this.technique.getSkillSet().get(0);
         }
@@ -154,6 +155,7 @@ public class CursedTechniqueCapability {
             return switch (name) {
                 case "Limitless" -> new LimitlessCursedTechnique();
                 // Добавь другие техники здесь
+                case "Ten Shadows" -> new TenShadowsTechnique();
                 default -> new LimitlessCursedTechnique(); // Запасной вариант вместо null
             };
         }
@@ -165,6 +167,7 @@ public class CursedTechniqueCapability {
                 case "Red" -> new Red();
                 case "Hollow Purple" -> new HollowPurple();
                 case "Unlimited Void" -> new UnlimitedVoid();
+                case "Divine Dogs" -> new DivineDogs();
                 default -> null; // Оставляем null, так как проверка происходит позже
             };
         }

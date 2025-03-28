@@ -55,6 +55,10 @@ public class UseSkillPacket {
                         UnlimitedVoid unlimitedVoid = (UnlimitedVoid) activeSkill;
                         unlimitedVoid.use(player, msg.useType, msg.charge);
                         break;
+                    case "Divine Dogs":
+                        DivineDogs divineDogs = (DivineDogs) activeSkill;
+                        divineDogs.use(player, msg.useType, msg.charge);
+                        break;
                 }
             }
         });
