@@ -59,6 +59,10 @@ public class UseSkillPacket {
                         DivineDogs divineDogs = (DivineDogs) activeSkill;
                         divineDogs.use(player, msg.useType, msg.charge);
                         break;
+                    case "Nue":
+                        Nue nue = (Nue) activeSkill;
+                        nue.use(player, msg.useType, msg.charge);
+                        break;
                 }
             }
         });

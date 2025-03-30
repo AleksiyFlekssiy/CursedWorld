@@ -3,10 +3,7 @@ package com.aleksiyflekssiy.tutorialmod;
 import com.aleksiyflekssiy.tutorialmod.block.ModBlocks;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.client.model.BlueModel;
-import com.aleksiyflekssiy.tutorialmod.client.model.HollowPurpleModel;
-import com.aleksiyflekssiy.tutorialmod.client.model.RedModel;
-import com.aleksiyflekssiy.tutorialmod.client.model.DivineDogModel;
+import com.aleksiyflekssiy.tutorialmod.client.model.*;
 import com.aleksiyflekssiy.tutorialmod.client.particle.BluePullParticle;
 import com.aleksiyflekssiy.tutorialmod.client.particle.LaunchRingParticle;
 import com.aleksiyflekssiy.tutorialmod.client.renderer.*;
@@ -134,6 +131,7 @@ public class TutorialMod
         public static final ModelLayerLocation RED_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "red_entity"), "main");
         public static final ModelLayerLocation HOLLOW_PURPLE_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "hollow_purple_entity"), "main");
         public static final ModelLayerLocation DIVINE_DOG_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "divine_dog"), "main");
+        public static final ModelLayerLocation NUE_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "nue"), "main");
 
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
@@ -170,6 +168,7 @@ public class TutorialMod
             event.registerEntityRenderer(ModEntities.ANIMATION_BLUE_ENTITY.get(), AnimationBlueRenderer::new);
             event.registerEntityRenderer(ModEntities.ANIMATION_RED_ENTITY.get(), AnimationRedRenderer::new);
             event.registerEntityRenderer(ModEntities.DIVINE_DOG.get(), DivineDogRenderer::new);
+            event.registerEntityRenderer(ModEntities.NUE.get(), NueRenderer::new);
         }
 
         @SubscribeEvent
@@ -178,6 +177,7 @@ public class TutorialMod
             event.registerLayerDefinition(RED_LAYER, RedModel::createBodyLayer);
             event.registerLayerDefinition(HOLLOW_PURPLE_LAYER, HollowPurpleModel::createBodyLayer);
             event.registerLayerDefinition(DIVINE_DOG_LAYER, DivineDogModel::createBodyLayer);
+            event.registerLayerDefinition(NUE_LAYER, NueModel::createBodyLayer);
         }
 
         @SubscribeEvent
@@ -185,6 +185,5 @@ public class TutorialMod
             event.registerSpriteSet(ModParticles.LAUNCH_RING.get(), LaunchRingParticle.Provider::new);
             event.registerSpriteSet(ModParticles.BLUE_PULL.get(), BluePullParticle.Provider::new);
         }
-
     }
 }

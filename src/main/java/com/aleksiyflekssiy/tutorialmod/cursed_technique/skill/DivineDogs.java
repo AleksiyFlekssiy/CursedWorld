@@ -44,18 +44,22 @@ public class DivineDogs extends Skill {
             System.out.println("ACTIVATE");
             BlockPos spawnPos = entity.blockPosition();
             if (whiteDivineDog == null || !whiteDivineDog.isAlive()) { // Проверяем, жива ли сущность
-                    whiteDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level(), (Player) entity, areTamed);
+                    whiteDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
                     whiteDivineDog.setColor(DivineDogEntity.Color.WHITE);
                     whiteDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                     entity.level().addFreshEntity(whiteDivineDog);
             }
             if (blackDivineDog == null || !blackDivineDog.isAlive()) {
-                blackDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level(), (Player) entity, areTamed);
+                blackDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
                 blackDivineDog.setColor(DivineDogEntity.Color.BLACK);
                 blackDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 entity.level().addFreshEntity(blackDivineDog);
             }
-        } else if(isActive && areTamed) {
+            if (areTamed){
+                whiteDivineDog.tame((Player) entity);
+                blackDivineDog.tame((Player) entity);
+            }
+        } else if(isActive && areTamed && areBothAlive()) {
             System.out.println("DEACTIVATE");
             whiteDivineDog.discard();
             whiteDivineDog = null;
@@ -70,22 +74,27 @@ public class DivineDogs extends Skill {
         return whiteDivineDog == null && blackDivineDog == null;
     }
 
+    private boolean areBothAlive(){
+        if (whiteDivineDog != null && blackDivineDog != null) return whiteDivineDog.isAlive() && blackDivineDog.isAlive();
+        return false;
+    }
+
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof DivineDogEntity divineDogEntity &&
-                (divineDogEntity.equals(whiteDivineDog) || divineDogEntity.equals(blackDivineDog))) {
-            if (event.getSource().getEntity() instanceof Player) {
-                if (blackDivineDog != null && !blackDivineDog.isAlive() && whiteDivineDog != null && !whiteDivineDog.isAlive()) {
+        if (event.getEntity() instanceof DivineDogEntity divineDogEntity && (divineDogEntity.equals(whiteDivineDog) || divineDogEntity.equals(blackDivineDog))) {
+            if (blackDivineDog != null && !blackDivineDog.isAlive() && whiteDivineDog != null && !whiteDivineDog.isAlive()) {
+                if (areTamed) {
+                    isDead = true;
+                    System.out.println("DEAD");
+                }
+                else if (event.getSource().getEntity() instanceof Player) {
                     if (!areTamed) {
                         areTamed = true;
                         System.out.println("TAMED");
-                    } else {
-                        isDead = true;
-                        System.out.println("DEAD");
                     }
-                    whiteDivineDog = null;
-                    blackDivineDog = null;
                 }
+                whiteDivineDog = null;
+                blackDivineDog = null;
             }
             isActive = false;
         }

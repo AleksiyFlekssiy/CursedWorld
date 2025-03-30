@@ -32,6 +32,7 @@ public class Blue extends Skill{
     public final BlueSummon blueSummon = new BlueSummon();
 
     public void use(LivingEntity entity, UseType type, int charge){
+        if (!(entity instanceof ServerPlayer)) return;
         switch (type){
             case ACTIVATION -> {
                 if (entity.isCrouching()) teleport.activate(entity);
@@ -80,7 +81,7 @@ public class Blue extends Skill{
     public class Teleport extends Skill{
 
         public void activate(LivingEntity entity){
-            if (entity instanceof Player player) {
+            if (entity instanceof ServerPlayer player) {
                     Vec3 eyePos = player.getEyePosition(1.0F); // Позиция глаз игрока
                     Vec3 lookVec = player.getViewVector(1.0F); // Вектор взгляда
                     Vec3 endPos = eyePos.add(lookVec.x * TELEPORT_RANGE, lookVec.y * TELEPORT_RANGE, lookVec.z * TELEPORT_RANGE);

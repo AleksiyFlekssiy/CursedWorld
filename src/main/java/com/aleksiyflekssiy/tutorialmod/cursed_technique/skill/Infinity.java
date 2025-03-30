@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,6 +46,7 @@ public class Infinity extends Skill {
     }
 
     public void use(LivingEntity entity, UseType type, int charge){
+        if (!(entity instanceof ServerPlayer)) return;
         switch (type){
             case ACTIVATION -> infinitySwitch.activate(entity);
             case DISACTIVATION -> infinitySwitch.disactivate(entity);

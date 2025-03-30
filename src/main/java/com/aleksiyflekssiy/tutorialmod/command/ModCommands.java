@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.command;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -8,7 +9,9 @@ import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -78,5 +81,27 @@ public class ModCommands {
                                                                                             return 1;
                                                                                         }))))))))
                         )));
+        dispatcher.register(literal("settechnique")
+                .then(argument("player", EntityArgument.player())
+                .then(argument("technique", StringArgumentType.string())
+                        .suggests((context, builder) -> {
+                            builder.suggest("TenShadows");
+                            builder.suggest("Limitless");
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            Player player = EntityArgument.getPlayer(context, "player");
+                            String technique = StringArgumentType.getString(context, "technique");
+                            CursedTechniqueCapability.setCursedTechnique(player, technique);
+                            context.getSource().sendSuccess(() -> Component.literal("Successfully set the technique! " + CursedTechniqueCapability.getCursedTechnique(player).getName()), true);
+                            return 1;
+                        }))));
+        dispatcher.register(literal("gettechnique")
+                .then(argument("player", EntityArgument.player())
+                        .executes(context -> {
+                            Player player = EntityArgument.getPlayer(context, "player");
+                            context.getSource().sendSystemMessage(Component.literal(CursedTechniqueCapability.getCursedTechnique(player).getName()));
+                            return 1;
+                        })));
     }
 }

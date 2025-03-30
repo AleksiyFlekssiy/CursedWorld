@@ -1,5 +1,8 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
+import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiFollowOwnerGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtByTargetGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtTargetGoal;
 import com.aleksiyflekssiy.tutorialmod.entity.navigation.CustomNavigation;
 import com.aleksiyflekssiy.tutorialmod.entity.navigation.SmartBodyHelper;
 import net.minecraft.core.BlockPos;
@@ -30,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class DivineDogEntity extends TamableAnimal implements OwnableEntity{
+public class DivineDogEntity extends Shikigami{
     public enum Color{
         WHITE,
         BLACK
@@ -39,28 +42,16 @@ public class DivineDogEntity extends TamableAnimal implements OwnableEntity{
     private final List<BlockPos> visualizedPath = new ArrayList<>(); // Список для хранения позиций блоков пути
     private final List<BlockState> originalBlockStates = new ArrayList<>(); // Список для хранения оригинальных состояний блоков
     private boolean isVisualizingPath = true; // Флаг для включения/выключения визуализации
-    private boolean isTamed;
     private static final EntityDataAccessor<Float> REAL_SPEED = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.INT);
 
-    protected DivineDogEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
+    public DivineDogEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         //this.moveControl = new CustomMoveControl(this, this);
         this.entityData.set(REAL_SPEED, 0.33F);
         this.setMaxUpStep(1);
-
-    }
-
-    public DivineDogEntity(EntityType<? extends TamableAnimal> entityType, Level level, Player owner, boolean isTamed){
-        super(entityType,level);
-        this.isTamed = isTamed;
         System.out.println("Is tamed: " + isTamed);
         System.out.println("UUID: " + getStringUUID());
-        setTame(isTamed);
-        if (isTamed) {
-            tame(owner);
-            this.registerGoals();
-        }
         entityData.set(COLOR, Color.WHITE.ordinal());
     }
 
@@ -87,11 +78,6 @@ public class DivineDogEntity extends TamableAnimal implements OwnableEntity{
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
         return new CustomNavigation(this, level());
-    }
-
-    @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) {
-        return null;
     }
 
     @Override
@@ -182,13 +168,11 @@ public class DivineDogEntity extends TamableAnimal implements OwnableEntity{
             this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
         }
         else {
-            this.goalSelector.removeAllGoals(filter -> true);
-            this.targetSelector.removeAllGoals(filter -> true);
             this.goalSelector.addGoal(0, new FloatGoal(this));
             this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 2f, true));
-            this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1, 5, 5, false));
-            this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
-            this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
+            this.goalSelector.addGoal(2, new ShikigamiFollowOwnerGoal(this, 5, 5, 1f));
+            this.targetSelector.addGoal(2, new ShikigamiOwnerHurtTargetGoal(this, false));
+            this.targetSelector.addGoal(2, new ShikigamiOwnerHurtByTargetGoal(this, false));
         }
     }
 

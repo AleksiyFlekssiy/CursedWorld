@@ -7,6 +7,7 @@ import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -25,6 +26,7 @@ public class Red extends Skill {
     public final RedSummon redSummon = new RedSummon();
 
     public void use(LivingEntity entity, UseType type, int charge){
+        if (!(entity instanceof ServerPlayer)) return;
         switch (type){
             case ACTIVATION -> push.activate(entity);
             case CHARGING -> redSummon.charge(entity, charge);

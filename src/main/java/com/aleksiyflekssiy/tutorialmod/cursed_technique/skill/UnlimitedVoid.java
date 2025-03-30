@@ -10,6 +10,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResultHolder;
@@ -51,6 +52,7 @@ public class UnlimitedVoid extends Skill {
 
     @Override
     public void use(LivingEntity entity, UseType type, int charge) {
+        if (!(entity instanceof ServerPlayer)) return;
         this.activate((Player) entity, entity.level());
     }
 

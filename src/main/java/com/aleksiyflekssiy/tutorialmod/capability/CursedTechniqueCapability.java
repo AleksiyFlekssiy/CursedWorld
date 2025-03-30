@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class CursedTechniqueCapability {
-    public static final Capability<ICursedTechnique> CURSED_TECHNIQUE = CapabilityManager.get(new CapabilityToken<ICursedTechnique>() {});
+    public static final Capability<ICursedTechnique> CURSED_TECHNIQUE = CapabilityManager.get(new CapabilityToken<>() {});
 
     public interface ICursedTechnique {
         CursedTechnique getTechnique();
@@ -36,7 +36,7 @@ public class CursedTechniqueCapability {
         private Skill currentSkill;
 
         public TechniqueHolder() {
-            this.technique = new TenShadowsTechnique(); // По умолчанию
+            this.technique = new LimitlessCursedTechnique(); // По умолчанию
             this.currentSkill = technique.getSkillSet().get(0); // Первый скилл техники
         }
 
@@ -47,9 +47,10 @@ public class CursedTechniqueCapability {
 
         @Override
         public void setTechnique(CursedTechnique technique) {
-            this.technique = technique != null ? technique : new TenShadowsTechnique();
+            this.technique = technique != null ? technique : new LimitlessCursedTechnique();
             // При смене техники сбрасываем текущий скилл на первый в новом наборе
             this.currentSkill = this.technique.getSkillSet().isEmpty() ? null : this.technique.getSkillSet().get(0);
+            System.out.println("CURRENT TECHNIQUE: "+ this.technique.getName());
         }
 
         @Override
@@ -89,6 +90,8 @@ public class CursedTechniqueCapability {
                 int nextIndex = (currentIndex + 1) % skillSet.size(); // Циклическое переключение
                 currentSkill = skillSet.get(nextIndex);
             }
+            System.out.println("Current Skill: " + currentSkill.getName());
+            System.out.println("Current Technique: " + technique.getName());
         }
 
         @Override
@@ -107,7 +110,7 @@ public class CursedTechniqueCapability {
     }
 
     public static class Provider implements ICapabilitySerializable<CompoundTag> {
-        private final ICursedTechnique techniqueHolder = new TechniqueHolder();
+        private static final ICursedTechnique techniqueHolder = new TechniqueHolder();
         private final LazyOptional<ICursedTechnique> holder = LazyOptional.of(() -> techniqueHolder);
 
         @NotNull
@@ -120,6 +123,7 @@ public class CursedTechniqueCapability {
         public CompoundTag serializeNBT() {
             CompoundTag nbt = new CompoundTag();
             if (techniqueHolder.getTechnique() != null) {
+                System.out.println("Serialized: " + techniqueHolder.getTechnique().getName());
                 nbt.putString("technique_name", techniqueHolder.getTechnique().getName());
                 if (techniqueHolder.getCurrentSkill() != null) {
                     nbt.putString("skill_name", techniqueHolder.getCurrentSkill().getName());
@@ -134,6 +138,7 @@ public class CursedTechniqueCapability {
             String skillName = nbt.getString("skill_name");
 
             if (!techniqueName.isEmpty()) {
+                System.out.println("Deserialized: " + techniqueName);
                 CursedTechnique technique = createTechniqueByName(techniqueName);
                 techniqueHolder.setTechnique(technique); // Устанавливаем технику
                 if (!skillName.isEmpty()) {
@@ -151,11 +156,11 @@ public class CursedTechniqueCapability {
             }
         }
 
-        private CursedTechnique createTechniqueByName(String name) {
+        public static CursedTechnique createTechniqueByName(String name) {
             return switch (name) {
                 case "Limitless" -> new LimitlessCursedTechnique();
                 // Добавь другие техники здесь
-                case "Ten Shadows" -> new TenShadowsTechnique();
+                case "TenShadows" -> new TenShadowsTechnique();
                 default -> new LimitlessCursedTechnique(); // Запасной вариант вместо null
             };
         }
@@ -168,6 +173,7 @@ public class CursedTechniqueCapability {
                 case "Hollow Purple" -> new HollowPurple();
                 case "Unlimited Void" -> new UnlimitedVoid();
                 case "Divine Dogs" -> new DivineDogs();
+                case "Nue" -> new Nue();
                 default -> null; // Оставляем null, так как проверка происходит позже
             };
         }
@@ -178,6 +184,12 @@ public class CursedTechniqueCapability {
         return player.getCapability(CURSED_TECHNIQUE)
                 .map(ICursedTechnique::getTechnique)
                 .orElse(new LimitlessCursedTechnique());
+    }
+
+    public static void setCursedTechnique(Player player, String techniqueName) {
+        player.getCapability(CURSED_TECHNIQUE).ifPresent(cursedTechnique -> {
+            cursedTechnique.setTechnique(Provider.createTechniqueByName(techniqueName));
+        });
     }
 
     public static Skill getSkill(Player player) {
