@@ -44,4 +44,8 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     public @Nullable Player getOwner() {
         return owner;
     }
+
+    public void setOwner(Player owner) {
+        this.owner = owner;
+    }
 }

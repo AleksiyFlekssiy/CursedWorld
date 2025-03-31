@@ -27,14 +27,12 @@ public class ShikigamiMeleeAttackGoal extends MeleeAttackGoal {
     public void start() {
         super.start();
         this.pathRecalculationCooldown = 0;
-        entity.startPathVisualization();
     }
 
     @Override
     public void stop() {
         super.stop();
         this.pathRecalculationCooldown = 0;
-        entity.stopPathVisualization();
     }
 
     @Override

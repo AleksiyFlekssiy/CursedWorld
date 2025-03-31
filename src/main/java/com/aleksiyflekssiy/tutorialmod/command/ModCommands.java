@@ -2,7 +2,11 @@ package com.aleksiyflekssiy.tutorialmod.command;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
+import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
@@ -15,6 +19,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
@@ -103,5 +109,37 @@ public class ModCommands {
                             context.getSource().sendSystemMessage(Component.literal(CursedTechniqueCapability.getCursedTechnique(player).getName()));
                             return 1;
                         })));
+        dispatcher.register(literal("tameshikigami")
+                .executes(context -> {
+                    Player owner = context.getSource().getPlayer();
+                    if (CursedTechniqueCapability.getCursedTechnique(owner) instanceof TenShadowsTechnique technique){
+                        List<Skill> skills = technique.getSkillSet();
+                        skills.forEach(skill -> {
+                            ShikigamiSkill shikigamiSkill = (ShikigamiSkill) skill;
+                            if (!shikigamiSkill.isDead() && !shikigamiSkill.isTamed()){
+                                shikigamiSkill.setTamed(true);
+                                if (shikigamiSkill.isActive()) shikigamiSkill.getShikigami().forEach(shikigami -> shikigami.tame(owner));
+                            }
+                        });
+                    }
+                    context.getSource().sendSuccess(() -> Component.literal("Your shikigami have been tamed"), true);
+                    return 1;
+                }));
+        dispatcher.register(literal("regainshikigami")
+                .executes(context -> {
+                    Player owner = context.getSource().getPlayer();
+                    if (CursedTechniqueCapability.getCursedTechnique(owner) instanceof TenShadowsTechnique technique){
+                        List<Skill> skills = technique.getSkillSet();
+                        skills.forEach(skill -> {
+                            ShikigamiSkill shikigamiSkill = (ShikigamiSkill) skill;
+                            if (shikigamiSkill.isDead()) {
+                                shikigamiSkill.setDead(false);
+                                shikigamiSkill.setTamed(false);
+                            }
+                        });
+                    }
+                    context.getSource().sendSuccess(() -> Component.literal("Your shikigami have been regained"), true);
+                    return 1;
+                }));
     }
 }

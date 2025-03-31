@@ -3,7 +3,9 @@ package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
+import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -12,11 +14,10 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class Nue extends Skill{
-    private boolean isActive = false;
-    private boolean isTamed = false;
-    private boolean isDead = false;
+public class Nue extends ShikigamiSkill{
     private NueEntity nueEntity = null;
 
     public Nue(){
@@ -49,9 +50,15 @@ public class Nue extends Skill{
             }
         }
         else if(isActive && isTamed) {
-            System.out.println("DEACTIVATE");
-            nueEntity.discard();
-            nueEntity = null;
+            if (nueEntity.getControllingPassenger() == null) {
+                System.out.println("DEACTIVATE");
+                nueEntity.discard();
+                nueEntity = null;
+            }
+            else {
+                nueEntity.tryGrabEntityBelow();
+                return;
+            }
         }
         isActive = !isActive;
     }
@@ -62,12 +69,13 @@ public class Nue extends Skill{
             if (nueEntity != null && !nueEntity.isAlive()) {
                 if (isTamed) {
                     isDead = true;
-                    System.out.println("DEAD");
+                    nueEntity.getOwner().sendSystemMessage(Component.literal("Nue has died"));
                 }
-                else if (event.getSource().getEntity() instanceof Player) {
+                else if (event.getSource().getEntity() instanceof Player player) {
                     if (!isTamed) {
                         isTamed = true;
                         System.out.println("TAMED");
+                        player.sendSystemMessage(Component.literal("You tamed Nue"));
                     }
                 }
                 nueEntity = null;
@@ -75,6 +83,11 @@ public class Nue extends Skill{
             isActive = false;
         }
         //MinecraftForge.EVENT_BUS.unregister(this);
+    }
+
+    @Override
+    public List<Shikigami> getShikigami() {
+        return List.of(nueEntity);
     }
 
     @Override

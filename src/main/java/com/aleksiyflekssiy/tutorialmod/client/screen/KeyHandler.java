@@ -70,7 +70,7 @@ public class KeyHandler {
             Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
             if (selectedSkill != null) {
                 ModMessages.INSTANCE.sendToServer(new UseSkillPacket(selectedSkill.getName(), Skill.UseType.CHARGING, chargeTicks));
-                mc.player.sendSystemMessage(Component.literal("Charge: " + chargeTicks));
+                if (chargeTicks == 1) mc.player.sendSystemMessage(Component.literal("Charging!"));
             }
         }
 

@@ -39,9 +39,6 @@ public class DivineDogEntity extends Shikigami{
         BLACK
     }
     public float targetYaw = 0.0F;
-    private final List<BlockPos> visualizedPath = new ArrayList<>(); // Список для хранения позиций блоков пути
-    private final List<BlockState> originalBlockStates = new ArrayList<>(); // Список для хранения оригинальных состояний блоков
-    private boolean isVisualizingPath = true; // Флаг для включения/выключения визуализации
     private static final EntityDataAccessor<Float> REAL_SPEED = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.INT);
 
@@ -63,9 +60,6 @@ public class DivineDogEntity extends Shikigami{
         double dx = target.getX() - getX();
         double dz = target.getZ() - getZ();
         targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
-        if (this.isVisualizingPath) {
-            visualizePath();
-        }
         if (this.navigation.getPath() != null) entityData.set(REAL_SPEED, 0.33f * 2.5f);
         else entityData.set(REAL_SPEED, 0.33F);
     }
@@ -99,65 +93,9 @@ public class DivineDogEntity extends Shikigami{
         return Color.values()[entityData.get(COLOR)];
     }
 
-    // Метод для включения визуализации пути
-    public void startPathVisualization() {
-        this.isVisualizingPath = true;
-    }
-
-    // Метод для выключения визуализации пути
-    public void stopPathVisualization() {
-        this.isVisualizingPath = false;
-        revertPathBlocks(); // Возвращаем блоки к исходному состоянию при выключении
-    }
-
-    // Метод для временной замены блоков пути
-    private void visualizePath() {
-        PathNavigation navigation = this.getNavigation();
-        Path currentPath = navigation.getPath();
-        BlockPos wanted = new BlockPos((int) getMoveControl().getWantedX(), (int) getMoveControl().getWantedY(), (int) getMoveControl().getWantedZ());
-        if (currentPath != null) {
-            // Очищаем предыдущую визуализацию
-            revertPathBlocks();
-            visualizedPath.clear();
-            originalBlockStates.clear();
-
-            for (int i = 0; i < currentPath.getNodeCount(); ++i) {
-                Node node = currentPath.getNode(i);
-                BlockPos pos = node.asBlockPos();
-
-                // Проверяем, что позиция находится в границах мира
-                if (level().isLoaded(pos)) {
-                    visualizedPath.add(pos.immutable()); // Добавляем неизменяемую копию BlockPos
-                    originalBlockStates.add(level().getBlockState(pos)); // Сохраняем оригинальное состояние
-
-                    // Заменяем блок на светящийся камень (можно выбрать любой другой яркий блок)
-                    level().setBlock(pos, Blocks.ACACIA_SIGN.defaultBlockState(), 3); // Флаг 3 означает обновление клиента
-                }
-            }
-            if (!wanted.equals(BlockPos.ZERO)) {
-                visualizedPath.add(wanted.immutable());
-                originalBlockStates.add(level().getBlockState(wanted));
-                level().setBlock(wanted, Blocks.BIRCH_SIGN.defaultBlockState(), 3);
-            }
-        }
-    }
-
     @Override
     public void aiStep() {
         super.aiStep();
-    }
-
-    // Метод для возвращения блоков пути к их исходному состоянию
-    private void revertPathBlocks() {
-        for (int i = 0; i < visualizedPath.size(); ++i) {
-            BlockPos pos = visualizedPath.get(i);
-            BlockState originalState = originalBlockStates.get(i);
-            if (level().isLoaded(pos)) {
-                level().setBlock(pos, originalState, 3);
-            }
-        }
-        visualizedPath.clear();
-        originalBlockStates.clear();
     }
 
     @Override

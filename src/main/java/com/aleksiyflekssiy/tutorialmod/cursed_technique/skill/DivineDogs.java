@@ -3,7 +3,9 @@ package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
+import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -12,11 +14,10 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class DivineDogs extends Skill {
-    private boolean isActive = false;
-    private boolean areTamed = false;
-    private boolean isDead = false;
+public class DivineDogs extends ShikigamiSkill {
     private DivineDogEntity whiteDivineDog = null;
     private DivineDogEntity blackDivineDog = null;
 
@@ -55,11 +56,11 @@ public class DivineDogs extends Skill {
                 blackDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 entity.level().addFreshEntity(blackDivineDog);
             }
-            if (areTamed){
+            if (isTamed){
                 whiteDivineDog.tame((Player) entity);
                 blackDivineDog.tame((Player) entity);
             }
-        } else if(isActive && areTamed && areBothAlive()) {
+        } else if(isActive && isTamed && areBothAlive()) {
             System.out.println("DEACTIVATE");
             whiteDivineDog.discard();
             whiteDivineDog = null;
@@ -69,12 +70,12 @@ public class DivineDogs extends Skill {
         isActive = !isActive;
     }
 
-    private boolean areBothDead(){
+    public boolean areBothDead(){
         if (whiteDivineDog != null && blackDivineDog != null) return !whiteDivineDog.isAlive() && !blackDivineDog.isAlive();
         return whiteDivineDog == null && blackDivineDog == null;
     }
 
-    private boolean areBothAlive(){
+    public boolean areBothAlive(){
         if (whiteDivineDog != null && blackDivineDog != null) return whiteDivineDog.isAlive() && blackDivineDog.isAlive();
         return false;
     }
@@ -83,14 +84,14 @@ public class DivineDogs extends Skill {
     public void onEntityDeath(LivingDeathEvent event) {
         if (event.getEntity() instanceof DivineDogEntity divineDogEntity && (divineDogEntity.equals(whiteDivineDog) || divineDogEntity.equals(blackDivineDog))) {
             if (blackDivineDog != null && !blackDivineDog.isAlive() && whiteDivineDog != null && !whiteDivineDog.isAlive()) {
-                if (areTamed) {
+                if (isTamed) {
                     isDead = true;
-                    System.out.println("DEAD");
+                    divineDogEntity.getOwner().sendSystemMessage(Component.literal("Your Divine Dogs have died"));
                 }
-                else if (event.getSource().getEntity() instanceof Player) {
-                    if (!areTamed) {
-                        areTamed = true;
-                        System.out.println("TAMED");
+                else if (event.getSource().getEntity() instanceof Player player) {
+                    if (!isTamed) {
+                        isTamed = true;
+                        player.sendSystemMessage(Component.literal("You tamed Divine Dogs"));
                     }
                 }
                 whiteDivineDog = null;
@@ -99,6 +100,11 @@ public class DivineDogs extends Skill {
             isActive = false;
         }
         //MinecraftForge.EVENT_BUS.unregister(this);
+    }
+
+    @Override
+    public List<Shikigami> getShikigami() {
+        return List.of(whiteDivineDog, blackDivineDog);
     }
 
     @Override
