@@ -2,6 +2,9 @@ package com.aleksiyflekssiy.tutorialmod.network;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;

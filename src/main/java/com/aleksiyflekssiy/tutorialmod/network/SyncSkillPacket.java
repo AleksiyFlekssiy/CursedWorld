@@ -1,8 +1,10 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -30,6 +32,9 @@ public class SyncSkillPacket {
                             .filter(skill -> skill.getName().equals(msg.skillName))
                             .findFirst()
                             .ifPresent(technique::setCurrentSkill);
+                    // Отправляем обновление клиенту
+//                    CompoundTag nbt = technique.serializeNBT();
+//                    ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new TechniqueSyncPacket(nbt));
                 });
             }
         });

@@ -4,14 +4,21 @@ import com.aleksiyflekssiy.tutorialmod.cursed_technique.CursedTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.LimitlessCursedTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
+import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
+import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +36,8 @@ public class CursedTechniqueCapability {
         Skill getFirstSkill();
         void nextSkill(); // Переключение на следующий скилл
         void previousSkill(); // Переключение на предыдущий скилл
+        CompoundTag serializeNBT();
+        void deserializeNBT(CompoundTag nbt);
     }
 
     public static class TechniqueHolder implements ICursedTechnique {
@@ -50,7 +59,6 @@ public class CursedTechniqueCapability {
             this.technique = technique != null ? technique : new LimitlessCursedTechnique();
             // При смене техники сбрасываем текущий скилл на первый в новом наборе
             this.currentSkill = this.technique.getSkillSet().isEmpty() ? null : this.technique.getSkillSet().get(0);
-            System.out.println("CURRENT TECHNIQUE: "+ this.technique.getName());
         }
 
         @Override
@@ -107,26 +115,16 @@ public class CursedTechniqueCapability {
                 currentSkill = skillSet.get(prevIndex);
             }
         }
-    }
-
-    public static class Provider implements ICapabilitySerializable<CompoundTag> {
-        private static final ICursedTechnique techniqueHolder = new TechniqueHolder();
-        private final LazyOptional<ICursedTechnique> holder = LazyOptional.of(() -> techniqueHolder);
-
-        @NotNull
-        @Override
-        public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side) {
-            return capability == CURSED_TECHNIQUE ? holder.cast() : LazyOptional.empty();
-        }
 
         @Override
         public CompoundTag serializeNBT() {
             CompoundTag nbt = new CompoundTag();
-            if (techniqueHolder.getTechnique() != null) {
-                System.out.println("Serialized: " + techniqueHolder.getTechnique().getName());
-                nbt.putString("technique_name", techniqueHolder.getTechnique().getName());
-                if (techniqueHolder.getCurrentSkill() != null) {
-                    nbt.putString("skill_name", techniqueHolder.getCurrentSkill().getName());
+            if (technique != null) {
+                System.out.println("Serialized: " + technique.getName());
+                nbt.putString("technique_name", technique.getName());
+                if (currentSkill != null) {
+                    nbt.putString("skill_name", currentSkill.getName());
+                    System.out.println("Serialized: " + currentSkill.getName());
                 }
             }
             return nbt;
@@ -139,22 +137,38 @@ public class CursedTechniqueCapability {
 
             if (!techniqueName.isEmpty()) {
                 System.out.println("Deserialized: " + techniqueName);
-                CursedTechnique technique = createTechniqueByName(techniqueName);
-                techniqueHolder.setTechnique(technique); // Устанавливаем технику
+                CursedTechnique technique = Provider.createTechniqueByName(techniqueName);
+                setTechnique(technique); // Устанавливаем технику
                 if (!skillName.isEmpty()) {
-                    Skill skill = createSkillByName(skillName);
-                    if (skill != null && technique.getSkillSet().contains(skill)) {
-                        techniqueHolder.setCurrentSkill(skill);
+                    System.out.println("Deserialized: " + skillName);
+                    Skill skill = Provider.createSkillByName(skillName);
+                    if (skill != null) {
+                        skill = technique.getSkillSet().stream()
+                                .filter(s -> s.getName().equals(skillName))
+                                .findFirst()
+                                .orElse(technique.getFirstSkill());
+                        setCurrentSkill(skill);
                     } else {
-                        techniqueHolder.setCurrentSkill(technique.getFirstSkill()); // Запасной вариант
+                        setCurrentSkill(technique.getFirstSkill());
                     }
                 }
             } else {
-                // Если данных нет, используем значения по умолчанию
-                techniqueHolder.setTechnique(new LimitlessCursedTechnique());
-                techniqueHolder.setCurrentSkill(techniqueHolder.getFirstSkill());
+                setTechnique(new LimitlessCursedTechnique());
+                setCurrentSkill(getFirstSkill());
             }
         }
+    }
+
+    public static class Provider implements ICapabilitySerializable<CompoundTag> {
+        private final ICursedTechnique techniqueHolder = new TechniqueHolder();
+        private final LazyOptional<ICursedTechnique> holder = LazyOptional.of(() -> techniqueHolder);
+
+        @NotNull
+        @Override
+        public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side) {
+            return capability == CURSED_TECHNIQUE ? holder.cast() : LazyOptional.empty();
+        }
+
 
         public static CursedTechnique createTechniqueByName(String name) {
             return switch (name) {
@@ -165,7 +179,7 @@ public class CursedTechniqueCapability {
             };
         }
 
-        private Skill createSkillByName(String name) {
+        private static Skill createSkillByName(String name) {
             return switch (name) {
                 case "Infinity" -> new Infinity();
                 case "Blue" -> new Blue();
@@ -176,6 +190,16 @@ public class CursedTechniqueCapability {
                 case "Nue" -> new Nue();
                 default -> null; // Оставляем null, так как проверка происходит позже
             };
+        }
+
+        @Override
+        public CompoundTag serializeNBT() {
+            return techniqueHolder.serializeNBT();
+        }
+
+        @Override
+        public void deserializeNBT(CompoundTag nbt) {
+            techniqueHolder.deserializeNBT(nbt);
         }
     }
 
@@ -189,6 +213,8 @@ public class CursedTechniqueCapability {
     public static void setCursedTechnique(Player player, String techniqueName) {
         player.getCapability(CURSED_TECHNIQUE).ifPresent(cursedTechnique -> {
             cursedTechnique.setTechnique(Provider.createTechniqueByName(techniqueName));
+            CompoundTag nbt = cursedTechnique.serializeNBT();
+            ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new TechniqueSyncPacket(nbt));
         });
     }
 

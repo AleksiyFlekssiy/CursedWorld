@@ -1,9 +1,10 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.LimitlessCursedTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.item.custom.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,7 +14,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,12 +43,16 @@ public class UnlimitedVoid extends Skill {
 
     private boolean domainActive = false;
     private int domainTicks = 0;
-    private Map<BlockPos, BlockState> originalBlocks = new HashMap<>();
-    private List<BlockPos> barrierBlocks = new ArrayList<>();
+    private final Map<BlockPos, BlockState> originalBlocks = new HashMap<>();
+    private final List<BlockPos> barrierBlocks = new ArrayList<>();
     private AABB domainArea = null;
     private Vec3 domainCenter = null;
-    private Set<LivingEntity> trappedEntities = new HashSet<>();
+    private final Set<LivingEntity> trappedEntities = new HashSet<>();
     private Player domainOwner = null;
+
+    public UnlimitedVoid(){
+        MinecraftForge.EVENT_BUS.register(this);
+    }
 
     @Override
     public void use(LivingEntity entity, UseType type, int charge) {
@@ -72,7 +76,6 @@ public class UnlimitedVoid extends Skill {
             player.sendSystemMessage(Component.literal("Domain Expansion: Unlimited Void activated!"));
             player.setPos(player.getX(), floorY + 1.1, player.getZ());
             CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 50);
-            MinecraftForge.EVENT_BUS.register(this);
         }
     }
 
@@ -149,6 +152,7 @@ public class UnlimitedVoid extends Skill {
 
     @SubscribeEvent
     public void tick(TickEvent.ServerTickEvent event) {
+            if (domainOwner == null || event.phase == TickEvent.Phase.END) return;
             ServerLevel serverLevel = (ServerLevel) domainOwner.level();
             domainOwner.sendSystemMessage(Component.literal(String.valueOf(domainTicks)));
             if (domainActive && domainCenter != null) {
@@ -167,7 +171,6 @@ public class UnlimitedVoid extends Skill {
                     }
                     applyTechniqueBurnout(domainOwner);
                     restoreOriginalBlocks(serverLevel);
-                    MinecraftForge.EVENT_BUS.unregister(this);
                 }
             }
     }

@@ -1,7 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.cursed_technique;
 
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.DivineDogs;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Nue;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 
 import java.util.List;

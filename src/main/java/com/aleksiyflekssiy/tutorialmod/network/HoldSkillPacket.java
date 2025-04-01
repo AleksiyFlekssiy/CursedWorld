@@ -2,6 +2,10 @@ package com.aleksiyflekssiy.tutorialmod.network;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.Blue;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.HollowPurple;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.Infinity;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.Red;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;

@@ -1,6 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;

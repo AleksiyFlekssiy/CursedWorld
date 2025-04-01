@@ -2,8 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.effect;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.LimitlessCursedTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Infinity;
-import net.minecraft.network.chat.Component;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.Infinity;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;

@@ -1,6 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.BlueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
@@ -22,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class Blue extends Skill{
+public class Blue extends Skill {
     private static final float PULL_RANGE = 10;
     private static final float PULL_FORCE = 1.5F;
     private static final float TELEPORT_RANGE = 25;

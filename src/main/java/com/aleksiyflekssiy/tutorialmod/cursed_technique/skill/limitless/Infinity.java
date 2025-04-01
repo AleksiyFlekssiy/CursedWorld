@@ -1,6 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.effect.ModEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -72,7 +73,7 @@ public class Infinity extends Skill {
         }
 
         public void applyInfinityEffect(Player player, Level level) {
-            if (!CursedEnergyCapability.isEnoughEnergy(player, 1)) return;
+            if (!(player instanceof ServerPlayer) || !CursedEnergyCapability.isEnoughEnergy(player, 1)) return;
             int INTERVAL = 20;
             if (tick >= INTERVAL){
                 CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 1);

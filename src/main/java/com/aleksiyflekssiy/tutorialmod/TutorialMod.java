@@ -100,10 +100,6 @@ public class TutorialMod
         }
     }
 
-    public static void inGamePrint(Player player, String message){
-        player.sendSystemMessage(Component.literal(message));
-    }
-
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)

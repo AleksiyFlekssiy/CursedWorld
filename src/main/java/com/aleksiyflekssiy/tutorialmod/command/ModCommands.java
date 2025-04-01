@@ -7,6 +7,8 @@ import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
+import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
@@ -14,11 +16,14 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -96,10 +101,15 @@ public class ModCommands {
                             return builder.buildFuture();
                         })
                         .executes(context -> {
-                            Player player = EntityArgument.getPlayer(context, "player");
+                            ServerPlayer player = EntityArgument.getPlayer(context, "player");
                             String technique = StringArgumentType.getString(context, "technique");
                             CursedTechniqueCapability.setCursedTechnique(player, technique);
                             context.getSource().sendSuccess(() -> Component.literal("Successfully set the technique! " + CursedTechniqueCapability.getCursedTechnique(player).getName()), true);
+                            // Отправляем пакет синхронизации клиенту
+//                            player.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(techniqueHolder -> {
+//                                CompoundTag nbt = techniqueHolder.serializeNBT();
+//                                ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new TechniqueSyncPacket(nbt));
+//                            });
                             return 1;
                         }))));
         dispatcher.register(literal("gettechnique")

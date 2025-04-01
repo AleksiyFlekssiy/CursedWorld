@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.horse.Horse;
@@ -41,7 +42,7 @@ public class NueEntity extends Shikigami{
         this.moveControl = new FlyingMoveControl(this);
     }
 
-    static enum AttackPhase {
+    enum AttackPhase {
         CIRCLE,
         SWOOP;
     }
@@ -50,7 +51,6 @@ public class NueEntity extends Shikigami{
     public void tick() {
         super.tick();
         //this.goalSelector.getRunningGoals().forEach(goal -> System.out.println(goal.getGoal()));
-        System.out.println(getPassengers().size());
     }
 
     @Override
@@ -149,7 +149,6 @@ public class NueEntity extends Shikigami{
             super.positionRider(passenger, callback);
         } else { // Схваченная сущность
             double nueHeight = this.getBbHeight(); // Высота NueEntity
-            System.out.println("NueEntity height: " + nueHeight); // Отладка
             double offsetY = -nueHeight / 2; // Смещение до нижней границы NueEntity
             callback.accept(passenger, this.getX(), this.getY() + offsetY, this.getZ());
         }
@@ -157,7 +156,7 @@ public class NueEntity extends Shikigami{
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 60)
+                .add(Attributes.MAX_HEALTH, 100)
                 .add(Attributes.MOVEMENT_SPEED, 0.5)
                 .add(Attributes.ATTACK_DAMAGE, 10f)
                 .add(Attributes.FOLLOW_RANGE, 100)
@@ -168,6 +167,7 @@ public class NueEntity extends Shikigami{
     }
 
     protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
+        //Nue is unable to be damaged by falling
     }
 
     public void travel(Vec3 pTravelVector) {

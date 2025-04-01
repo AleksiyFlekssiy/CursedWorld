@@ -1,6 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
@@ -17,7 +18,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class Nue extends ShikigamiSkill{
+public class Nue extends ShikigamiSkill {
     private NueEntity nueEntity = null;
 
     public Nue(){
