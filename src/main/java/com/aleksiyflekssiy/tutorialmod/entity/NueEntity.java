@@ -1,9 +1,15 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
+import com.aleksiyflekssiy.tutorialmod.client.model.NueAnimations;
 import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtByTargetGoal;
 import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtTargetGoal;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.animation.definitions.CamelAnimation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -18,6 +24,8 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.camel.CamelAi;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
@@ -37,9 +45,17 @@ public class NueEntity extends Shikigami{
     Vec3 moveTargetPoint = Vec3.ZERO;
     BlockPos anchorPoint = BlockPos.ZERO;
     NueEntity.AttackPhase attackPhase = NueEntity.AttackPhase.CIRCLE;
+    public AnimationState idleAnimation = new AnimationState();
+    public AnimationState flyAnimation = new AnimationState();
+    private int idleAnimationTimeout = 0;
+    private static final EntityDataAccessor<Integer> ANIMATION = SynchedEntityData.defineId(NueEntity.class, EntityDataSerializers.INT);
+    public static final int IDLE = 0;
+    public static final int FLY = 1;
+
     public NueEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new FlyingMoveControl(this);
+        this.entityData.set(ANIMATION, 0);
     }
 
     enum AttackPhase {
@@ -50,8 +66,52 @@ public class NueEntity extends Shikigami{
     @Override
     public void tick() {
         super.tick();
+        if (!this.level().isClientSide()){
+            if (this.onGround()) setAnimation(IDLE);
+            else setAnimation(FLY);
+        }
+        else updateAnimation();
         //this.goalSelector.getRunningGoals().forEach(goal -> System.out.println(goal.getGoal()));
     }
+
+    private void setupAnimationStates(){
+        if (this.idleAnimationTimeout <= 0){
+            this.idleAnimationTimeout = random.nextInt(40) + 80;
+            this.idleAnimation.start(this.tickCount);
+        }
+        else {
+            --this.idleAnimationTimeout;
+        }
+    }
+
+    private void updateAnimation(){
+        int state = getAnimation();
+        //stopAnimation();
+        switch (state) {
+            case IDLE -> idleAnimation.startIfStopped(this.tickCount);
+            case FLY -> flyAnimation.startIfStopped(this.tickCount);
+        }
+    }
+
+    public AnimationState getAnimationState(AnimationDefinition definition) {
+        if (definition == NueAnimations.idle) return idleAnimation;
+        if (definition == NueAnimations.fly) return flyAnimation;
+        return idleAnimation; // По умолчанию
+    }
+
+    private void stopAnimation(){
+        idleAnimation.stop();
+        flyAnimation.stop();
+    }
+
+    public void setAnimation(int animation){
+        this.entityData.set(ANIMATION, animation);
+    }
+
+    public int getAnimation(){
+        return this.entityData.get(ANIMATION);
+    }
+
 
     @Override
     protected void registerGoals() {
@@ -81,6 +141,12 @@ public class NueEntity extends Shikigami{
                 return player;
             }
         return null;
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(ANIMATION, 0);
     }
 
     public void tryGrabEntityBelow() {
@@ -258,13 +324,13 @@ public class NueEntity extends Shikigami{
             LivingEntity livingentity = NueEntity.this.getTarget();
             if (livingentity != null) {
                 NueEntity.this.moveTargetPoint = new Vec3(livingentity.getX(), livingentity.getY(0.5D), livingentity.getZ());
-                if (NueEntity.this.getBoundingBox().inflate((double)0.2F).intersects(livingentity.getBoundingBox())) {
+                if (NueEntity.this.getBoundingBox().inflate((double)0.5F).intersects(livingentity.getBoundingBox())) {
                     NueEntity.this.doHurtTarget(livingentity);
                     NueEntity.this.attackPhase = NueEntity.AttackPhase.CIRCLE;
                     if (!NueEntity.this.isSilent()) {
                         NueEntity.this.level().levelEvent(1039, NueEntity.this.blockPosition(), 0);
                     }
-                } else if (NueEntity.this.horizontalCollision || NueEntity.this.hurtTime > 0) {
+                } else if (NueEntity.this.horizontalCollision) {
                     NueEntity.this.attackPhase = NueEntity.AttackPhase.CIRCLE;
                 }
 
@@ -328,15 +394,14 @@ public class NueEntity extends Shikigami{
                 if (this.nextSweepTick <= 0) {
                     NueEntity.this.attackPhase = NueEntity.AttackPhase.SWOOP;
                     this.setAnchorAboveTarget();
-                    this.nextSweepTick = this.adjustedTickDelay((8 + NueEntity.this.random.nextInt(4)) * 2);
+                    this.nextSweepTick = this.adjustedTickDelay((10 + NueEntity.this.random.nextInt(10)) * 2);
                     NueEntity.this.playSound(SoundEvents.PHANTOM_SWOOP, 10.0F, 0.95F + NueEntity.this.random.nextFloat() * 0.1F);
                 }
             }
-
         }
 
         private void setAnchorAboveTarget() {
-            NueEntity.this.anchorPoint = NueEntity.this.getTarget().blockPosition().above(20 + NueEntity.this.random.nextInt(20));
+            NueEntity.this.anchorPoint = NueEntity.this.getTarget().blockPosition().above(10 + NueEntity.this.random.nextInt(20));
             if (NueEntity.this.anchorPoint.getY() < NueEntity.this.level().getSeaLevel()) {
                 NueEntity.this.anchorPoint = new BlockPos(NueEntity.this.anchorPoint.getX(), NueEntity.this.level().getSeaLevel() + 1, NueEntity.this.anchorPoint.getZ());
             }
@@ -350,27 +415,17 @@ public class NueEntity extends Shikigami{
         private float height;
         private float clockwise;
 
-        /**
-         * Returns whether execution should begin. You can also read and cache any state necessary for execution in this
-         * method as well.
-         */
         public boolean canUse() {
             return NueEntity.this.getTarget() == null || NueEntity.this.attackPhase == NueEntity.AttackPhase.CIRCLE;
         }
 
-        /**
-         * Execute a one shot task or start executing a continuous task
-         */
         public void start() {
             this.distance = 5.0F + NueEntity.this.random.nextFloat() * 10.0F;
-            this.height = -4.0F + NueEntity.this.random.nextFloat() * 9.0F;
+            this.height = 1.0F + NueEntity.this.random.nextFloat() * 4F;
             this.clockwise = NueEntity.this.random.nextBoolean() ? 1.0F : -1.0F;
             this.selectNext();
         }
 
-        /**
-         * Keep ticking a continuous task that has already been started
-         */
         public void tick() {
             if (NueEntity.this.random.nextInt(this.adjustedTickDelay(350)) == 0) {
                 this.height = -4.0F + NueEntity.this.random.nextFloat() * 9.0F;
@@ -445,7 +500,7 @@ public class NueEntity extends Shikigami{
                 NueEntity.this.setYRot(Mth.approachDegrees(f2, f3, 4.0F) - 90.0F);
                 NueEntity.this.yBodyRot = NueEntity.this.getYRot();
                 if (Mth.degreesDifferenceAbs(f, NueEntity.this.getYRot()) < 3.0F) {
-                    this.speed = Mth.approach(this.speed, 1.8F, 0.005F * (1.8F / this.speed));
+                    this.speed = Mth.approach(this.speed, 5F, 0.005F * (5F / this.speed));
                 } else {
                     this.speed = Mth.approach(this.speed, 0.2F, 0.025F);
                 }

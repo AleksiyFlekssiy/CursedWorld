@@ -88,10 +88,6 @@ public class DivineDogModel<T extends Entity> extends HierarchicalModel<T> {
 		//this.applyHeadRotation(netHeadYaw, headPitch, ageInTicks);
 
 
-		// Поворот тела в сторону цели
-//		if (entity instanceof DivineDogEntity dog && dog.getTarget() != null) {
-//			this.body.yRot = netHeadYaw * ((float)Math.PI / 180F) * 0.5F; // Плавный поворот тела
-//		}
 		runAnimations((DivineDogEntity) entity, limbSwing, limbSwingAmount, 2, 2.5F);
 	}
 
