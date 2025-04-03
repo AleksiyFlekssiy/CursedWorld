@@ -26,6 +26,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.camel.Camel;
 import net.minecraft.world.entity.animal.camel.CamelAi;
+import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
@@ -70,6 +71,7 @@ public class NueEntity extends Shikigami{
             if (this.onGround()) setAnimation(IDLE);
             else setAnimation(FLY);
         }
+
         else updateAnimation();
         //this.goalSelector.getRunningGoals().forEach(goal -> System.out.println(goal.getGoal()));
     }
@@ -188,6 +190,13 @@ public class NueEntity extends Shikigami{
         super.tickRidden(pPlayer, pTravelVector);
         this.setRot(pPlayer.getYRot(), pPlayer.getXRot() * 0.5F);
         this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
+        if (!onGround()) {
+            List<LivingEntity> entities = this.level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(0.5));
+            entities.forEach(entity -> {
+                if (!entity.equals(this) && !entity.equals(grabbedEntity) && !entity.equals(getControllingPassenger()))
+                    this.doHurtTarget(entity);
+            });
+        }
     }
 
     protected Vec3 getRiddenInput(Player player, Vec3 travelVector) {
@@ -333,7 +342,6 @@ public class NueEntity extends Shikigami{
                 } else if (NueEntity.this.horizontalCollision) {
                     NueEntity.this.attackPhase = NueEntity.AttackPhase.CIRCLE;
                 }
-
             }
         }
     }
@@ -401,7 +409,7 @@ public class NueEntity extends Shikigami{
         }
 
         private void setAnchorAboveTarget() {
-            NueEntity.this.anchorPoint = NueEntity.this.getTarget().blockPosition().above(10 + NueEntity.this.random.nextInt(20));
+            NueEntity.this.anchorPoint = NueEntity.this.getTarget().blockPosition().above(10); //+ NueEntity.this.random.nextInt(5));
             if (NueEntity.this.anchorPoint.getY() < NueEntity.this.level().getSeaLevel()) {
                 NueEntity.this.anchorPoint = new BlockPos(NueEntity.this.anchorPoint.getX(), NueEntity.this.level().getSeaLevel() + 1, NueEntity.this.anchorPoint.getZ());
             }
@@ -421,7 +429,7 @@ public class NueEntity extends Shikigami{
 
         public void start() {
             this.distance = 5.0F + NueEntity.this.random.nextFloat() * 10.0F;
-            this.height = 1.0F + NueEntity.this.random.nextFloat() * 4F;
+            this.height = 0;//1.0F + NueEntity.this.random.nextFloat() * 4F;
             this.clockwise = NueEntity.this.random.nextBoolean() ? 1.0F : -1.0F;
             this.selectNext();
         }
@@ -504,7 +512,6 @@ public class NueEntity extends Shikigami{
                 } else {
                     this.speed = Mth.approach(this.speed, 0.2F, 0.025F);
                 }
-
                 float f4 = (float)(-(Mth.atan2(-d1, d3) * (double)(180F / (float)Math.PI)));
                 NueEntity.this.setXRot(f4);
                 float f5 = NueEntity.this.getYRot() + 90.0F;

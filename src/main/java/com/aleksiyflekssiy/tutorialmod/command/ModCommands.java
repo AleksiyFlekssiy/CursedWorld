@@ -105,11 +105,6 @@ public class ModCommands {
                             String technique = StringArgumentType.getString(context, "technique");
                             CursedTechniqueCapability.setCursedTechnique(player, technique);
                             context.getSource().sendSuccess(() -> Component.literal("Successfully set the technique! " + CursedTechniqueCapability.getCursedTechnique(player).getName()), true);
-                            // Отправляем пакет синхронизации клиенту
-//                            player.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(techniqueHolder -> {
-//                                CompoundTag nbt = techniqueHolder.serializeNBT();
-//                                ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new TechniqueSyncPacket(nbt));
-//                            });
                             return 1;
                         }))));
         dispatcher.register(literal("gettechnique")

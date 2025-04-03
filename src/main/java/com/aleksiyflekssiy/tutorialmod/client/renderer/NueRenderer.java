@@ -23,7 +23,6 @@ public class NueRenderer extends MobRenderer<NueEntity, NueModel<NueEntity>> {
     public void render(NueEntity entity, float pEntityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
         // Рендеринг модели
-
         super.render(entity,pEntityYaw,partialTicks, poseStack, buffer, packedLight);
 
         poseStack.popPose();

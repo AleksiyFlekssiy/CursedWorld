@@ -42,6 +42,7 @@ public class UnlimitedVoid extends Skill {
     private static final int DOMAIN_DURATION = 600;
 
     private boolean domainActive = false;
+    private int charge = 0;
     private int domainTicks = 0;
     private final Map<BlockPos, BlockState> originalBlocks = new HashMap<>();
     private final List<BlockPos> barrierBlocks = new ArrayList<>();
@@ -57,7 +58,14 @@ public class UnlimitedVoid extends Skill {
     @Override
     public void use(LivingEntity entity, UseType type, int charge) {
         if (!(entity instanceof ServerPlayer)) return;
-        this.activate((Player) entity, entity.level());
+        switch (type){
+            case ACTIVATION -> {
+                if (!domainActive) this.activate((Player) entity, entity.level());
+                else this.disactivate(entity);
+            }
+            case CHARGING -> this.charge(entity, charge);
+            case RELEASING -> this.release(entity);
+        }
     }
 
     public void activate(Player player, Level level) {
@@ -66,26 +74,57 @@ public class UnlimitedVoid extends Skill {
         if (!domainActive) {
             if (!CursedEnergyCapability.isEnoughEnergy(player, 50)) return;
             // Центр сферы над игроком, пол под ногами
-            double floorY = player.blockPosition().getY() - 0.1; // Пол на уровне ног игрока
-            Vec3 center = new Vec3(player.getX(), floorY + DOMAIN_RADIUS / 2.0, player.getZ());
-            activateDomainExpansion((ServerLevel) level, center, player);
-            domainActive = true;
-            domainCenter = center;
-            domainTicks = 0;
-            domainOwner = player;
+            activateDomainExpansion((ServerLevel) level, player);
             player.sendSystemMessage(Component.literal("Domain Expansion: Unlimited Void activated!"));
-            player.setPos(player.getX(), floorY + 1.1, player.getZ());
+
             CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 50);
         }
     }
 
-    private void activateDomainExpansion(ServerLevel level, Vec3 center, Player player) {
+    public void disactivate(LivingEntity entity) {
+        if (domainActive) {
+            for (LivingEntity trapped : trappedEntities) {
+                trapped.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
+                if (trapped instanceof Player affectedPlayer) {
+                    affectedPlayer.getAbilities().mayBuild = true;
+                    affectedPlayer.getAbilities().mayfly = affectedPlayer.getAbilities().instabuild;
+                }
+            }
+            applyTechniqueBurnout(domainOwner);
+            restoreOriginalBlocks((ServerLevel) entity.level());
+        }
+    }
+
+    public void charge(LivingEntity entity, int charge){
+        if (charge <= 200){
+            if (charge % 100 == 0) {
+                this.charge++;
+                entity.sendSystemMessage(Component.literal("Charge: " + this.charge));
+            }
+        }
+    }
+
+    public void release(LivingEntity entity){
+        if (!domainActive) activateDomainExpansion((ServerLevel) entity.level(), (Player) entity);
+        this.charge = 0;
+    }
+
+    private void activateDomainExpansion(ServerLevel level, Player player) {
+        float radius = DOMAIN_RADIUS + DOMAIN_RADIUS * charge;
+        double floorY = player.blockPosition().getY() - 0.1; // Пол на уровне ног игрока
+
+        Vec3 center = new Vec3(player.getX(), floorY + radius / 2.0, player.getZ());
         level.playSound(null, player.blockPosition(), SoundEvents.WITHER_SPAWN, player.getSoundSource(), 1.0F, 1.0F);
         level.sendParticles(ParticleTypes.FLASH, center.x, center.y, center.z, 1, 0, 0, 0, 0);
 
+        domainActive = true;
+        domainCenter = center;
+        domainTicks = 0;
+        domainOwner = player;
+
         BlockPos centerPos = new BlockPos((int) center.x, (int) center.y, (int) center.z);
-        int radiusInt = (int) Math.ceil(DOMAIN_RADIUS);
-        double floorY = player.getY(); // Пол прямо под игроком
+        int radiusInt = (int) Math.ceil(radius);
+        player.setPos(player.getX(), floorY + 1.1, player.getZ());
 
         for (int x = -radiusInt; x <= radiusInt; x++) {
             for (int y = -radiusInt; y <= radiusInt; y++) {
@@ -94,9 +133,9 @@ public class UnlimitedVoid extends Skill {
                     double distanceSq = center.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
                     double distance = Math.sqrt(distanceSq);
 
-                    if (distance <= DOMAIN_RADIUS) {
+                    if (distance <= radius) {
                         originalBlocks.put(pos.immutable(), level.getBlockState(pos));
-                        if (distance >= DOMAIN_RADIUS - BOUNDARY_THICKNESS && distance <= DOMAIN_RADIUS + BOUNDARY_THICKNESS) {
+                        if (distance >= radius - BOUNDARY_THICKNESS && distance <= radius + BOUNDARY_THICKNESS) {
                             level.setBlock(pos, Blocks.BLACK_CONCRETE.defaultBlockState(), 3);
                             barrierBlocks.add(pos);
                         } else if (Math.abs(pos.getY() - floorY) < 1.0) {
@@ -111,8 +150,8 @@ public class UnlimitedVoid extends Skill {
         }
 
         // Фиксация всех сущностей, включая игроков (кроме владельца)
-        domainArea = new AABB(center.add(-DOMAIN_RADIUS, -DOMAIN_RADIUS, -DOMAIN_RADIUS),
-                center.add(DOMAIN_RADIUS, DOMAIN_RADIUS, DOMAIN_RADIUS));
+        domainArea = new AABB(center.add(-radius, -radius, -radius),
+                center.add(radius, radius, radius));
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, domainArea)) {
             if (entity != player) {
                 double newY = floorY + 1.0;
@@ -136,7 +175,7 @@ public class UnlimitedVoid extends Skill {
         }
         for (LivingEntity entity : trappedEntities){
             entity.setPos(entity.getX(), entity.getY(), entity.getZ());
-            entity.setDeltaMovement(0, 0, 0);
+            //entity.setDeltaMovement(0, 0, 0);
             entity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
             if (entity instanceof Mob mob) {
                 mob.setNoAi(true);
@@ -144,7 +183,6 @@ public class UnlimitedVoid extends Skill {
                 player.getAbilities().mayBuild = false;
                 player.getAbilities().mayfly = false;
                 player.getAbilities().flying = false;
-                player.getAbilities().invulnerable = false;
                 player.setSprinting(false);
             }
         }
@@ -159,19 +197,7 @@ public class UnlimitedVoid extends Skill {
                 domainTicks++;
                 spawnBarrierParticles(serverLevel, domainCenter, DOMAIN_RADIUS);
                 affectEntities(serverLevel);
-
-
-                if (domainTicks >= DOMAIN_DURATION || checkBarrierDamage(serverLevel)) {
-                    for (LivingEntity trapped : trappedEntities) {
-                        trapped.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
-                        if (trapped instanceof Player affectedPlayer) {
-                            affectedPlayer.getAbilities().mayBuild = true;
-                            affectedPlayer.getAbilities().mayfly = affectedPlayer.getAbilities().instabuild;
-                        }
-                    }
-                    applyTechniqueBurnout(domainOwner);
-                    restoreOriginalBlocks(serverLevel);
-                }
+                if (domainTicks >= DOMAIN_DURATION || checkBarrierDamage(serverLevel)) this.disactivate(domainOwner);
             }
     }
 
