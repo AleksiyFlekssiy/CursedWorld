@@ -128,6 +128,7 @@ public class TutorialMod
         public static final ModelLayerLocation HOLLOW_PURPLE_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "hollow_purple_entity"), "main");
         public static final ModelLayerLocation DIVINE_DOG_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "divine_dog"), "main");
         public static final ModelLayerLocation NUE_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "nue"), "main");
+        public static final ModelLayerLocation TOAD_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "toad"), "main");
 
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
@@ -165,6 +166,7 @@ public class TutorialMod
             event.registerEntityRenderer(ModEntities.ANIMATION_RED_ENTITY.get(), AnimationRedRenderer::new);
             event.registerEntityRenderer(ModEntities.DIVINE_DOG.get(), DivineDogRenderer::new);
             event.registerEntityRenderer(ModEntities.NUE.get(), NueRenderer::new);
+            event.registerEntityRenderer(ModEntities.TOAD.get(), ToadRenderer::new);
         }
 
         @SubscribeEvent
@@ -174,6 +176,7 @@ public class TutorialMod
             event.registerLayerDefinition(HOLLOW_PURPLE_LAYER, HollowPurpleModel::createBodyLayer);
             event.registerLayerDefinition(DIVINE_DOG_LAYER, DivineDogModel::createBodyLayer);
             event.registerLayerDefinition(NUE_LAYER, NueModel::createBodyLayer);
+            event.registerLayerDefinition(TOAD_LAYER, ToadModel::createBodyLayer);
         }
 
         @SubscribeEvent

@@ -7,6 +7,7 @@ import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import net.minecraft.core.Direction;
@@ -188,6 +189,7 @@ public class CursedTechniqueCapability {
                 case "Unlimited Void" -> new UnlimitedVoid();
                 case "Divine Dogs" -> new DivineDogs();
                 case "Nue" -> new Nue();
+                case "Toad" -> new Toad();
                 default -> null; // Оставляем null, так как проверка происходит позже
             };
         }

@@ -56,6 +56,11 @@ public class ModEntities {
                     .sized(2.5f, 3f)
                     .build("tutorialmod:nue"));
 
+    public static final RegistryObject<EntityType<ToadEntity>> TOAD = ENTITIES.register("toad",
+            () -> EntityType.Builder.of(ToadEntity::new, MobCategory.CREATURE)
+                    .sized(1.5f, 1.5f)
+                    .build("tutorialmod:toad"));
+
     public static void register(IEventBus bus) {
         ENTITIES.register(bus);
     }

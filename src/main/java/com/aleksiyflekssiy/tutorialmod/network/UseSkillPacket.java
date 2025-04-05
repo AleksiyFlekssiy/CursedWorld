@@ -5,6 +5,7 @@ import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -65,6 +66,10 @@ public class UseSkillPacket {
                     case "Nue":
                         Nue nue = (Nue) activeSkill;
                         nue.use(player, msg.useType, msg.charge);
+                        break;
+                    case "Toad":
+                        Toad toad = (Toad) activeSkill;
+                        toad.use(player, msg.useType, msg.charge);
                         break;
                 }
             }

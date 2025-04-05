@@ -4,6 +4,7 @@ import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
+import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -14,5 +15,6 @@ public class ModEvents {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(ModEntities.DIVINE_DOG.get(), DivineDogEntity.createAttributes().build());
         event.put(ModEntities.NUE.get(), NueEntity.createAttributes().build());
+        event.put(ModEntities.TOAD.get(), ToadEntity.createAttributes().build());
     }
 }

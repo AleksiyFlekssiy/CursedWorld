@@ -3,11 +3,12 @@ package com.aleksiyflekssiy.tutorialmod.cursed_technique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
 
 import java.util.List;
 
 public class TenShadowsTechnique extends CursedTechnique{
-    private final List<Skill> skills = List.of(new DivineDogs(), new Nue());
+    private final List<Skill> skills = List.of(new DivineDogs(), new Nue(), new Toad());
 
     public TenShadowsTechnique() {
         super(true);
