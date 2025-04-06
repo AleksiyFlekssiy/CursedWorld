@@ -39,6 +39,6 @@ public class CursedEnergySyncPacket {
     }
 
     public static void updateToClient(ICursedEnergy energy, Player player) {
-        TutorialMod.NETWORK.sendTo(new CursedEnergySyncPacket(energy.getCursedEnergy()), ((ServerPlayer) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        ModMessages.INSTANCE.sendTo(new CursedEnergySyncPacket(energy.getCursedEnergy()), ((ServerPlayer) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 }

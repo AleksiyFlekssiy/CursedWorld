@@ -8,7 +8,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 public class ModMessages {
     private static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(TutorialMod.MOD_ID, "main1"),
+            ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "main"),
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals
@@ -16,6 +16,11 @@ public class ModMessages {
 
     public static void register() {
         int id = 0;
+        INSTANCE.registerMessage(id++, CursedEnergySyncPacket.class,
+                CursedEnergySyncPacket::encode,
+                CursedEnergySyncPacket::decode,
+                CursedEnergySyncPacket::handle);
+
         INSTANCE.registerMessage(id++, UseSkillPacket.class,
                 UseSkillPacket::encode,
                 UseSkillPacket::decode,

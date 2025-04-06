@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ToadModel<T extends ToadEntity> extends HierarchicalModel<T> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("tutorialmod", "toad"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tutorialmod", "toad"), "main");
     private final ModelPart body;
     private final ModelPart leftFrontLeg;
     private final ModelPart torso;

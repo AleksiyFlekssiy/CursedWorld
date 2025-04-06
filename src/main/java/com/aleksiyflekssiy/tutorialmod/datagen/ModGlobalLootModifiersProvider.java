@@ -24,6 +24,6 @@ public class ModGlobalLootModifiersProvider extends GlobalLootModifierProvider {
         add("tomato_from_grass", new AddItemModifier(new LootItemCondition[]{
                 LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.GRASS).build()}, ModItems.TOMATO.get()));
         add("metal_detector_from_suspicious_sand", new AddSusSandItemModifier(new LootItemCondition[]{
-                new LootTableIdCondition.Builder(new ResourceLocation("archaeology/desert_pyramid")).build()}, ModItems.METAL_DETECTOR.get()));
+                new LootTableIdCondition.Builder(ResourceLocation.parse("archaeology/desert_pyramid")).build()}, ModItems.METAL_DETECTOR.get()));
     }
 }

@@ -126,6 +126,6 @@ public class Red extends Skill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/red.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/red.png");
     }
 }

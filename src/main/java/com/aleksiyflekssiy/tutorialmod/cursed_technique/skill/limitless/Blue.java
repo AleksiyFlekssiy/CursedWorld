@@ -213,6 +213,6 @@ public class Blue extends Skill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/blue.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/blue.png");
     }
 }

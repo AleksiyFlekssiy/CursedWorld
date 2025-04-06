@@ -95,6 +95,6 @@ public class Toad extends ShikigamiSkill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/toad.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/toad.png");
     }
 }

@@ -98,6 +98,6 @@ public class Nue extends ShikigamiSkill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/nue.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/nue.png");
     }
 }

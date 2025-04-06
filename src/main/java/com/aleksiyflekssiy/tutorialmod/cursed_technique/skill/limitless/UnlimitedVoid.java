@@ -346,6 +346,6 @@ public class UnlimitedVoid extends Skill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/unlimited_void.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/unlimited_void.png");
     }
 }

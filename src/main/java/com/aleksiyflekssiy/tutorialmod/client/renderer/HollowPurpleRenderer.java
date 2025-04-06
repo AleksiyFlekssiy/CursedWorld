@@ -2,6 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.client.renderer;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.client.model.HollowPurpleModel;
+import com.aleksiyflekssiy.tutorialmod.client.model.ModModelLayers;
 import com.aleksiyflekssiy.tutorialmod.client.model.RedModel;
 import com.aleksiyflekssiy.tutorialmod.entity.HollowPurpleEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
@@ -18,14 +19,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public class HollowPurpleRenderer extends EntityRenderer<HollowPurpleEntity> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("tutorialmod", "textures/entity/hollow_purple_entity.png");
-    private static final RenderType GLOW_RENDER_TYPE = RenderType.eyes(new ResourceLocation("tutorialmod", "textures/entity/hollow_purple_glow.png"));
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/hollow_purple_entity.png");
+    private static final RenderType GLOW_RENDER_TYPE = RenderType.eyes(ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/hollow_purple_glow.png"));
     private final HollowPurpleModel model;
 
 
     public HollowPurpleRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new HollowPurpleModel(context.bakeLayer(TutorialMod.ClientModEvents.HOLLOW_PURPLE_LAYER));
+        this.model = new HollowPurpleModel(context.bakeLayer(ModModelLayers.HOLLOW_PURPLE_LAYER));
     }
 
     @Override
@@ -52,7 +53,7 @@ public class HollowPurpleRenderer extends EntityRenderer<HollowPurpleEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(HollowPurpleEntity hollowPurpleEntity) {
-        return new ResourceLocation("tutorialmod", "textures/entity/hollow_purple_glow.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/hollow_purple_glow.png");
     }
 
 }

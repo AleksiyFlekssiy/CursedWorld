@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.client.renderer;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.client.model.ModModelLayers;
 import com.aleksiyflekssiy.tutorialmod.client.model.NueModel;
 import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
@@ -13,10 +14,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public class NueRenderer extends MobRenderer<NueEntity, NueModel<NueEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("tutorialmod", "textures/entity/nue.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/nue.png");
 
     public NueRenderer(EntityRendererProvider.Context context) {
-        super(context, new NueModel<>(context.bakeLayer(TutorialMod.ClientModEvents.NUE_LAYER)), 2.5f);
+        super(context, new NueModel<>(context.bakeLayer(ModModelLayers.NUE_LAYER)), 2.5f);
     }
 
     @Override

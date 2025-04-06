@@ -54,13 +54,6 @@ public class TutorialMod
 {
     // Define mod id in a common place for everything to reference
     public static final String MOD_ID = "tutorialmod";
-    private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel NETWORK = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(MOD_ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
 
     public TutorialMod(FMLJavaModLoadingContext context)
     {
@@ -82,10 +75,8 @@ public class TutorialMod
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new JujutsuHUD());
 
-
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
-        NETWORK.registerMessage(0, CursedEnergySyncPacket.class, CursedEnergySyncPacket::encode, CursedEnergySyncPacket::decode, CursedEnergySyncPacket::handle);
         ModMessages.register();
     }
 
@@ -114,8 +105,8 @@ public class TutorialMod
     @SubscribeEvent
     public void attachCapabilities(AttachCapabilitiesEvent<Entity> event){
         if (event.getObject() instanceof Player){
-            event.addCapability(new ResourceLocation(MOD_ID, "cursed_energy"), new CursedEnergyCapability.Provider());
-            event.addCapability(new ResourceLocation(MOD_ID, "cursed_technique"), new CursedTechniqueCapability.Provider());
+            event.addCapability(ResourceLocation.fromNamespaceAndPath(MOD_ID, "cursed_energy"), new CursedEnergyCapability.Provider());
+            event.addCapability(ResourceLocation.fromNamespaceAndPath(MOD_ID, "cursed_technique"), new CursedTechniqueCapability.Provider());
         }
     }
 
@@ -123,12 +114,7 @@ public class TutorialMod
     @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents
     {
-        public static final ModelLayerLocation BLUE_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "blue_entity"), "main");
-        public static final ModelLayerLocation RED_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "red_entity"), "main");
-        public static final ModelLayerLocation HOLLOW_PURPLE_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "hollow_purple_entity"), "main");
-        public static final ModelLayerLocation DIVINE_DOG_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "divine_dog"), "main");
-        public static final ModelLayerLocation NUE_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "nue"), "main");
-        public static final ModelLayerLocation TOAD_LAYER = new ModelLayerLocation(new ResourceLocation(MOD_ID, "toad"), "main");
+
 
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
@@ -138,7 +124,7 @@ public class TutorialMod
             });
 
             PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(
-                    new ResourceLocation(MOD_ID, "animation"),
+                    ResourceLocation.fromNamespaceAndPath(MOD_ID, "animation"),
                     42,
                     ClientModEvents::registerPlayerAnimation
             );
@@ -171,12 +157,12 @@ public class TutorialMod
 
         @SubscribeEvent
         public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
-            event.registerLayerDefinition(BLUE_LAYER, BlueModel::createBodyLayer);
-            event.registerLayerDefinition(RED_LAYER, RedModel::createBodyLayer);
-            event.registerLayerDefinition(HOLLOW_PURPLE_LAYER, HollowPurpleModel::createBodyLayer);
-            event.registerLayerDefinition(DIVINE_DOG_LAYER, DivineDogModel::createBodyLayer);
-            event.registerLayerDefinition(NUE_LAYER, NueModel::createBodyLayer);
-            event.registerLayerDefinition(TOAD_LAYER, ToadModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.BLUE_LAYER, BlueModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.RED_LAYER, RedModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.HOLLOW_PURPLE_LAYER, HollowPurpleModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.DIVINE_DOG_LAYER, DivineDogModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.NUE_LAYER, NueModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.TOAD_LAYER, ToadModel::createBodyLayer);
         }
 
         @SubscribeEvent

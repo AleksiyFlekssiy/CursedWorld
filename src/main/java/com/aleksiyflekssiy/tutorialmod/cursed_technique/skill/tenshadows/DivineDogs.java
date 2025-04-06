@@ -115,6 +115,6 @@ public class DivineDogs extends ShikigamiSkill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/divine_dogs.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/divine_dogs.png");
     }
 }

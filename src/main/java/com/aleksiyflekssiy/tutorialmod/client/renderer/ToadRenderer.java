@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.client.renderer;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.client.model.ModModelLayers;
 import com.aleksiyflekssiy.tutorialmod.client.model.NueModel;
 import com.aleksiyflekssiy.tutorialmod.client.model.ToadModel;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
@@ -12,10 +13,10 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public class ToadRenderer extends MobRenderer<ToadEntity, ToadModel<ToadEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("tutorialmod", "textures/entity/toad.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/toad.png");
 
     public ToadRenderer(EntityRendererProvider.Context context) {
-        super(context, new ToadModel<>(context.bakeLayer(TutorialMod.ClientModEvents.TOAD_LAYER)), 1.5f);
+        super(context, new ToadModel<>(context.bakeLayer(ModModelLayers.TOAD_LAYER)), 1.5f);
     }
 
     @Override

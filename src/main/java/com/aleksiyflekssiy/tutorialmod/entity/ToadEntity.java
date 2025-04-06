@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -285,11 +286,11 @@ public class ToadEntity extends Shikigami {
         private long lastUseTime = 0;
         private int swingTick = 0;
         private final int SWING_DURATION = 40; // 2 секунды
-        private final float SWING_RADIUS = 3.0F; // Радиус вращения
-        private final float SWING_SPEED = 0.2F; // Скорость вращения (радианы/тик)
+        private final float SWING_SPEED = 0.5F; // Уменьшена угловая скорость
         private Vec3 centerPosition; // Центр вращения (позиция лягушки)
         private float angle = 0.0F; // Текущий угол
-        private float initialSpeed = 0.1F; // Исходная скорость цели
+        private boolean isReleased = false;
+        private float initialDistance = 0.0F; // Изначальная дистанция до цели
 
         public TongueSwingGoal(ToadEntity toad) {
             this.toad = toad;
@@ -305,7 +306,7 @@ public class ToadEntity extends Shikigami {
 
         @Override
         public boolean canContinueToUse() {
-            return caughtEntity != null && caughtEntity.isAlive() && swingTick <= SWING_DURATION;
+            return caughtEntity != null && caughtEntity.isAlive();
         }
 
         @Override
@@ -321,90 +322,85 @@ public class ToadEntity extends Shikigami {
 
             if (result != null && result.getEntity() instanceof LivingEntity entity) {
                 caughtEntity = entity;
-                centerPosition = toad.position(); // Центр вращения — позиция лягушки
+                centerPosition = toad.position(); // Центр вращения
+                initialDistance = (float) centerPosition.distanceTo(caughtEntity.position()); // Изначальная дистанция
                 angle = (float) Math.atan2(caughtEntity.getZ() - centerPosition.z, caughtEntity.getX() - centerPosition.x);
-                toad.lookAt(EntityAnchorArgument.Anchor.FEET, caughtEntity.position());
-
-                // Отключаем гравитацию и фиксируем скорость
-                caughtEntity.setNoGravity(true);
-                AttributeInstance speedAttribute = caughtEntity.getAttribute(Attributes.MOVEMENT_SPEED);
-                if (speedAttribute != null) {
-                    initialSpeed = (float) speedAttribute.getBaseValue();
-                    speedAttribute.setBaseValue(0.0); // Блокируем движение цели
-                }
+                swingTick = 0;
+                toad.setDistance(initialDistance);
+                System.out.println("START: " + caughtEntity.getClass().getSimpleName());
             }
         }
 
         @Override
         public void tick() {
-            if (caughtEntity == null) {
-                // Отслеживание столкновений после отпускания
-                LivingEntity target = toad.getTarget();
-                if (target != null && (target.horizontalCollision || target.verticalCollision)) {
-                    float speed = (float) target.getDeltaMovement().length();
-                    if (speed > 0.5F) {
-                        target.hurt(level().damageSources().generic(), speed * 2.0F);
-                        target.setDeltaMovement(target.getDeltaMovement().scale(0.5));
-                        toad.setTarget(null); // Сбрасываем цель после удара
-                    }
+            if (caughtEntity == null) return;
+            if (caughtEntity.minorHorizontalCollision || caughtEntity.verticalCollision) {
+                double speed = caughtEntity.getDeltaMovement().length();
+                caughtEntity.hurt(level().damageSources().generic(), (float) speed);
+                System.out.println("HURT");
+                if (isReleased) {
+                    this.stop();
+                    return;
                 }
-                return;
+            }
+            if (!isReleased) {
+                // Увеличиваем угол вращения
+                angle += SWING_SPEED;
+
+                // Вычисляем целевую позицию на окружности
+                double targetX = centerPosition.x + initialDistance * Math.cos(angle);
+                double targetZ = centerPosition.z + initialDistance * Math.sin(angle);
+
+                // Перемещаем цель к этой позиции
+                caughtEntity.setDeltaMovement(
+                        (targetX - caughtEntity.getX()) * 0.3, // Плавное движение по X
+                        caughtEntity.getDeltaMovement().y,    // Сохраняем вертикальную скорость
+                        (targetZ - caughtEntity.getZ()) * 0.3  // Плавное движение по Z
+                );
+                caughtEntity.hurtMarked = true;
+
+                // Поворачиваем жабу
+                float yaw = (float) Math.toDegrees(angle);
+                toad.setYRot(yaw);         // Поворот головы
+                toad.yBodyRot = yaw;       // Поворот тела
+                toad.yHeadRot = yaw;       // Поворот головы (для точности)
+                toad.yRotO = yaw;          // Предыдущий поворот (для плавности)
+                toad.yBodyRotO = yaw;      // Предыдущий поворот тела
+
+                swingTick++;
+
+                // Отпускаем цель
+                if (swingTick >= SWING_DURATION) {
+                    releaseEntity();
+                }
             }
 
-            // Обновляем угол вращения
-            angle += SWING_SPEED;
-
-            // Вычисляем новую позицию цели
-            double offsetX = SWING_RADIUS * Math.cos(angle);
-            double offsetZ = SWING_RADIUS * Math.sin(angle);
-            Vec3 newPos = centerPosition.add(offsetX, caughtEntity.getY() - centerPosition.y, offsetZ);
-
-            // Перемещаем цель
-            caughtEntity.teleportTo(newPos.x, newPos.y, newPos.z);
-            caughtEntity.setDeltaMovement(Vec3.ZERO); // Обнуляем движение
-            caughtEntity.hurtMarked = true;
-
-            // Поворачиваем лягушку
-            toad.setYRot((float) Math.toDegrees(angle));
-            toad.yBodyRot = toad.getYRot();
-            toad.lookAt(EntityAnchorArgument.Anchor.FEET, caughtEntity.position());
-
-            swingTick++;
-
-            // Отпускаем цель
-            if (swingTick >= SWING_DURATION) {
-                releaseEntity();
-            }
+            System.out.println("Tick: " + caughtEntity.getClass().getSimpleName() + " Speed: " + caughtEntity.getDeltaMovement().length() + " Distance: " + centerPosition.distanceTo(caughtEntity.position()));
         }
 
         private void releaseEntity() {
             if (caughtEntity == null) return;
 
-            // Рассчитываем вектор скорости для отпускания
-            float releaseSpeed = SWING_SPEED * SWING_RADIUS * 2.0F; // Увеличиваем импульс
-            double velocityX = releaseSpeed * Math.cos(angle); // Направление наружу
+            // Финальный импульс
+            float releaseSpeed = SWING_SPEED * initialDistance * 4.0F;
+            double velocityX = releaseSpeed * Math.cos(angle);
             double velocityZ = releaseSpeed * Math.sin(angle);
             caughtEntity.setDeltaMovement(velocityX, 0.5, velocityZ);
             caughtEntity.hurtMarked = true;
 
-            // Восстанавливаем гравитацию и скорость
-            caughtEntity.setNoGravity(false);
-            AttributeInstance speedAttribute = caughtEntity.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (speedAttribute != null) {
-                speedAttribute.setBaseValue(initialSpeed);
-            }
-
-            // Переводим цель в статус "отпущенной"
-            toad.setTarget(caughtEntity);
-            caughtEntity = null;
             swingTick = 0;
             lastUseTime = toad.level().getGameTime();
+            toad.setDistance(0);
+            System.out.println("Released: " + caughtEntity.getClass().getSimpleName());
+            isReleased = true;
         }
 
         @Override
         public void stop() {
             if (caughtEntity != null) {
-                releaseEntity();
+                caughtEntity = null;
+                lastUseTime = level().getGameTime();
+                isReleased = false;
             }
         }
     }

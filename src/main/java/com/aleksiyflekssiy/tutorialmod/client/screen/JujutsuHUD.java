@@ -11,8 +11,8 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class JujutsuHUD {
-    private static final ResourceLocation SLOT_TEXTURE = new ResourceLocation("tutorialmod", "textures/gui/skill_slot.png");
-    private static ResourceLocation ABILITY_ICON = new ResourceLocation("tutorialmod", "textures/gui/infinite.png");
+    private static final ResourceLocation SLOT_TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/skill_slot.png");
+    private static ResourceLocation ABILITY_ICON = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/infinite.png");
 
     @SubscribeEvent
     public void onRenderGui(RenderGuiOverlayEvent.Post event) {

@@ -10,8 +10,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class AbilityScreen extends Screen {
-    private static final ResourceLocation SLOT_TEXTURE = new ResourceLocation("tutorialmod", "textures/gui/skill_slot.png");
-    private static final ResourceLocation ABILITY_ICON = new ResourceLocation("tutorialmod", "textures/gui/blue.png");
+    private static final ResourceLocation SLOT_TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/skill_slot.png");
+    private static final ResourceLocation ABILITY_ICON = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/blue.png");
 
     public AbilityScreen() {
         super(Component.literal("Способности"));

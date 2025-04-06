@@ -160,6 +160,6 @@ public class HollowPurple extends Skill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/hollow_purple.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/hollow_purple.png");
     }
 }

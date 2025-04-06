@@ -15,5 +15,5 @@ import java.util.List;
 public class ModToolTiers {
     public static final Tier COPPER = TierSortingRegistry.registerTier(
             new ForgeTier(2, 180, 6f, 2f, 15, BlockTags.NEEDS_STONE_TOOL, () -> Ingredient.of(Items.COPPER_INGOT)),
-            new ResourceLocation(TutorialMod.MOD_ID, "copper"), List.of(Tiers.STONE), List.of(Tiers.IRON));
+            ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "copper"), List.of(Tiers.STONE), List.of(Tiers.IRON));
 }

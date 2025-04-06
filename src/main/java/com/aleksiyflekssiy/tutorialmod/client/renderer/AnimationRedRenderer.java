@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.client.renderer;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.client.model.ModModelLayers;
 import com.aleksiyflekssiy.tutorialmod.client.model.RedModel;
 import com.aleksiyflekssiy.tutorialmod.entity.animation.AnimationRedEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,14 +14,14 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class AnimationRedRenderer extends EntityRenderer<AnimationRedEntity> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("tutorialmod", "textures/entity/red_entity.png");
-    private static final RenderType GLOW_RENDER_TYPE = RenderType.eyes(new ResourceLocation("tutorialmod", "textures/entity/red_entity.png"));
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/red_entity.png");
+    private static final RenderType GLOW_RENDER_TYPE = RenderType.eyes(ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/red_entity.png"));
 
     private final RedModel model;
 
     public AnimationRedRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new RedModel(context.bakeLayer(TutorialMod.ClientModEvents.RED_LAYER));
+        this.model = new RedModel(context.bakeLayer(ModModelLayers.RED_LAYER));
     }
 
     @Override

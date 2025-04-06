@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class NueModel<T extends NueEntity> extends HierarchicalModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("tutorialmod", "nue"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tutorialmod", "nue"), "main");
 	private final ModelPart body;
 	private final ModelPart leftWing;
 	private final ModelPart singlePart;

@@ -160,7 +160,7 @@ public class BlueItem extends Item {
 
     private void playAnimation(AbstractClientPlayer player){
         ModifierLayer<BlueControlAnimation> animationLayer = (ModifierLayer<BlueControlAnimation>) PlayerAnimationAccess.getPlayerAssociatedData(player)
-                .get(new ResourceLocation("tutorialmod", "animation"));
+                .get(ResourceLocation.fromNamespaceAndPath("tutorialmod", "animation"));
         BlueControlAnimation animation = new BlueControlAnimation(player);
         animation.setUsing(true); // Анимация активна
         animationLayer.setAnimation(animation);
@@ -168,7 +168,7 @@ public class BlueItem extends Item {
 
     public static void stopAnimation(AbstractClientPlayer player){
         ModifierLayer<BlueControlAnimation> animationLayer = (ModifierLayer<BlueControlAnimation>) PlayerAnimationAccess.getPlayerAssociatedData(player)
-                .get(new ResourceLocation("tutorialmod", "animation"));
+                .get(ResourceLocation.fromNamespaceAndPath("tutorialmod", "animation"));
         BlueControlAnimation animation = new BlueControlAnimation(player);
         animation.setUsing(false); // Анимация активна
         animationLayer.setAnimation(null);
@@ -192,7 +192,7 @@ public class BlueItem extends Item {
     public static void registerAnimation(Player player) {
         if (player instanceof AbstractClientPlayer clientPlayer) {
             PlayerAnimationAccess.getPlayerAssociatedData(clientPlayer)
-                    .set(new ResourceLocation("tutorialmod", "animation"), new ModifierLayer<>());
+                    .set(ResourceLocation.fromNamespaceAndPath("tutorialmod", "animation"), new ModifierLayer<>());
         }
     }
     @Override

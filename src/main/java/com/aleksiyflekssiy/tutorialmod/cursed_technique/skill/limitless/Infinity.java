@@ -257,7 +257,7 @@ public class Infinity extends Skill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return new ResourceLocation("tutorialmod", "textures/gui/infinity.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/infinity.png");
     }
 
 }

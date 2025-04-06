@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 
 public class RedModel extends EntityModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(TutorialMod.MOD_ID, "red_entity"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "red_entity"), "main");
 	private final ModelPart bb_main;
 
 	public RedModel(ModelPart root) {
