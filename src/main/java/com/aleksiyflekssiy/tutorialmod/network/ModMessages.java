@@ -39,5 +39,10 @@ public class ModMessages {
                 TechniqueSyncPacket::encode,
                 TechniqueSyncPacket::decode,
                 TechniqueSyncPacket::handle);
+
+        INSTANCE.registerMessage(id++, SwitchOrderPacket.class,
+                SwitchOrderPacket::encode,
+                SwitchOrderPacket::decode,
+                SwitchOrderPacket::handle);
     }
 }

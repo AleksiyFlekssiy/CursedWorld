@@ -12,14 +12,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class JujutsuHUD {
     private static final ResourceLocation SLOT_TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/skill_slot.png");
-    private static ResourceLocation ABILITY_ICON = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/infinite.png");
 
     @SubscribeEvent
     public void onRenderGui(RenderGuiOverlayEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         GuiGraphics guiGraphics = event.getGuiGraphics();
-        if (mc.player == null) return;
-        ABILITY_ICON = CursedTechniqueCapability.getSkill(mc.player).getSkillIcon();
+        if (mc.player == null || !mc.player.isAlive()) return;
+        ResourceLocation ABILITY_ICON = CursedTechniqueCapability.getSkill(mc.player).getSkillIcon();
         // Рисуем текст
         //guiGraphics.drawString(mc.font, "Привет, это мой HUD!", 10, 10, 0xFFFFFF, true);
 

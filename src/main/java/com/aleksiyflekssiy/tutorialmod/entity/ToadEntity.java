@@ -1,44 +1,36 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiFollowOwnerGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtByTargetGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtTargetGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.ShikigamiTargetSummonerGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.TongueCatchGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.TonguePullGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.TongueSwingGoal;
+import com.aleksiyflekssiy.tutorialmod.entity.navigation.JumpingMoveControl;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageSources;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.JumpControl;
-import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
 
 public class ToadEntity extends Shikigami {
     private static final EntityDataAccessor<Float> DISTANCE = SynchedEntityData.defineId(ToadEntity.class, EntityDataSerializers.FLOAT);
     public AnimationState mouthOpen = new AnimationState();
-    float targetYaw;
+    public float targetYaw;
+    private long lastTickUse;
+    private Order order = Order.NONE;
 
     public ToadEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -51,11 +43,32 @@ public class ToadEntity extends Shikigami {
                 .add(Attributes.MAX_HEALTH, 100)
                 .add(Attributes.MOVEMENT_SPEED, 0.5)
                 .add(Attributes.ATTACK_DAMAGE, 10f)
-                .add(Attributes.FOLLOW_RANGE, 100)
+                .add(Attributes.FOLLOW_RANGE, 50)
                 .add(Attributes.ATTACK_SPEED, 1)
                 .add(Attributes.ATTACK_KNOCKBACK, 2.5)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.5)
                 .add(Attributes.JUMP_STRENGTH, 1);
+    }
+
+    public Order getOrder(){
+        return this.order;
+    }
+
+    public void setOrder(Order order){
+        this.order = order;
+    }
+
+    public void followOrder(LivingEntity target, Order order) {
+        if (this.isTamed() && this.owner != null) {
+            this.goalSelector.getRunningGoals().forEach(Goal::stop);
+            this.setTarget(target);
+            this.setOrder(order);
+        }
+    }
+
+    public void clearOrder(){
+        this.setTarget(null);
+        this.setOrder(Order.NONE);
     }
 
     @Override
@@ -68,28 +81,41 @@ public class ToadEntity extends Shikigami {
         return this.entityData.get(DISTANCE);
     }
 
-    private void setDistance(float distance) {
+    public void setDistance(float distance) {
         this.entityData.set(DISTANCE, distance);
+    }
+
+    public void setLastTickUse() {
+        this.lastTickUse = level().getGameTime();
+    }
+
+    public boolean isCooldownOff(){
+        return this.level().getGameTime() - this.lastTickUse > 100;
     }
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new TongueSwingGoal(this));
-        this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, LivingEntity.class, false));
+        if (!isTamed) {
+            this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        }
+        else {
+            this.goalSelector.addGoal(3, new ShikigamiFollowOwnerGoal(this, 5, 5, 1));
+            this.targetSelector.addGoal(0, new ShikigamiOwnerHurtTargetGoal(this, true));
+            this.targetSelector.addGoal(1, new ShikigamiOwnerHurtByTargetGoal(this, true));
+        }
+        this.goalSelector.addGoal(0, new TonguePullGoal(this));
+        this.goalSelector.addGoal(1, new TongueSwingGoal(this));
+        this.goalSelector.addGoal(2, new TongueCatchGoal(this));
     }
 
     @Override
     public void tick() {
         super.tick();
-        LivingEntity target = this.level().getNearestPlayer(this, 20);
+        LivingEntity target = this.level().getNearestEntity(LivingEntity.class, TargetingConditions.DEFAULT, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(30));
         if (target == null) return;
         double dx = target.getX() - getX();
         double dz = target.getZ() - getZ();
         targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
-    }
-
-    protected int getJumpDelay() {
-        return this.random.nextInt(20) + 10;
     }
 
     @Override
@@ -99,7 +125,6 @@ public class ToadEntity extends Shikigami {
         }
         return InteractionResult.SUCCESS;
     }
-
 
     @Nullable
     public LivingEntity getControllingPassenger() {
@@ -112,388 +137,10 @@ public class ToadEntity extends Shikigami {
         return null;
     }
 
-    static class TonguePullGoal extends Goal {
-        public static final float ANIMATION_DELAY_TICKS = 20F;
-        private final ToadEntity toad;
-        private LivingEntity catchedEntity;
-        private long lastUseTime = 0;
-        private int catchTick = 0;
-
-        public TonguePullGoal(ToadEntity toad) {
-            this.toad = toad;
-            this.setFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
-        }
-
-        @Override
-        public boolean canUse() {
-            long time = toad.level().getGameTime();
-            if (time - lastUseTime < 40) return false; // Кулдаун 2 секунды (40 тиков)
-            return toad.getTarget() != null && !toad.getTarget().isSpectator() && toad.distanceToSqr(toad.getTarget()) < 900; // 30 блоков в квадрате
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return catchedEntity != null && !catchedEntity.isSpectator() && toad.distanceToSqr(catchedEntity) > 1.0; // Продолжаем, пока цель дальше 1 блока
-        }
-
-        @Override
-        public void start() {
-            System.out.println("Start");
-            toad.navigation.stop(); // Останавливаем движение жабы
-            Vec3 startPos = toad.getEyePosition(); // Позиция глаз жабы
-            Vec3 endPos = startPos.add(toad.getViewVector(1).scale(50)); // Дальность языка (30 блоков)
-            EntityHitResult result = ProjectileUtil.getEntityHitResult(toad.level(), toad, startPos, endPos, new AABB(startPos, endPos), entity -> entity instanceof LivingEntity && !entity.equals(toad));
-
-            if (result != null && result.getEntity() instanceof LivingEntity entity) {
-                catchedEntity = entity;
-                toad.setDistance((float) toad.position().subtract(catchedEntity.position()).length());
-                toad.lookAt(EntityAnchorArgument.Anchor.FEET, catchedEntity.position());
-            }
-        }
-
-        @Override
-        public void tick() {
-            if (catchedEntity == null) return;
-
-            // Целевая позиция: 1 блок от жабы в направлении взгляда
-            Vec3 targetPos = toad.position().add(toad.getLookAngle().scale(2));
-            Vec3 currentPos = catchedEntity.position();
-
-            // Вектор притягивания
-            Vec3 pullVector = targetPos.subtract(currentPos);
-            double distance = pullVector.length();
-            toad.setDistance((float) distance);
-            if (distance > 1) { // Если цель дальше 1 блока
-                // Нормализуем вектор и задаём скорость притягивания
-                double speed = 5;
-                if (distance < 3.0) {
-                    speed = 0; // Замедление перед остановкой
-                } else if (distance < 5) speed *= 0.5;
-                Vec3 normalizedPull = pullVector.normalize(); // Скорость 0.5 блока/тик
-
-                catchedEntity.setDeltaMovement(normalizedPull.scale(speed));
-                catchedEntity.hurtMarked = true; // Обновляем движение
-
-                toad.lookAt(EntityAnchorArgument.Anchor.FEET, catchedEntity.position());
-                System.out.println("Tick: " + catchedEntity.getClass().getSimpleName());
-                catchTick++;
-                catchedEntity.hasImpulse = false;
-            } else {
-                // Если цель уже близко, останавливаем её
-                catchedEntity.setDeltaMovement(Vec3.ZERO);
-                catchedEntity.setPos(targetPos.x, targetPos.y, targetPos.z);
-                System.out.println("Positioned");
-                stop();
-            }
-        }
-
-        @Override
-        public boolean requiresUpdateEveryTick() {
-            return true; // Обновляем каждый тик
-        }
-
-        @Override
-        public void stop() {
-            if (catchedEntity == null) return;
-            System.out.println("Stop");
-            toad.setDistance(0);
-            lastUseTime = toad.level().getGameTime();
-            catchedEntity = null;
-            catchTick = 0;
-        }
-    }
-
-    static class TongueCatchGoal extends Goal {
-        public static final float IMMOBILIZATION_TICKS = 60F;
-        private final ToadEntity toad;
-        private LivingEntity caughtEntity;
-        private long lastUseTime = 0;
-        private int catchTick = 0;
-        private float initialSpeed;
-
-        public TongueCatchGoal(ToadEntity toad) {
-            this.toad = toad;
-            this.setFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
-            MinecraftForge.EVENT_BUS.register(this);
-        }
-
-        @Override
-        public boolean canUse() {
-            long time = toad.level().getGameTime();
-            if (time - lastUseTime < 40) return false; // Кулдаун 2 секунды (40 тиков)
-            return toad.getTarget() != null && !toad.getTarget().isSpectator(); // 30 блоков в квадрате
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return caughtEntity != null && !caughtEntity.isSpectator() && catchTick <= IMMOBILIZATION_TICKS; // Продолжаем, пока цель дальше 1 блока
-        }
-
-        @Override
-        public void start() {
-            System.out.println("Start");
-            toad.navigation.stop(); // Останавливаем движение жабы
-            Vec3 startPos = toad.getEyePosition(); // Позиция глаз жабы
-            Vec3 endPos = startPos.add(toad.getViewVector(1).scale(50)); // Дальность языка (30 блоков)
-            EntityHitResult result = ProjectileUtil.getEntityHitResult(toad.level(), toad, startPos, endPos, new AABB(startPos, endPos), entity -> entity instanceof LivingEntity && !entity.equals(toad));
-
-            if (result != null && result.getEntity() instanceof LivingEntity entity) {
-                caughtEntity = entity;
-                toad.setDistance((float) toad.position().subtract(caughtEntity.position()).length());
-                toad.lookAt(EntityAnchorArgument.Anchor.FEET, caughtEntity.position());
-                initialSpeed = (float) caughtEntity.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue();
-                caughtEntity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
-            }
-        }
-
-        @Override
-        public void tick() {
-            if (toad.level().isClientSide() || caughtEntity == null) return;
-            toad.lookAt(EntityAnchorArgument.Anchor.FEET, caughtEntity.position());
-            System.out.println("Tick: " + caughtEntity.getClass().getSimpleName());
-            catchTick++;
-        }
-
-        @SubscribeEvent
-        public void disableMovement(LivingEvent.LivingJumpEvent event){
-            //Вся система - ебучий костыль.
-            //Необходимо написать систему управления вводом игрока
-            if (event.getEntity().equals(caughtEntity)) {
-                event.getEntity().setDeltaMovement(0,0,0);
-            }
-        }
-
-        @Override
-        public boolean requiresUpdateEveryTick() {
-            return true; // Обновляем каждый тик
-        }
-
-        @Override
-        public void stop() {
-            if (caughtEntity == null) return;
-            System.out.println("Stop");
-            toad.setDistance(0);
-            lastUseTime = toad.level().getGameTime();
-            caughtEntity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(initialSpeed);
-            caughtEntity = null;
-            catchTick = 0;
-        }
-    }
-
-    public class TongueSwingGoal extends Goal {
-        private final ToadEntity toad;
-        private LivingEntity caughtEntity;
-        private long lastUseTime = 0;
-        private int swingTick = 0;
-        private final int SWING_DURATION = 40; // 2 секунды
-        private final float SWING_SPEED = 0.5F; // Уменьшена угловая скорость
-        private Vec3 centerPosition; // Центр вращения (позиция лягушки)
-        private float angle = 0.0F; // Текущий угол
-        private boolean isReleased = false;
-        private float initialDistance = 0.0F; // Изначальная дистанция до цели
-
-        public TongueSwingGoal(ToadEntity toad) {
-            this.toad = toad;
-            this.setFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
-        }
-
-        @Override
-        public boolean canUse() {
-            long time = toad.level().getGameTime();
-            if (time - lastUseTime < 60) return false; // Кулдаун 3 секунды
-            return toad.getTarget() != null && !toad.getTarget().isSpectator();
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return caughtEntity != null && caughtEntity.isAlive();
-        }
-
-        @Override
-        public void start() {
-            toad.navigation.stop();
-            Vec3 startPos = toad.getEyePosition();
-            Vec3 endPos = startPos.add(toad.getViewVector(1).scale(50));
-            EntityHitResult result = ProjectileUtil.getEntityHitResult(
-                    toad.level(), toad, startPos, endPos,
-                    new AABB(startPos, endPos),
-                    entity -> entity instanceof LivingEntity && !entity.equals(toad)
-            );
-
-            if (result != null && result.getEntity() instanceof LivingEntity entity) {
-                caughtEntity = entity;
-                centerPosition = toad.position(); // Центр вращения
-                initialDistance = (float) centerPosition.distanceTo(caughtEntity.position()); // Изначальная дистанция
-                angle = (float) Math.atan2(caughtEntity.getZ() - centerPosition.z, caughtEntity.getX() - centerPosition.x);
-                swingTick = 0;
-                toad.setDistance(initialDistance);
-                System.out.println("START: " + caughtEntity.getClass().getSimpleName());
-            }
-        }
-
-        @Override
-        public void tick() {
-            if (caughtEntity == null) return;
-            if (caughtEntity.minorHorizontalCollision || caughtEntity.verticalCollision) {
-                double speed = caughtEntity.getDeltaMovement().length();
-                caughtEntity.hurt(level().damageSources().generic(), (float) speed);
-                System.out.println("HURT");
-                if (isReleased) {
-                    this.stop();
-                    return;
-                }
-            }
-            if (!isReleased) {
-                // Увеличиваем угол вращения
-                angle += SWING_SPEED;
-
-                // Вычисляем целевую позицию на окружности
-                double targetX = centerPosition.x + initialDistance * Math.cos(angle);
-                double targetZ = centerPosition.z + initialDistance * Math.sin(angle);
-
-                // Перемещаем цель к этой позиции
-                caughtEntity.setDeltaMovement(
-                        (targetX - caughtEntity.getX()) * 0.3, // Плавное движение по X
-                        caughtEntity.getDeltaMovement().y,    // Сохраняем вертикальную скорость
-                        (targetZ - caughtEntity.getZ()) * 0.3  // Плавное движение по Z
-                );
-                caughtEntity.hurtMarked = true;
-
-                // Поворачиваем жабу
-                float yaw = (float) Math.toDegrees(angle);
-                toad.setYRot(yaw);         // Поворот головы
-                toad.yBodyRot = yaw;       // Поворот тела
-                toad.yHeadRot = yaw;       // Поворот головы (для точности)
-                toad.yRotO = yaw;          // Предыдущий поворот (для плавности)
-                toad.yBodyRotO = yaw;      // Предыдущий поворот тела
-
-                swingTick++;
-
-                // Отпускаем цель
-                if (swingTick >= SWING_DURATION) {
-                    releaseEntity();
-                }
-            }
-
-            System.out.println("Tick: " + caughtEntity.getClass().getSimpleName() + " Speed: " + caughtEntity.getDeltaMovement().length() + " Distance: " + centerPosition.distanceTo(caughtEntity.position()));
-        }
-
-        private void releaseEntity() {
-            if (caughtEntity == null) return;
-
-            // Финальный импульс
-            float releaseSpeed = SWING_SPEED * initialDistance * 4.0F;
-            double velocityX = releaseSpeed * Math.cos(angle);
-            double velocityZ = releaseSpeed * Math.sin(angle);
-            caughtEntity.setDeltaMovement(velocityX, 0.5, velocityZ);
-            caughtEntity.hurtMarked = true;
-
-            swingTick = 0;
-            lastUseTime = toad.level().getGameTime();
-            toad.setDistance(0);
-            System.out.println("Released: " + caughtEntity.getClass().getSimpleName());
-            isReleased = true;
-        }
-
-        @Override
-        public void stop() {
-            if (caughtEntity != null) {
-                caughtEntity = null;
-                lastUseTime = level().getGameTime();
-                isReleased = false;
-            }
-        }
-    }
-
-
-    static class JumpingMoveControl extends MoveControl {
-        private final ToadEntity toad;
-        private float yRot;
-        private int jumpDelay;
-        private boolean isAggressive;
-        private float jumpHeight = 0.5F;
-
-        public JumpingMoveControl(ToadEntity toad) {
-            super(toad);
-            this.toad = toad;
-            this.yRot = 180.0F * toad.getYRot() / (float) Math.PI;
-        }
-
-        public void setDirection(float pYRot, boolean pAggressive) {
-            this.yRot = pYRot;
-            this.isAggressive = pAggressive;
-        }
-
-        public void setWantedMovement(double pSpeed) {
-            this.speedModifier = pSpeed;
-            this.operation = MoveControl.Operation.MOVE_TO;
-        }
-
-        public void tick() {
-            this.setDirection(this.toad.targetYaw, true);
-            this.mob.setYRot(this.rotlerp(this.mob.getYRot(), this.yRot, 90.0F));
-            this.mob.yHeadRot = this.mob.getYRot();
-            this.mob.yBodyRot = this.mob.getYRot();
-            if (this.operation != MoveControl.Operation.MOVE_TO) {
-                this.mob.setZza(0.0F);
-            } else {
-                this.operation = MoveControl.Operation.WAIT;
-                if (this.mob.onGround()) {
-                    this.mob.setSpeed((float) (this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
-                    if (this.jumpDelay-- <= 0) {
-                        this.jumpDelay = this.toad.getJumpDelay();
-                        if (this.isAggressive) {
-                            this.jumpDelay /= 3;
-                        }
-                        Vec3 direction = Vec3.ZERO;
-                        if (toad.getTarget() != null)
-                            direction = toad.getTarget().position().subtract(toad.position()).normalize();
-
-
-                    } else {
-                        this.toad.xxa = 0.0F;
-                        this.toad.zza = 0.0F;
-                        this.mob.setSpeed(0.0F);
-                    }
-                } else {
-                    this.mob.setSpeed((float) (this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
-                }
-            }
-        }
-    }
-
-    static class ToadJumpControl extends JumpControl {
-
-        public ToadJumpControl(Mob pMob) {
-            super(pMob);
-        }
-    }
-
-    static class ToadKeepOnJumpingGoal extends Goal {
-        private final ToadEntity toad;
-
-        public ToadKeepOnJumpingGoal(ToadEntity toad) {
-            this.toad = toad;
-            this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
-        }
-
-        /**
-         * Returns whether execution should begin. You can also read and cache any state necessary for execution in this
-         * method as well.
-         */
-        public boolean canUse() {
-            return !this.toad.isPassenger();
-        }
-
-        /**
-         * Keep ticking a continuous task that has already been started
-         */
-        public void tick() {
-            MoveControl movecontrol = this.toad.getMoveControl();
-            if (movecontrol instanceof JumpingMoveControl control) {
-                control.setWantedMovement(1.0D);
-            }
-
-        }
+    public enum Order {
+        NONE,
+        PULL,
+        SWING,
+        CATCH
     }
 }

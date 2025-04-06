@@ -2,11 +2,9 @@ package com.aleksiyflekssiy.tutorialmod.client.screen;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
-import com.aleksiyflekssiy.tutorialmod.network.UseSkillPacket;
-import com.aleksiyflekssiy.tutorialmod.network.HoldSkillPacket;
-import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
-import com.aleksiyflekssiy.tutorialmod.network.SyncSkillPacket;
+import com.aleksiyflekssiy.tutorialmod.network.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -96,10 +94,15 @@ public class KeyHandler {
         }
 
         if (NEXT_SKILL.consumeClick()) {
-            CursedTechniqueCapability.nextSkill(mc.player);
-            Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
-            if (selectedSkill != null) {
-                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(selectedSkill.getName()));
+            if (CursedTechniqueCapability.getSkill(mc.player) instanceof ShikigamiSkill && mc.player.isCrouching()){
+                ModMessages.INSTANCE.sendToServer(new SwitchOrderPacket());
+            }
+            else {
+                CursedTechniqueCapability.nextSkill(mc.player);
+                Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
+                if (selectedSkill != null) {
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(selectedSkill.getName()));
+                }
             }
         }
     }

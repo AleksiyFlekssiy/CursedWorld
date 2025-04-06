@@ -1,5 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,13 +30,11 @@ public class SyncSkillPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 player.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(technique -> {
+                    if (technique.getCurrentSkill() instanceof ShikigamiSkill)
                     technique.getSkillSet().stream()
                             .filter(skill -> skill.getName().equals(msg.skillName))
                             .findFirst()
                             .ifPresent(technique::setCurrentSkill);
-                    // Отправляем обновление клиенту
-//                    CompoundTag nbt = technique.serializeNBT();
-//                    ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new TechniqueSyncPacket(nbt));
                 });
             }
         });

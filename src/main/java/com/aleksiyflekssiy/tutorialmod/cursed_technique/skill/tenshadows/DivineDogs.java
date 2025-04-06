@@ -109,6 +109,11 @@ public class DivineDogs extends ShikigamiSkill {
     }
 
     @Override
+    public void switchOrder(LivingEntity owner) {
+
+    }
+
+    @Override
     public String getName() {
         return "Divine Dogs";
     }

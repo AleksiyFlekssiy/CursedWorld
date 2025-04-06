@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
 
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
 
@@ -34,4 +35,5 @@ public abstract class ShikigamiSkill extends Skill{
     }
 
     public abstract List<Shikigami> getShikigami();
+    public abstract void switchOrder(LivingEntity owner);
 }
