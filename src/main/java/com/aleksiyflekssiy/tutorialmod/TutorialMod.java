@@ -10,21 +10,19 @@ import com.aleksiyflekssiy.tutorialmod.client.renderer.*;
 import com.aleksiyflekssiy.tutorialmod.client.screen.JujutsuHUD;
 import com.aleksiyflekssiy.tutorialmod.client.screen.KeyHandler;
 import com.aleksiyflekssiy.tutorialmod.effect.ModEffects;
-import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
 import com.aleksiyflekssiy.tutorialmod.item.ModCreativeModeTabs;
 import com.aleksiyflekssiy.tutorialmod.item.ModItems;
 import com.aleksiyflekssiy.tutorialmod.loot.ModLootModifiers;
-import com.aleksiyflekssiy.tutorialmod.network.CursedEnergySyncPacket;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory;
-import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +35,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -45,8 +42,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(TutorialMod.MOD_ID)
@@ -66,6 +61,8 @@ public class TutorialMod
         ModSoundEvents.register(modEventBus);
         ModParticles.register(modEventBus);
         ModEffects.register(modEventBus);
+        CustomMemoryModuleTypes.register(modEventBus);
+        CustomSensorTypes.register(modEventBus);
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
@@ -119,9 +116,7 @@ public class TutorialMod
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
         {
-            event.enqueueWork(() -> {
-                MinecraftForge.EVENT_BUS.register(new KeyHandler());
-            });
+            event.enqueueWork(() -> MinecraftForge.EVENT_BUS.register(new KeyHandler()));
 
             PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(
                     ResourceLocation.fromNamespaceAndPath(MOD_ID, "animation"),

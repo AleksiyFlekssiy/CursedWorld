@@ -85,9 +85,9 @@ public class DivineDogs extends ShikigamiSkill {
     public void onEntityDeath(LivingDeathEvent event) {
         if (event.getEntity() instanceof DivineDogEntity divineDogEntity && (divineDogEntity.equals(whiteDivineDog) || divineDogEntity.equals(blackDivineDog))) {
             if (blackDivineDog != null && !blackDivineDog.isAlive() && whiteDivineDog != null && !whiteDivineDog.isAlive()) {
-                if (isTamed) {
+                if (divineDogEntity.isTamed()) {
                     isDead = true;
-                    divineDogEntity.getOwner().sendSystemMessage(Component.literal("Your Divine Dogs have died"));
+                    divineDogEntity.getOwner().sendSystemMessage(Component.literal("Your Divine Dogs have died")); //TODO Овнера может не быть
                 }
                 else if (event.getSource().getEntity() instanceof Player player) {
                     if (!isTamed) {

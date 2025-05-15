@@ -1,9 +1,8 @@
-package com.aleksiyflekssiy.tutorialmod.entity.goal.toad;
+package com.aleksiyflekssiy.tutorialmod.entity.goal;
 
 
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 
 public class ShikigamiTargetSummonerGoal extends TargetGoal {

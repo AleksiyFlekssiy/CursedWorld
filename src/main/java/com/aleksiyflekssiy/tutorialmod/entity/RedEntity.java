@@ -1,10 +1,12 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
+import com.aleksiyflekssiy.tutorialmod.client.particle.LaunchRingParticleData;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import com.aleksiyflekssiy.tutorialmod.util.CustomExplosion;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -93,6 +95,7 @@ public class RedEntity extends Projectile {
             return;
         }
         super.tick();
+        Vec3 vec = Vec3.ZERO;
         // Логика на сервере: только управление состоянием и временем жизни
         if (!this.level().isClientSide()) {
             isCharged = this.entityData.get(IS_LAUNCHED);
@@ -120,6 +123,7 @@ public class RedEntity extends Projectile {
                 } else {
                     if (this.attackType == ATTACK_TYPE.MELEE) meleeAttack();
                     else rangedAttack(lookVec);
+                    vec = lookVec;
                     this.entityData.set(IS_LAUNCHED, true); // Синхронизируем запуск
                     isCharged = true;
                 }
@@ -130,6 +134,16 @@ public class RedEntity extends Projectile {
                 lifetime--;
             } else {
                 this.discard();
+            }
+            if (isCharged && !level().isClientSide() &&  level() instanceof ServerLevel serverLevel) {
+                Vec3i delta = getMotionDirection().getNormal();
+                serverLevel.sendParticles(
+                        new LaunchRingParticleData(this.getId()),
+                        this.getX(), this.getY(), this.getZ(),
+                        1,
+                        0, 0, 0,
+                        0
+                );
             }
         }
     }
@@ -167,7 +181,7 @@ public class RedEntity extends Projectile {
             if (this.level() instanceof ServerLevel serverLevel) {
                 // Спавним кастомную частицу с направлением движения
                 serverLevel.sendParticles(
-                        ModParticles.LAUNCH_RING.get(),
+                        new LaunchRingParticleData(this.getId()),
                         this.getX(), this.getY(), this.getZ(),
                         1,
                         0, 0, 0,

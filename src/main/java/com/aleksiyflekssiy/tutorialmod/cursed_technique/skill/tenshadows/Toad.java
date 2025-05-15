@@ -9,11 +9,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -22,15 +23,15 @@ import java.util.List;
 
 public class Toad extends ShikigamiSkill {
     private ToadEntity toad;
-    private byte orderIndex = 1;
+    private byte orderIndex = 0;
 
-    public Toad(){
+    public Toad() {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Override
     public void use(LivingEntity entity, UseType type, int charge) {
-        switch (type){
+        switch (type) {
             case ACTIVATION -> this.activate(entity);
         }
     }
@@ -53,39 +54,44 @@ public class Toad extends ShikigamiSkill {
                 if (isTamed) {
                     toad.tame((Player) entity);
                 }
+                else toad.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, entity);
+                isActive = !isActive;
             } else if (isActive && isTamed) {
-                if (toad.getControllingPassenger() == null) {
-                    System.out.println("DEACTIVATE");
-                    toad.discard();
-                    toad = null;
+                HitResult result = ProjectileUtil.getHitResultOnViewVector(toad.getOwner(), target -> !target.equals(toad), 50);
+                if (result.getType() == HitResult.Type.ENTITY) {
+                    EntityHitResult hitResult = (EntityHitResult) result;
+                    if (hitResult.getEntity() instanceof LivingEntity target) {
+                        System.out.println(target.getClass().getSimpleName());
+                        toad.followOrder(target, ToadEntity.ToadOrder.values()[orderIndex]);
+                    }
+                } else if (result.getType() == HitResult.Type.BLOCK) {
+                    BlockHitResult hitResult = (BlockHitResult) result;
+                    System.out.println(hitResult.getBlockPos());
+                    toad.followOrder(hitResult.getBlockPos(), ToadEntity.ToadOrder.values()[orderIndex]);
                 } else {
-                    return;
+                    System.out.println("MISS");
                 }
             }
-            isActive = !isActive;
-        }
-        else {
-            if (isTamed) {
-                Vec3 startPos = entity.getEyePosition(); // Позиция глаз жабы
-                Vec3 endPos = startPos.add(entity.getViewVector(1).scale(50)); // Дальность языка (30 блоков)
-                EntityHitResult result = ProjectileUtil.getEntityHitResult(entity.level(), entity, startPos, endPos, new AABB(startPos, endPos),
-                        target -> target instanceof LivingEntity && !target.equals(entity) && !target.equals(toad));
-
-                if (result != null && result.getEntity() instanceof LivingEntity target) {
-                    toad.followOrder(target, ToadEntity.Order.values()[orderIndex]);
-                }
+        } else {
+            if (isActive && isTamed) {
+                System.out.println("DEACTIVATE");
+                toad.discard();
+                toad = null;
+                isActive = !isActive;
             }
         }
     }
 
     @Override
     public void switchOrder(LivingEntity owner) {
-        if (isTamed){
-            if (++orderIndex == 4) orderIndex = 1;
-            switch (orderIndex){
+        if (isTamed) {
+            if (++orderIndex >= 5) orderIndex = 0;
+            switch (orderIndex) {
+                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
                 case 1 -> owner.sendSystemMessage(Component.literal("PULL"));
                 case 2 -> owner.sendSystemMessage(Component.literal("SWING"));
-                case 3 -> owner.sendSystemMessage(Component.literal("CATCH"));
+                case 3 -> owner.sendSystemMessage(Component.literal("IMMOBILIZE"));
+                case 4 -> owner.sendSystemMessage(Component.literal("MOVE"));
             }
         }
     }
@@ -97,8 +103,7 @@ public class Toad extends ShikigamiSkill {
                 if (isTamed) {
                     isDead = true;
                     toad.getOwner().sendSystemMessage(Component.literal("Toad has died"));
-                }
-                else if (event.getSource().getEntity() instanceof Player player) {
+                } else if (event.getSource().getEntity() instanceof Player player) {
                     if (!isTamed) {
                         isTamed = true;
                         System.out.println("TAMED");

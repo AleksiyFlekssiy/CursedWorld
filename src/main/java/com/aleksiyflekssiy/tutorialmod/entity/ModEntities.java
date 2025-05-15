@@ -28,7 +28,7 @@ public class ModEntities {
     public static final RegistryObject<EntityType<RedEntity>> RED_ENTITY = ENTITIES.register("red_entity",
             () -> EntityType.Builder.<RedEntity>of(RedEntity::new, MobCategory.MISC)
                     .sized(0.5F,0.5F)
-                    .clientTrackingRange(10)
+                    .clientTrackingRange(50)
                     .setUpdateInterval(1)
                     .build("tutorialmod:red_entity"));
 
@@ -47,13 +47,13 @@ public class ModEntities {
                     .build("tutorialmod:hollow_purple_entity"));
 
     public static final RegistryObject<EntityType<DivineDogEntity>> DIVINE_DOG = ENTITIES.register("divine_dog",
-            () -> EntityType.Builder.<DivineDogEntity>of(DivineDogEntity::new, MobCategory.CREATURE)
+            () -> EntityType.Builder.of(DivineDogEntity::new, MobCategory.CREATURE)
                     .sized(1.5f,1.5f)
                     .build("tutorialmod:divine_dog"));
 
     public static final RegistryObject<EntityType<NueEntity>> NUE = ENTITIES.register("nue",
             () -> EntityType.Builder.of(NueEntity::new, MobCategory.CREATURE)
-                    .sized(2.5f, 3f)
+                    .sized(5f, 6f)
                     .build("tutorialmod:nue"));
 
     public static final RegistryObject<EntityType<ToadEntity>> TOAD = ENTITIES.register("toad",

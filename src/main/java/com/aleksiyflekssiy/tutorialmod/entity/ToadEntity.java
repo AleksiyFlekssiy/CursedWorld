@@ -1,27 +1,29 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
-import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiFollowOwnerGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtByTargetGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtTargetGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.ShikigamiTargetSummonerGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.TongueCatchGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.TonguePullGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.toad.TongueSwingGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.navigation.JumpingMoveControl;
+import com.aleksiyflekssiy.tutorialmod.entity.ai.ToadAI;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Dynamic;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 
@@ -30,12 +32,14 @@ public class ToadEntity extends Shikigami {
     public AnimationState mouthOpen = new AnimationState();
     public float targetYaw;
     private long lastTickUse;
-    private Order order = Order.NONE;
+    protected static final ImmutableList<SensorType<? extends Sensor<? super ToadEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get());
 
     public ToadEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new JumpingMoveControl(this);
+        //this.moveControl = new JumpingMoveControl(this);
         setDistance(0);
+        this.currentOrder = ToadOrder.NONE;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -50,25 +54,60 @@ public class ToadEntity extends Shikigami {
                 .add(Attributes.JUMP_STRENGTH, 1);
     }
 
-    public Order getOrder(){
-        return this.order;
+    @Override
+    public void tame(Player owner) {
+        super.tame(owner);
+        this.getBrain().setMemory(CustomMemoryModuleTypes.OWNER.get(), owner);
     }
 
-    public void setOrder(Order order){
-        this.order = order;
+    @Override
+    protected Brain.Provider<ToadEntity> brainProvider() {
+        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
     }
 
-    public void followOrder(LivingEntity target, Order order) {
+    @Override
+    protected Brain<?> makeBrain(Dynamic<?> pDynamic) {
+        Brain<ToadEntity> brain = this.brainProvider().makeBrain(pDynamic);
+        return ToadAI.makeBrain(brain); // Инициализируем через NueAI
+    }
+
+    @Override
+    public Brain<ToadEntity> getBrain() {
+        return (Brain<ToadEntity>) super.getBrain();
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        this.getBrain().tick((ServerLevel)this.level(), this);
+        ToadAI.updateActivity(this.getBrain());
+        super.customServerAiStep();
+    }
+
+    @Override
+    public void followOrder(LivingEntity target, IOrder order) {
+        if (order == ToadOrder.MOVE) return;
+        super.followOrder(target, order);
         if (this.isTamed() && this.owner != null) {
-            this.goalSelector.getRunningGoals().forEach(Goal::stop);
-            this.setTarget(target);
-            this.setOrder(order);
+            this.getBrain().stopAll((ServerLevel) this.level(), this);
+            this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
         }
     }
 
-    public void clearOrder(){
-        this.setTarget(null);
-        this.setOrder(Order.NONE);
+    @Override
+    public void followOrder(BlockPos target, IOrder order) {
+        if (order == ToadOrder.MOVE) {
+            super.followOrder(target, order);
+            if (this.isTamed() && this.owner != null) {
+                this.getBrain().stopAll((ServerLevel) this.level(), this);
+                this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(target, 1, 1));
+            }
+        }
+    }
+
+    @Override
+    public void clearOrder() {
+        this.setOrder(ToadOrder.NONE);
+        this.getBrain().stopAll((ServerLevel) this.level(), this);
     }
 
     @Override
@@ -94,28 +133,20 @@ public class ToadEntity extends Shikigami {
     }
 
     @Override
-    protected void registerGoals() {
-        if (!isTamed) {
-            this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        }
-        else {
-            this.goalSelector.addGoal(3, new ShikigamiFollowOwnerGoal(this, 5, 5, 1));
-            this.targetSelector.addGoal(0, new ShikigamiOwnerHurtTargetGoal(this, true));
-            this.targetSelector.addGoal(1, new ShikigamiOwnerHurtByTargetGoal(this, true));
-        }
-        this.goalSelector.addGoal(0, new TonguePullGoal(this));
-        this.goalSelector.addGoal(1, new TongueSwingGoal(this));
-        this.goalSelector.addGoal(2, new TongueCatchGoal(this));
-    }
-
-    @Override
     public void tick() {
         super.tick();
-        LivingEntity target = this.level().getNearestEntity(LivingEntity.class, TargetingConditions.DEFAULT, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(30));
-        if (target == null) return;
-        double dx = target.getX() - getX();
-        double dz = target.getZ() - getZ();
-        targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
+        if (!level().isClientSide()) {
+            if (this.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
+                this.getBrain().setActiveActivityIfPossible(Activity.FIGHT);
+            } else {
+                this.getBrain().setActiveActivityIfPossible(Activity.IDLE);
+            }
+            System.out.println("ORDER: " + this.getOrder());
+            if (this.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get())) {
+                lookControl.setLookAt(this.getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).get());
+                System.out.println("GRABBED: " + this.getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).get().getClass().getSimpleName());
+            }
+        }
     }
 
     @Override
@@ -137,10 +168,30 @@ public class ToadEntity extends Shikigami {
         return null;
     }
 
-    public enum Order {
+    protected Vec3 getRiddenInput(Player player, Vec3 travelVector) {
+        return super.getRiddenInput(player, travelVector);
+    }
+
+    protected float getRiddenSpeed(Player pPlayer) {
+        return (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5);
+    }
+
+    @Override
+    protected void positionRider(Entity passenger, MoveFunction callback) {
+        callback.accept(passenger, this.getX(), this.getY() + this.getBbHeight() / 2, this.getZ());
+    }
+
+    protected void tickRidden(Player pPlayer, Vec3 pTravelVector) {
+        super.tickRidden(pPlayer, pTravelVector);
+        this.setRot(pPlayer.getYRot(), pPlayer.getXRot() * 0.5F);
+        this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
+    }
+
+    public enum ToadOrder implements IOrder{
         NONE,
         PULL,
         SWING,
-        CATCH
+        IMMOBILIZE,
+        MOVE
     }
 }

@@ -33,7 +33,7 @@ public class TongueCatchGoal extends Goal {
     public boolean canUse() {
         if (toad.getTarget() != null && !toad.getTarget().isSpectator()) {
             if (!toad.isTamed()) return toad.isCooldownOff(); // 30 блоков в квадрате
-            else return toad.getOrder() == ToadEntity.Order.NONE || toad.getOrder() == ToadEntity.Order.CATCH;
+            else return toad.getOrder() == ToadEntity.ToadOrder.NONE || toad.getOrder() == ToadEntity.ToadOrder.IMMOBILIZE;
         }
         return false;
     }

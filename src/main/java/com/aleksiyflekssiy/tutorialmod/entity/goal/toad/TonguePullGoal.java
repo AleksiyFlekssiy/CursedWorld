@@ -25,14 +25,18 @@ public class TonguePullGoal extends Goal {
         if (toad.getTarget() != null && !toad.getTarget().isSpectator()) {
             if (!toad.isTamed())
                 return toad.isCooldownOff() && toad.distanceTo(toad.getTarget()) > 20; // 30 блоков в квадрате
-            else return toad.getOrder() == ToadEntity.Order.NONE || toad.getOrder() == ToadEntity.Order.PULL;
+            else return toad.getOrder() == ToadEntity.ToadOrder.NONE || toad.getOrder() == ToadEntity.ToadOrder.PULL;
         }
         return false;
     }
 
     @Override
     public boolean canContinueToUse() {
-        return caughtEntity != null && !caughtEntity.isSpectator() && toad.distanceTo(caughtEntity) > 1.0; // Продолжаем, пока цель дальше 1 блока
+        if (caughtEntity != null && !caughtEntity.isSpectator()) {
+            if (!toad.isTamed()) return toad.distanceTo(caughtEntity) > 1.0; // Продолжаем, пока цель дальше 1 блока
+            else return toad.getOrder() == ToadEntity.ToadOrder.PULL;
+        }
+        return false;
     }
 
     @Override
@@ -79,10 +83,10 @@ public class TonguePullGoal extends Goal {
             caughtEntity.hasImpulse = false;
         } else {
             // Если цель уже близко, останавливаем её
-            caughtEntity.setDeltaMovement(Vec3.ZERO);
-            caughtEntity.hurtMarked = true;
-            System.out.println("Positioned");
-            stop();
+//            caughtEntity.setDeltaMovement(Vec3.ZERO);
+//            caughtEntity.hurtMarked = true;
+//            System.out.println("Positioned");
+//            stop();
         }
     }
 

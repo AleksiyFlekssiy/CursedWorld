@@ -5,11 +5,15 @@ import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.phys.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -19,7 +23,8 @@ import java.util.List;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Nue extends ShikigamiSkill {
-    private NueEntity nueEntity = null;
+    private NueEntity nue = null;
+    private byte orderIndex = 0;
 
     public Nue(){
         MinecraftForge.EVENT_BUS.register(this);
@@ -38,39 +43,63 @@ public class Nue extends ShikigamiSkill {
             System.out.println("DEAD");
             return;
         }
-        if (!isActive) {
-            System.out.println("ACTIVATE");
-            BlockPos spawnPos = entity.blockPosition();
-            if (nueEntity == null || !nueEntity.isAlive()) { // Проверяем, жива ли сущность
-                nueEntity = new NueEntity(ModEntities.NUE.get(), entity.level());
-                nueEntity.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-                entity.level().addFreshEntity(nueEntity);
-            }
-            if (isTamed){
-                nueEntity.tame((Player) entity);
+        if (!entity.isCrouching()) {
+            if (!isActive) {
+                System.out.println("ACTIVATE");
+                BlockPos spawnPos = entity.blockPosition();
+                if (nue == null || !nue.isAlive()) { // Проверяем, жива ли сущность
+                    nue = new NueEntity(ModEntities.NUE.get(), entity.level());
+                    nue.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+                    entity.level().addFreshEntity(nue);
+                }
+                if (isTamed) {
+                    nue.tame((Player) entity);
+                } else {
+                    if (nue.canAttack(entity)) nue.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, entity);
+                }
+                isActive = !isActive;
+            } else if (isActive && isTamed) {
+                if (nue.getControllingPassenger() == null) {
+                    HitResult result = ProjectileUtil.getHitResultOnViewVector(nue.getOwner(), target -> !target.equals(nue), 50);
+                    if (result.getType() == HitResult.Type.ENTITY) {
+                        EntityHitResult hitResult = (EntityHitResult) result;
+                        if (hitResult.getEntity() instanceof LivingEntity target) {
+                            System.out.println(target.getClass().getSimpleName());
+                            nue.followOrder(target, NueEntity.NueOrder.values()[orderIndex]);
+                        }
+                    } else if (result.getType() == HitResult.Type.BLOCK) {
+                        BlockHitResult hitResult = (BlockHitResult) result;
+                        System.out.println(hitResult.getBlockPos());
+                        nue.followOrder(hitResult.getBlockPos(), NueEntity.NueOrder.values()[orderIndex]);
+                    } else {
+                        System.out.println("MISS");
+                    }
+                }
+                else if (entity.equals(nue.getControllingPassenger())){
+                    nue.tryGrabEntityBelow();
+                }
             }
         }
-        else if(isActive && isTamed) {
-            if (nueEntity.getControllingPassenger() == null) {
-                System.out.println("DEACTIVATE");
-                nueEntity.discard();
-                nueEntity = null;
-            }
-            else {
-                nueEntity.tryGrabEntityBelow();
-                return;
+        else {
+            if (isActive && isTamed) {
+                if (nue.getControllingPassenger() == null) {
+                    System.out.println("DEACTIVATE");
+                    nue.discard();
+                    nue = null;
+                    isActive = !isActive;
+                }
             }
         }
-        isActive = !isActive;
     }
+
 
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof NueEntity entity && entity.equals(nueEntity)) {
-            if (nueEntity != null && !nueEntity.isAlive()) {
+        if (event.getEntity() instanceof NueEntity entity && entity.equals(nue)) {
+            if (nue != null && !nue.isAlive()) {
                 if (isTamed) {
                     isDead = true;
-                    nueEntity.getOwner().sendSystemMessage(Component.literal("Nue has died"));
+                    nue.getOwner().sendSystemMessage(Component.literal("Nue has died"));
                 }
                 else if (event.getSource().getEntity() instanceof Player player) {
                     if (!isTamed) {
@@ -79,7 +108,7 @@ public class Nue extends ShikigamiSkill {
                         player.sendSystemMessage(Component.literal("You tamed Nue"));
                     }
                 }
-                nueEntity = null;
+                nue = null;
             }
             isActive = false;
         }
@@ -88,12 +117,22 @@ public class Nue extends ShikigamiSkill {
 
     @Override
     public List<Shikigami> getShikigami() {
-        return List.of(nueEntity);
+        return List.of(nue);
     }
 
     @Override
     public void switchOrder(LivingEntity owner) {
-
+        if (isTamed) {
+            if (++orderIndex >= 4) {
+                orderIndex = 0;
+            }
+            switch (orderIndex) {
+                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
+                case 1 -> owner.sendSystemMessage(Component.literal("ATTACK"));
+                case 2 -> owner.sendSystemMessage(Component.literal("GRAB"));
+                case 3 -> owner.sendSystemMessage(Component.literal("MOVE"));
+            }
+        }
     }
 
     @Override

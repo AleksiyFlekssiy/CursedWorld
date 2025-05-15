@@ -30,7 +30,6 @@ public class SyncSkillPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 player.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(technique -> {
-                    if (technique.getCurrentSkill() instanceof ShikigamiSkill)
                     technique.getSkillSet().stream()
                             .filter(skill -> skill.getName().equals(msg.skillName))
                             .findFirst()
