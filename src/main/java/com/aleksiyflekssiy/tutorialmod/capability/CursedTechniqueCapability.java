@@ -1,13 +1,14 @@
 package com.aleksiyflekssiy.tutorialmod.capability;
 
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.CursedTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.LimitlessCursedTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.CursedTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.LimitlessCursedTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.TenShadowsTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.*;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.DivineDogs;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.GreatSerpent;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Nue;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Toad;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import net.minecraft.core.Direction;
@@ -190,6 +191,7 @@ public class CursedTechniqueCapability {
                 case "Divine Dogs" -> new DivineDogs();
                 case "Nue" -> new Nue();
                 case "Toad" -> new Toad();
+                case "GreatSerpent" -> new GreatSerpent();
                 default -> null; // Оставляем null, так как проверка происходит позже
             };
         }
@@ -220,7 +222,7 @@ public class CursedTechniqueCapability {
         });
     }
 
-    public static Skill getSkill(Player player) {
+    public static Skill getCurrentSkill(Player player) {
         return player.getCapability(CURSED_TECHNIQUE)
                 .map(ICursedTechnique::getCurrentSkill)
                 .orElseGet(() -> player.getCapability(CURSED_TECHNIQUE)

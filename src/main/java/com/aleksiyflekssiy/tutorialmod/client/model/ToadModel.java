@@ -44,15 +44,15 @@ public class ToadModel<T extends ToadEntity> extends HierarchicalModel<T> {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
-        PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 24.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
+        PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 14.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
-        PartDefinition leftFrontLeg = body.addOrReplaceChild("leftFrontLeg", CubeListBuilder.create().texOffs(80, 64).addBox(-14.0F, -1.0F, 12.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, -13.0F));
+        PartDefinition leftFrontLeg = body.addOrReplaceChild("leftFrontLeg", CubeListBuilder.create().texOffs(80, 64).addBox(-14.0F, -1.0F, 12.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 10.0F, -7.0F));
 
         PartDefinition cube_r1 = leftFrontLeg.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 80).addBox(-1.5F, -3.0F, -1.5F, 3.0F, 11.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-11.5F, -6.0F, 8.5F, 0.7854F, 0.0F, 0.0F));
 
         PartDefinition cube_r2 = leftFrontLeg.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(88, 0).addBox(-3.0F, -5.0F, -1.0F, 3.0F, 9.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-8.0F, -10.0F, 7.0F, 0.0F, 0.0F, 0.7854F));
 
-        PartDefinition torso = body.addOrReplaceChild("torso", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition torso = body.addOrReplaceChild("torso", CubeListBuilder.create(), PartPose.offset(0.0F, 10.0F, 6.0F));
 
         PartDefinition cube_r3 = torso.addOrReplaceChild("cube_r3", CubeListBuilder.create().texOffs(0, 58).addBox(0.0F, -8.0F, -1.0F, 1.0F, 8.0F, 14.0F, new CubeDeformation(0.0F))
                 .texOffs(46, 46).addBox(15.0F, -8.0F, -1.0F, 1.0F, 8.0F, 14.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-8.0F, -2.0F, -8.0F, 1.1345F, 0.0F, 0.0F));
@@ -67,7 +67,7 @@ public class ToadModel<T extends ToadEntity> extends HierarchicalModel<T> {
 
         PartDefinition cube_r8 = torso.addOrReplaceChild("cube_r8", CubeListBuilder.create().texOffs(0, 0).addBox(-14.0F, -10.0F, 0.0F, 14.0F, 10.0F, 16.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(7.0F, 0.0F, -8.0F, 1.1345F, 0.0F, 0.0F));
 
-        PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(0.0F, -2.0F, 1.0F));
+        PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(0.0F, 8.0F, 7.0F));
 
         PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create(), PartPose.offset(0.0F, -12.0F, -5.0F));
 
@@ -84,19 +84,19 @@ public class ToadModel<T extends ToadEntity> extends HierarchicalModel<T> {
 
         PartDefinition tongue = head.addOrReplaceChild("tongue", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -17.0F, -6.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition leftBackLeg = body.addOrReplaceChild("leftBackLeg", CubeListBuilder.create().texOffs(80, 76).addBox(-13.0F, -1.0F, -15.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(1.0F, 0.0F, 0.0F));
+        PartDefinition leftBackLeg = body.addOrReplaceChild("leftBackLeg", CubeListBuilder.create().texOffs(80, 76).addBox(-13.0F, -1.0F, -15.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(1.0F, 10.0F, 6.0F));
 
         PartDefinition cube_r11 = leftBackLeg.addOrReplaceChild("cube_r11", CubeListBuilder.create().texOffs(36, 84).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 10.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-16.5F, -9.0F, -12.5F, 0.0F, 0.0F, -1.1345F));
 
         PartDefinition cube_r12 = leftBackLeg.addOrReplaceChild("cube_r12", CubeListBuilder.create().texOffs(24, 84).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 10.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-16.5F, -6.0F, -12.5F, 0.0F, 0.0F, -1.1345F));
 
-        PartDefinition rightFrontLeg = body.addOrReplaceChild("rightFrontLeg", CubeListBuilder.create().texOffs(80, 70).addBox(-14.0F, -1.0F, -1.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(23.0F, 0.0F, 0.0F));
+        PartDefinition rightFrontLeg = body.addOrReplaceChild("rightFrontLeg", CubeListBuilder.create().texOffs(80, 70).addBox(-14.0F, -1.0F, -1.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(23.0F, 10.0F, 6.0F));
 
         PartDefinition cube_r13 = rightFrontLeg.addOrReplaceChild("cube_r13", CubeListBuilder.create().texOffs(12, 80).addBox(-1.5F, -3.0F, -1.5F, 3.0F, 11.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-11.5F, -6.0F, -3.5F, 0.7854F, 0.0F, 0.0F));
 
         PartDefinition cube_r14 = rightFrontLeg.addOrReplaceChild("cube_r14", CubeListBuilder.create().texOffs(88, 12).addBox(-3.0F, -5.0F, -1.0F, 3.0F, 9.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-13.0F, -12.0F, -6.0F, 0.0F, 0.0F, -0.7854F));
 
-        PartDefinition rightBackLeg = body.addOrReplaceChild("rightBackLeg", CubeListBuilder.create().texOffs(80, 82).addBox(-14.0F, -1.0F, -15.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(21.0F, 0.0F, 0.0F));
+        PartDefinition rightBackLeg = body.addOrReplaceChild("rightBackLeg", CubeListBuilder.create().texOffs(80, 82).addBox(-14.0F, -1.0F, -15.0F, 5.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(21.0F, 10.0F, 6.0F));
 
         PartDefinition cube_r15 = rightBackLeg.addOrReplaceChild("cube_r15", CubeListBuilder.create().texOffs(60, 85).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 10.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-5.5F, -9.0F, -12.5F, 0.0F, 0.0F, 1.1345F));
 
@@ -108,7 +108,7 @@ public class ToadModel<T extends ToadEntity> extends HierarchicalModel<T> {
     @Override
     public void setupAnim(ToadEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.body.getAllParts().forEach(ModelPart::resetPose);
-        this.tongue.zScale = -(entity.getDistance() * 8);
+        this.tongue.zScale = -(entity.getDistance() * 5.5F);
         this.tongue.z = tongue.zScale * 4;
         this.animate(entity.mouthOpen, ToadAnimations.mouth_open, ageInTicks, 1);
     }

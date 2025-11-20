@@ -15,7 +15,10 @@ public class ShikigamiOwnerHurtBySensor extends Sensor<LivingEntity> {
         Brain<?> brain = entity.getBrain();
         brain.getMemory(CustomMemoryModuleTypes.OWNER.get()).ifPresent(owner -> {
                 LivingEntity lastHurtByMob = owner.getLastHurtByMob();
-                if (lastHurtByMob != null && !lastHurtByMob.equals(entity) && !lastHurtByMob.equals(owner) && lastHurtByMob.isAlive()) brain.setMemory(MemoryModuleType.ATTACK_TARGET, lastHurtByMob);
+                if (lastHurtByMob != null && !lastHurtByMob.equals(entity) && !lastHurtByMob.equals(owner) && lastHurtByMob.isAlive()) {
+                    brain.setMemory(MemoryModuleType.ATTACK_TARGET, lastHurtByMob);
+                    brain.setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), lastHurtByMob);
+                }
             });
 
         brain.getMemory(CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get()).ifPresent(enemy ->{
@@ -23,6 +26,7 @@ public class ShikigamiOwnerHurtBySensor extends Sensor<LivingEntity> {
             if (!enemy.isAlive() || !inDistance) {
                 brain.eraseMemory(CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get());
                 brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
+                brain.eraseMemory(CustomMemoryModuleTypes.GRAB_TARGET.get());
             }
         });
     }

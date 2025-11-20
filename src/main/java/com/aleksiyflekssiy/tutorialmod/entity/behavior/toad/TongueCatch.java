@@ -2,9 +2,11 @@ package com.aleksiyflekssiy.tutorialmod.entity.behavior.toad;
 
 import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -23,6 +25,7 @@ public class TongueCatch extends Behavior<ToadEntity> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel pLevel, ToadEntity toad) {
         if (toad.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get())) return false;
+        if (!toad.isCooldownOff()) return false;
         if (toad.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
             if (!toad.isTamed()) return true;
             else return toad.getOrder() != ToadEntity.ToadOrder.MOVE;
@@ -35,7 +38,7 @@ public class TongueCatch extends Behavior<ToadEntity> {
         System.out.println("START CATCH " + toad.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get().getClass().getSimpleName());
         toad.getNavigation().stop(); // Останавливаем движение жабы
         toad.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).ifPresent(target -> {
-                toad.getLookControl().setLookAt(target);
+                toad.lookAt(EntityAnchorArgument.Anchor.EYES, target.position());
                 Vec3 startPos = toad.getEyePosition(); // Позиция глаз жабы
                 Vec3 endPos = startPos.add(toad.getViewVector(1).scale(50)); // Дальность языка (30 блоков)
                 EntityHitResult result = ProjectileUtil.getEntityHitResult(toad.level(), toad, startPos, endPos, new AABB(startPos, endPos), entity -> entity instanceof LivingEntity && !entity.equals(toad));

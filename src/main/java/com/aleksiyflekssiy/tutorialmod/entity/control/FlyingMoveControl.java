@@ -1,21 +1,12 @@
-package com.aleksiyflekssiy.tutorialmod.entity.navigation;
+package com.aleksiyflekssiy.tutorialmod.entity.control;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.phys.Vec3;
 
 
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.control.MoveControl;
-import net.minecraft.world.phys.Vec3;
 
 public class FlyingMoveControl extends MoveControl {
     private final LivingEntity entity;
@@ -50,7 +41,8 @@ public class FlyingMoveControl extends MoveControl {
                 entity.yBodyRot = entity.getYRot();
                 if (Mth.degreesDifferenceAbs(f, entity.getYRot()) < 3.0F) {
                     this.speed = Mth.approach(this.speed, 5F, 0.005F * (5F / this.speed));
-                } else {
+                }
+                else {
                     this.speed = Mth.approach(this.speed, 0.2F, 0.025F);
                 }
                 float f4 = (float) (-(Mth.atan2(-d1, d3) * (double) (180F / (float) Math.PI)));

@@ -18,7 +18,7 @@ public class JujutsuHUD {
         Minecraft mc = Minecraft.getInstance();
         GuiGraphics guiGraphics = event.getGuiGraphics();
         if (mc.player == null || !mc.player.isAlive()) return;
-        ResourceLocation ABILITY_ICON = CursedTechniqueCapability.getSkill(mc.player).getSkillIcon();
+        ResourceLocation ABILITY_ICON = CursedTechniqueCapability.getCurrentSkill(mc.player).getSkillIcon();
         // Рисуем текст
         //guiGraphics.drawString(mc.font, "Привет, это мой HUD!", 10, 10, 0xFFFFFF, true);
 

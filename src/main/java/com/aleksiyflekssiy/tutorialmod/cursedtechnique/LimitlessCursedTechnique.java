@@ -1,7 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique;
+package com.aleksiyflekssiy.tutorialmod.cursedtechnique;
 
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.*;
 
 import java.util.List;
 

@@ -100,15 +100,6 @@ minecraft {
             jvmArgs '-Xmx4G'
         }
 
-        client2 {
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            workingDirectory("${projectDir}/run2")
-            property 'forge.enabledGameTestNamespaces', mod_id
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            jvmArgs '-Xmx2G'
-        }
-
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
             args '--nogui'
@@ -154,6 +145,9 @@ repositories {
         name "KosmX's maven"
         url 'https://maven.kosmx.dev/'
     }
+    maven {
+        url "https://cursemaven.com"
+    }
 }
 
 dependencies {
@@ -164,6 +158,10 @@ dependencies {
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
+    //implementation fg.deobf("curse.maven:ferritecore-429235:4810975")
+    //implementation fg.deobf("curse.maven:modernfix-790626:6837713")
+    //implementation fg.deobf("curse.maven:embeddium-908741:5681725")
+    //implementation fg.deobf("curse.maven:chloride-931925:6615986")
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")

@@ -2,7 +2,9 @@ package com.aleksiyflekssiy.tutorialmod.entity.behavior.toad;
 
 import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
+import com.aleksiyflekssiy.tutorialmod.util.MovementUtils;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -10,6 +12,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -69,19 +72,26 @@ public class TongueImmobilize extends Behavior<ToadEntity> {
         if (caughtEntity == null) return;
         System.out.println("STOP IMMOBILIZE");
         toad.setDistance(0);
-        caughtEntity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(initialSpeed);
+        mobilize();
         caughtEntity = null;
         catchTick = 0;
         toad.setLastTickUse();
         toad.getBrain().eraseMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get());
     }
 
+//    @SubscribeEvent
+//    public void disableMovement(LivingEvent.LivingJumpEvent event) {
+//        //Вся система - ебучий костыль.
+//        //Необходимо написать систему управления вводом игрока
+//        if (event.getEntity().equals(caughtEntity)) {
+//            event.getEntity().setDeltaMovement(0, 0, 0);
+//        }
+//    }
+
     @SubscribeEvent
-    public void disableMovement(LivingEvent.LivingJumpEvent event) {
-        //Вся система - ебучий костыль.
-        //Необходимо написать систему управления вводом игрока
+    public void disablePlayerInput(MovementInputUpdateEvent event){
         if (event.getEntity().equals(caughtEntity)) {
-            event.getEntity().setDeltaMovement(0, 0, 0);
+            MovementUtils.immobilize(event.getInput());
         }
     }
 
@@ -91,6 +101,6 @@ public class TongueImmobilize extends Behavior<ToadEntity> {
     }
 
     private void mobilize(){
-        
+        caughtEntity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(initialSpeed);
     }
 }

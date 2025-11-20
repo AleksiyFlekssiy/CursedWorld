@@ -59,7 +59,24 @@ public class ModEntities {
     public static final RegistryObject<EntityType<ToadEntity>> TOAD = ENTITIES.register("toad",
             () -> EntityType.Builder.of(ToadEntity::new, MobCategory.CREATURE)
                     .sized(1.5f, 2.5f)
+                    .setUpdateInterval(1)
+                    .setShouldReceiveVelocityUpdates(true)
                     .build("tutorialmod:toad"));
+
+    public static final RegistryObject<EntityType<GreatSerpentEntity>> GREAT_SERPENT = ENTITIES.register("great_serpent",
+            () -> EntityType.Builder.<GreatSerpentEntity>of(GreatSerpentEntity::new, MobCategory.CREATURE)
+                    .sized(2, 2)
+                    .setUpdateInterval(1)
+                    .setShouldReceiveVelocityUpdates(true)
+                    .build("tutorialmod:great_serpent"));
+
+    public static final RegistryObject<EntityType<GreatSerpentPartEntity>> GREAT_SERPENT_SEGMENT = ENTITIES.register("great_serpent_segment",
+            () -> EntityType.Builder.<GreatSerpentPartEntity>of(GreatSerpentPartEntity::new, MobCategory.CREATURE)
+                    .sized(2, 2)
+                    .setUpdateInterval(1)
+                    .setShouldReceiveVelocityUpdates(true)
+                    .build("tutorialmod:great_serpent_segment"));
+
 
     public static void register(IEventBus bus) {
         ENTITIES.register(bus);

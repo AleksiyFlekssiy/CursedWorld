@@ -1,16 +1,11 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
-import com.aleksiyflekssiy.tutorialmod.entity.ai.NueAI;
-import com.mojang.serialization.Dynamic;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -21,7 +16,7 @@ import java.util.UUID;
 public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     protected Player owner;
     protected boolean isTamed = false;
-    protected IOrder currentOrder = AbstractOrder.NONE;
+    protected IOrder currentOrder = null;
 
     protected Shikigami(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -36,9 +31,6 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     public void tame(Player owner){
         this.isTamed = true;
         this.owner = owner;
-        this.goalSelector.removeAllGoals(filter -> true);
-        this.targetSelector.removeAllGoals(filter -> true);
-        this.registerGoals();
     }
 
     public boolean isTamed() {
@@ -67,22 +59,16 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
         this.currentOrder = order;
     }
 
-    public void followOrder(LivingEntity target, IOrder order) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order){
         if (this.isTamed() && this.owner != null) {
-            this.setTarget(target);
-            this.setOrder(order);
+            setOrder(order);
+            return true;
         }
-    }
-
-    public void followOrder(BlockPos target, IOrder order) {
-        if (this.isTamed() && this.owner != null) {
-            this.setOrder(order);
-        }
+        return false;
     }
 
     public void clearOrder(){
-        this.setTarget(null);
-        this.setOrder(AbstractOrder.NONE);
+        this.setOrder(null);
     }
 
     protected Vec3 getRiddenInput(Player player, Vec3 travelVector) {
@@ -97,9 +83,5 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
         if (client.options.keyJump.isDown()) y += 1;
         if (client.options.keySprint.isDown()) y -= 1;
         return new Vec3(x, y, z);
-    }
-
-    private enum AbstractOrder implements IOrder{
-        NONE
     }
 }

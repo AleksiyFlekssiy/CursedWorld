@@ -13,13 +13,12 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.particle.SonicBoomParticle;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.DoNothing;
-import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.RandomLookAround;
+import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.goat.GoatAi;
 import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.monster.warden.WardenAi;
 import net.minecraft.world.entity.schedule.Activity;
 
 public class ToadAI {
@@ -41,13 +40,7 @@ public class ToadAI {
     }
 
     protected static void initializeIdleActivity(Brain<ToadEntity> brain){
-        brain.addActivityWithConditions(Activity.IDLE,
-                ImmutableList.of(
-                        Pair.of(1, new DoNothing(0, 72000)),
-                        Pair.of(2, new RandomLookAround(UniformInt.of(150, 300), 180, 0, 180))),
-                ImmutableSet.of(
-                        Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT)
-                ));
+
     }
 
     protected static void initializeFightActivity(Brain<ToadEntity> brain){

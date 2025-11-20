@@ -1,12 +1,8 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
-import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 

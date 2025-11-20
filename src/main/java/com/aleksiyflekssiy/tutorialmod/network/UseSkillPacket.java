@@ -1,11 +1,12 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.*;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.DivineDogs;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.GreatSerpent;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Nue;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Toad;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -37,7 +38,7 @@ public class UseSkillPacket {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
-                Skill activeSkill = CursedTechniqueCapability.getSkill(player);
+                Skill activeSkill = CursedTechniqueCapability.getCurrentSkill(player);
                 switch (msg.skillName) {
                     case "Infinity":
                         Infinity infinity = (Infinity) activeSkill;
@@ -70,6 +71,10 @@ public class UseSkillPacket {
                     case "Toad":
                         Toad toad = (Toad) activeSkill;
                         toad.use(player, msg.useType, msg.charge);
+                        break;
+                    case "GreatSerpent":
+                        GreatSerpent greatSerpent = (GreatSerpent) activeSkill;
+                        greatSerpent.use(player, msg.useType, msg.charge);
                         break;
                 }
             }

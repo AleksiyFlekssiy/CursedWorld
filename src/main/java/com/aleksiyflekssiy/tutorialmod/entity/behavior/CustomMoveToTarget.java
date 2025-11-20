@@ -1,16 +1,14 @@
 package com.aleksiyflekssiy.tutorialmod.entity.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
@@ -20,8 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class CustomMoveToTarget extends Behavior<Mob> {
-    private static final int MAX_COOLDOWN_BEFORE_RETRYING = 40;
+public class CustomMoveToTarget extends MoveToTargetSink {
     private int remainingCooldown;
     @Nullable
     private Path path;
@@ -30,70 +27,63 @@ public class CustomMoveToTarget extends Behavior<Mob> {
     private float speedModifier;
 
     public CustomMoveToTarget() {
-        this(150, 250);
+        this(0, 72000);
     }
 
     public CustomMoveToTarget(int pMinDuration, int pMaxDuration) {
-        super(ImmutableMap.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED, MemoryModuleType.PATH, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT), pMinDuration, pMaxDuration);
+        super(0, 72000);
     }
 
     protected boolean checkExtraStartConditions(ServerLevel pLevel, Mob pOwner) {
-        boolean bool;
         if (this.remainingCooldown > 0) {
             --this.remainingCooldown;
-            bool = false;
+            return false;
         } else {
             Brain<?> brain = pOwner.getBrain();
             WalkTarget walktarget = brain.getMemory(MemoryModuleType.WALK_TARGET).get();
             boolean flag = this.reachedTarget(pOwner, walktarget);
             if (!flag && this.tryComputePath(pOwner, walktarget, pLevel.getGameTime())) {
                 this.lastTargetPos = walktarget.getTarget().currentBlockPosition();
-                bool = true;
+                return true;
             } else {
                 brain.eraseMemory(MemoryModuleType.WALK_TARGET);
                 if (flag) {
                     brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
                 }
 
-                bool = false;
+                return false;
             }
         }
-        System.out.println("CHECK MOVE: " + bool);
-        return bool;
     }
 
     protected boolean canStillUse(ServerLevel pLevel, Mob pEntity, long pGameTime) {
-        boolean bool = false;
         if (this.path != null && this.lastTargetPos != null) {
             Optional<WalkTarget> optional = pEntity.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
             boolean flag = optional.map(CustomMoveToTarget::isWalkTargetSpectator).orElse(false);
             PathNavigation pathnavigation = pEntity.getNavigation();
-            bool = !pathnavigation.isDone() && optional.isPresent() && !this.reachedTarget(pEntity, optional.get()) && !flag;
+            return !pathnavigation.isDone();
+        } else {
+            return false;
         }
-        System.out.println("CAN STILL USE MOVE: " + bool);
-        return bool;
     }
 
     protected void stop(ServerLevel pLevel, Mob pEntity, long pGameTime) {
-        System.out.println("STOP MOVE");
         if (pEntity.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET) && !this.reachedTarget(pEntity, pEntity.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get()) && pEntity.getNavigation().isStuck()) {
             this.remainingCooldown = pLevel.getRandom().nextInt(40);
         }
 
         pEntity.getNavigation().stop();
-        pEntity.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+        //pEntity.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         pEntity.getBrain().eraseMemory(MemoryModuleType.PATH);
         this.path = null;
     }
 
     protected void start(ServerLevel pLevel, Mob pEntity, long pGameTime) {
-        System.out.println("START MOVE");
         pEntity.getBrain().setMemory(MemoryModuleType.PATH, this.path);
-        pEntity.getNavigation().moveTo(this.path, (double)this.speedModifier);
+        pEntity.getNavigation().moveTo(this.path, this.speedModifier);
     }
 
     protected void tick(ServerLevel pLevel, Mob pOwner, long pGameTime) {
-        System.out.println("MOVE");
         Path path = pOwner.getNavigation().getPath();
         Brain<?> brain = pOwner.getBrain();
         if (this.path != path) {
@@ -101,7 +91,7 @@ public class CustomMoveToTarget extends Behavior<Mob> {
             brain.setMemory(MemoryModuleType.PATH, path);
         }
 
-        if (path != null && this.lastTargetPos != null) {
+        if (path != null && this.lastTargetPos != null && brain.getMemory(MemoryModuleType.WALK_TARGET).isPresent()) {
             WalkTarget walktarget = brain.getMemory(MemoryModuleType.WALK_TARGET).get();
             if (walktarget.getTarget().currentBlockPosition().distSqr(this.lastTargetPos) > 4.0D && this.tryComputePath(pOwner, walktarget, pLevel.getGameTime())) {
                 this.lastTargetPos = walktarget.getTarget().currentBlockPosition();

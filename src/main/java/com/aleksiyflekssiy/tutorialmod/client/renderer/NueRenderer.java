@@ -1,17 +1,13 @@
 package com.aleksiyflekssiy.tutorialmod.client.renderer;
 
-import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.client.model.ModModelLayers;
 import com.aleksiyflekssiy.tutorialmod.client.model.NueModel;
-import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 
 public class NueRenderer extends MobRenderer<NueEntity, NueModel<NueEntity>> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/nue.png");

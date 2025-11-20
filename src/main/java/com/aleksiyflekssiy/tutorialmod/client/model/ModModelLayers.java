@@ -11,4 +11,5 @@ public class ModModelLayers {
     public static final ModelLayerLocation DIVINE_DOG_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "divine_dog"), "main");
     public static final ModelLayerLocation NUE_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "nue"), "main");
     public static final ModelLayerLocation TOAD_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "toad"), "main");
+    public static final ModelLayerLocation GREAT_SERPENT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "great_serpent"), "main");
 }

@@ -1,6 +1,9 @@
 package com.aleksiyflekssiy.tutorialmod.entity.behavior.nue;
 
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
+
+import com.aleksiyflekssiy.tutorialmod.entity.ai.NueAI;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -8,80 +11,114 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class SweepAttack extends Behavior<NueEntity> {
 
     public SweepAttack(Map<MemoryModuleType<?>, MemoryStatus> pEntryCondition) {
-        super(Map.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED), 0, 72000);
+        super(Map.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED, CustomMemoryModuleTypes.GRAB_TARGET.get(), MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED), 0, 72000);
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, NueEntity nue) {
-        LivingEntity target = nue.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+        LivingEntity target = getRequiredTarget(nue);
         boolean bool = target != null && target.isAlive() && nue.getAttackPhase() == NueEntity.AttackPhase.SWOOP;
-        boolean order = nue.getOrder() != NueEntity.NueOrder.SIT;
-        System.out.println("CHECK SWEEP: " + (bool && order));
+        boolean order = nue.getOrder() != NueEntity.NueOrder.MOVE;
         return bool && order;
+    }
+
+    private LivingEntity getRequiredTarget(NueEntity nue) {
+        if (nue.getOrder() == NueEntity.NueOrder.NONE){
+            if (nue.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).isPresent()) {
+                switch (nue.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).get()) {
+                    case "ATTACK" -> {
+                        return nue.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+                    }
+                    case "GRAB" -> {
+                        return nue.getBrain().getMemory(CustomMemoryModuleTypes.GRAB_TARGET.get()).orElse(null);
+                    }
+                }
+            }
+        }
+        else if (nue.getOrder() == NueEntity.NueOrder.ATTACK) {
+            return nue.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+        }
+        else if (nue.getOrder() == NueEntity.NueOrder.GRAB) {
+            return nue.getBrain().getMemory(CustomMemoryModuleTypes.GRAB_TARGET.get()).orElse(null);
+        }
+        System.out.println("WTF WITH THIS SHIT");
+        return null;
     }
 
     @Override
     protected boolean canStillUse(ServerLevel level, NueEntity nue, long time) {
-        System.out.println("CAN STILL USE SWEEP");
-        LivingEntity livingentity = nue.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+        LivingEntity livingentity = getRequiredTarget(nue);
         if (livingentity == null) {
             return false;
         } else if (!livingentity.isAlive()) {
             return false;
         } else {
-            if (livingentity instanceof Player) {
-                Player player = (Player) livingentity;
+            if (livingentity instanceof Player player) {
                 if (livingentity.isSpectator() || player.isCreative()) {
                     return false;
                 }
             }
-
             return this.checkExtraStartConditions(level, nue);
         }
     }
 
     @Override
+    protected void start(ServerLevel pLevel, NueEntity nue, long pGameTime) {
+
+    }
+
+    @Override
     protected void tick(ServerLevel level, NueEntity nue, long time) {
-        System.out.println("SWEEP");
-        LivingEntity livingentity = nue.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+        LivingEntity livingentity = getRequiredTarget(nue);
         if (livingentity != null) {
-            //nue.getMoveControl().setWantedPosition(livingentity.getX(), livingentity.getY(0.5), livingentity.getZ(), 1);
-            //nue.getNavigation().moveTo(livingentity.getX(), livingentity.getY(0.5), livingentity.getZ(), 1);
-            nue.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(livingentity.position(), 1, 1));
-            if (nue.getOrder() == NueEntity.NueOrder.GRAB) {
-                if (nue.getBoundingBox().inflate(0.5F).intersects(livingentity.getBoundingBox())) {
-                    nue.tryGrabEntityBelow();
+            nue.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(livingentity.blockPosition(), 1, 5));
+            if (nue.getOrder() == NueEntity.NueOrder.GRAB ||
+                    (nue.getOrder() == NueEntity.NueOrder.NONE && NueAI.checkAttackType(nue, "GRAB"))) {
+                if (nue.getBoundingBox().inflate(0.5F).intersects(livingentity.getBoundingBox()) && nue.checkGrabCooldown()) {
+                    System.out.println("SOMEONE IS THERE");
+                    nue.tryGrabEntityBelow(livingentity);
+                    setNextAttackType(nue);
                     this.stop(level, nue, time);
                 }
             }
-            else {
-                if (nue.getBoundingBox().inflate(0.5F).intersects(livingentity.getBoundingBox())) {
+            else if (nue.getOrder() == NueEntity.NueOrder.ATTACK ||
+                    (nue.getOrder() == NueEntity.NueOrder.NONE && NueAI.checkAttackType(nue, "ATTACK"))){
+                if (nue.getBoundingBox().inflate(0.5F).intersects(livingentity.getBoundingBox()) && nue.checkAttackCooldown()) {
                     nue.doHurtTarget(livingentity);
-                    if (!nue.isSilent()) {
-                        nue.level().levelEvent(1039, nue.blockPosition(), 0);
-                    }
-                    System.out.println("ATTACK");
+                    setNextAttackType(nue);
                     this.stop(level, nue, time);
                 } else if (nue.horizontalCollision) {
-                    nue.setAttackPhase(NueEntity.AttackPhase.ASCEND);
                     this.stop(level, nue, time);
                 }
             }
         }
-        else System.out.println("where?");
+    }
+
+    private void setNextAttackType(NueEntity nue) {
+        if (nue.getOrder() == NueEntity.NueOrder.NONE) {
+            switch (nue.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).get()){
+                case "ATTACK" -> {
+                    nue.setAttackCooldown();
+                    nue.setGrabCooldown();
+                    nue.getBrain().setMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get(), "GRAB");
+                }
+                case "GRAB" -> {
+                    nue.setAttackCooldown();
+                    nue.setGrabCooldown();
+                    nue.getBrain().setMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get(), "ATTACK");
+                }
+            }
+        }
     }
 
     @Override
     protected void stop(ServerLevel level, NueEntity nue, long time) {
-        System.out.println("SWEEP STOP");
         nue.setAttackPhase(NueEntity.AttackPhase.ASCEND);
     }
 }

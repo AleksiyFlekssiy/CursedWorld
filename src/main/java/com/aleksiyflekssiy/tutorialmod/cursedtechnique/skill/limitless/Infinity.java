@@ -1,7 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
+package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.effect.ModEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -50,7 +50,7 @@ public class Infinity extends Skill {
         if (!(entity instanceof ServerPlayer)) return;
         switch (type){
             case ACTIVATION -> infinitySwitch.activate(entity);
-            case DISACTIVATION -> infinitySwitch.disactivate(entity);
+            case DEACTIVATION -> infinitySwitch.disactivate(entity);
             case CHARGING -> increaseInfinityOutput.charge(entity, charge);
             case RELEASING -> increaseInfinityOutput.release(entity);
         }

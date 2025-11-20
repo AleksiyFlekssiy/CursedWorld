@@ -1,11 +1,10 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows;
+package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
-import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -60,23 +59,23 @@ public class Nue extends ShikigamiSkill {
                 isActive = !isActive;
             } else if (isActive && isTamed) {
                 if (nue.getControllingPassenger() == null) {
-                    HitResult result = ProjectileUtil.getHitResultOnViewVector(nue.getOwner(), target -> !target.equals(nue), 50);
+                    HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(nue), 50);
                     if (result.getType() == HitResult.Type.ENTITY) {
                         EntityHitResult hitResult = (EntityHitResult) result;
                         if (hitResult.getEntity() instanceof LivingEntity target) {
                             System.out.println(target.getClass().getSimpleName());
-                            nue.followOrder(target, NueEntity.NueOrder.values()[orderIndex]);
+                            nue.followOrder(target, null, NueEntity.NueOrder.values()[orderIndex]);
                         }
                     } else if (result.getType() == HitResult.Type.BLOCK) {
                         BlockHitResult hitResult = (BlockHitResult) result;
                         System.out.println(hitResult.getBlockPos());
-                        nue.followOrder(hitResult.getBlockPos(), NueEntity.NueOrder.values()[orderIndex]);
+                        nue.followOrder(null, hitResult.getBlockPos(), NueEntity.NueOrder.values()[orderIndex]);
                     } else {
                         System.out.println("MISS");
                     }
                 }
                 else if (entity.equals(nue.getControllingPassenger())){
-                    nue.tryGrabEntityBelow();
+                    nue.tryGrabEntityBelow(null);
                 }
             }
         }

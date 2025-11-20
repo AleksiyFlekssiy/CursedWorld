@@ -1,4 +1,4 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -27,9 +27,16 @@ public abstract class Skill {
     public void charge(LivingEntity entity, int charge) {}
     public void release(LivingEntity entity){}
 
+    public CompoundTag serializeNBT(){
+        CompoundTag tag = new CompoundTag();
+        return tag;
+    }
+
+    public void deserializeNBT(CompoundTag tag){}
+
     public enum UseType{
         ACTIVATION,
-        DISACTIVATION,
+        DEACTIVATION,
         CHARGING,
         RELEASING
     }

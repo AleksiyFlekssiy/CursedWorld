@@ -19,6 +19,7 @@ import com.aleksiyflekssiy.tutorialmod.loot.ModLootModifiers;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
+import com.mojang.logging.LogUtils;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory;
@@ -42,6 +43,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(TutorialMod.MOD_ID)
@@ -49,6 +51,7 @@ public class TutorialMod
 {
     // Define mod id in a common place for everything to reference
     public static final String MOD_ID = "tutorialmod";
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public TutorialMod(FMLJavaModLoadingContext context)
     {
@@ -148,6 +151,8 @@ public class TutorialMod
             event.registerEntityRenderer(ModEntities.DIVINE_DOG.get(), DivineDogRenderer::new);
             event.registerEntityRenderer(ModEntities.NUE.get(), NueRenderer::new);
             event.registerEntityRenderer(ModEntities.TOAD.get(), ToadRenderer::new);
+            event.registerEntityRenderer(ModEntities.GREAT_SERPENT.get(), GreatSerpentRenderer::new);
+            event.registerEntityRenderer(ModEntities.GREAT_SERPENT_SEGMENT.get(), GreatSerpentSegmentRenderer::new);
         }
 
         @SubscribeEvent
@@ -158,6 +163,7 @@ public class TutorialMod
             event.registerLayerDefinition(ModModelLayers.DIVINE_DOG_LAYER, DivineDogModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.NUE_LAYER, NueModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.TOAD_LAYER, ToadModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.GREAT_SERPENT_LAYER, GreatSerpentHeadModel::createBodyLayer);
         }
 
         @SubscribeEvent

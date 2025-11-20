@@ -1,13 +1,13 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows;
+package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
 
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
-import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
@@ -62,12 +62,12 @@ public class Toad extends ShikigamiSkill {
                     EntityHitResult hitResult = (EntityHitResult) result;
                     if (hitResult.getEntity() instanceof LivingEntity target) {
                         System.out.println(target.getClass().getSimpleName());
-                        toad.followOrder(target, ToadEntity.ToadOrder.values()[orderIndex]);
+                        toad.followOrder(target, null, ToadEntity.ToadOrder.values()[orderIndex]);
                     }
                 } else if (result.getType() == HitResult.Type.BLOCK) {
                     BlockHitResult hitResult = (BlockHitResult) result;
                     System.out.println(hitResult.getBlockPos());
-                    toad.followOrder(hitResult.getBlockPos(), ToadEntity.ToadOrder.values()[orderIndex]);
+                    toad.followOrder(null, hitResult.getBlockPos(), ToadEntity.ToadOrder.values()[orderIndex]);
                 } else {
                     System.out.println("MISS");
                 }
@@ -75,6 +75,7 @@ public class Toad extends ShikigamiSkill {
         } else {
             if (isActive && isTamed) {
                 System.out.println("DEACTIVATE");
+                stopBehaviors();
                 toad.discard();
                 toad = null;
                 isActive = !isActive;
@@ -110,11 +111,16 @@ public class Toad extends ShikigamiSkill {
                         player.sendSystemMessage(Component.literal("You tamed Toad"));
                     }
                 }
+                stopBehaviors();
                 toad = null;
             }
             isActive = false;
         }
         //MinecraftForge.EVENT_BUS.unregister(this);
+    }
+
+    private void stopBehaviors(){
+        if (toad != null) toad.getBrain().stopAll((ServerLevel) toad.level(), toad);
     }
 
     @Override

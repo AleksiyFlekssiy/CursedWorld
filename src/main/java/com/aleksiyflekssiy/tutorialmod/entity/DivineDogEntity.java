@@ -1,10 +1,11 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
-import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiFollowOwnerGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtByTargetGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.goal.ShikigamiOwnerHurtTargetGoal;
-import com.aleksiyflekssiy.tutorialmod.entity.navigation.CustomNavigation;
-import com.aleksiyflekssiy.tutorialmod.entity.navigation.SmartBodyHelper;
+import com.aleksiyflekssiy.tutorialmod.entity.ai.DivineDogAI;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
+import com.aleksiyflekssiy.tutorialmod.entity.navigation.CustomGroundNavigation;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -12,33 +13,27 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.Node;
-import net.minecraft.world.level.pathfinder.Path;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class DivineDogEntity extends Shikigami{
+
     public enum Color{
         WHITE,
         BLACK
     }
+
     public float targetYaw = 0.0F;
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+    protected static final ImmutableList<SensorType<? extends Sensor<? super DivineDogEntity>>> SENSOR_TYPES = ImmutableList.of(CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get(), SensorType.NEAREST_LIVING_ENTITIES);
     private static final EntityDataAccessor<Float> REAL_SPEED = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.INT);
 
@@ -55,23 +50,62 @@ public class DivineDogEntity extends Shikigami{
     @Override
     public void tick() {
         super.tick();
-        LivingEntity target = this.getTarget();
-        if (target == null) return;
-        double dx = target.getX() - getX();
-        double dz = target.getZ() - getZ();
-        targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
-        if (this.navigation.getPath() != null) entityData.set(REAL_SPEED, 0.33f * 2.5f);
-        else entityData.set(REAL_SPEED, 0.33F);
+        if (!level().isClientSide) {
+            if (getBrain().getMemory(MemoryModuleType.WALK_TARGET).isPresent()) entityData.set(REAL_SPEED, 0.33f * 2.5f);
+            else entityData.set(REAL_SPEED, 0.33F);
+        }
     }
 
-//    @Override
-//    protected BodyRotationControl createBodyControl() {
-//        return new SmartBodyHelper(this);
-//    }
+    @Override
+    public Brain<DivineDogEntity> getBrain() {
+        return (Brain<DivineDogEntity>) super.getBrain();
+    }
+
+    @Override
+    protected Brain<?> makeBrain(Dynamic<?> pDynamic) {
+        Brain<DivineDogEntity> brain = this.brainProvider().makeBrain(pDynamic);
+        return DivineDogAI.makeBrain(brain); // Инициализируем через NueAI
+    }
+
+    @Override
+    protected Brain.Provider<DivineDogEntity> brainProvider() {
+        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        DivineDogAI.updateActivity(this.getBrain());
+        this.getBrain().tick((ServerLevel)this.level(), this);
+    }
+
+    @Override
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+        if (super.followOrder(target, blockPos, order)) {
+            this.getBrain().stopAll((ServerLevel) this.level(), this);
+            if (order == DivineDogOrder.NONE) {}
+            else if (order == DivineDogOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            else if (order == DivineDogOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void clearOrder() {
+        this.setOrder(DivineDogOrder.NONE);
+        this.getBrain().stopAll((ServerLevel) this.level(), this);
+    }
+
+    @Override
+    public void tame(Player owner) {
+        super.tame(owner);
+        this.getBrain().setMemory(CustomMemoryModuleTypes.OWNER.get(), owner);
+    }
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        return new CustomNavigation(this, level());
+        return new CustomGroundNavigation(this, level());
     }
 
     @Override
@@ -91,27 +125,6 @@ public class DivineDogEntity extends Shikigami{
 
     public Color getColor(){
         return Color.values()[entityData.get(COLOR)];
-    }
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-    }
-
-    @Override
-    protected void registerGoals() {
-        if (!isTamed) {
-            this.goalSelector.addGoal(1, new FloatGoal(this)); // Чтобы не тонул в воде
-            this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 2D, false));
-            this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
-        }
-        else {
-            this.goalSelector.addGoal(0, new FloatGoal(this));
-            this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 2f, true));
-            this.goalSelector.addGoal(2, new ShikigamiFollowOwnerGoal(this, 5, 5, 1f));
-            this.targetSelector.addGoal(2, new ShikigamiOwnerHurtTargetGoal(this, false));
-            this.targetSelector.addGoal(2, new ShikigamiOwnerHurtByTargetGoal(this, false));
-        }
     }
 
     @Override
@@ -138,5 +151,11 @@ public class DivineDogEntity extends Shikigami{
                 .add(Attributes.ATTACK_KNOCKBACK, 1)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.5)
                 .add(Attributes.JUMP_STRENGTH, 1);
+    }
+
+    public enum DivineDogOrder implements IOrder{
+        NONE,
+        ATTACK,
+        MOVE
     }
 }

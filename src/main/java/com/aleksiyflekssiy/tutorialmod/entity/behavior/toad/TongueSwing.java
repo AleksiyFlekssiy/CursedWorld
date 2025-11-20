@@ -10,19 +10,15 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Map;
 
 public class TongueSwing extends Behavior<ToadEntity> {
+    private final float SWING_SPEED = 0.2F; // Уменьшена угловая скорость
     private LivingEntity caughtEntity;
     private int swingTick = 0;
-    private final int SWING_DURATION = 80; // 2 секунды
-    private final float SWING_SPEED = 0.25F; // Уменьшена угловая скорость
     private Vec3 centerPosition; // Центр вращения (позиция лягушки)
     private float angle = 0.0F; // Текущий угол
     private boolean isReleased = false;
@@ -48,7 +44,7 @@ public class TongueSwing extends Behavior<ToadEntity> {
 
     @Override
     protected boolean canStillUse(ServerLevel level, ToadEntity toad, long pGameTime) {
-        if (caughtEntity != null && caughtEntity.isAlive() && releaseTick < 60){
+        if (caughtEntity != null && caughtEntity.isAlive() && releaseTick < 60) {
             return toad.getOrder() == ToadEntity.ToadOrder.NONE || toad.getOrder() == ToadEntity.ToadOrder.SWING;
         }
         return false;
@@ -57,15 +53,14 @@ public class TongueSwing extends Behavior<ToadEntity> {
     @Override
     protected void start(ServerLevel level, ToadEntity toad, long pGameTime) {
         toad.setLastTickUse();
-                caughtEntity = toad.getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).get();
-                centerPosition = toad.position(); // Центр вращения
-                initialDistance = (float) centerPosition.distanceTo(caughtEntity.position()); // Изначальная дистанция
-                angle = (float) Math.atan2(caughtEntity.getZ() - centerPosition.z, caughtEntity.getX() - centerPosition.x);
-                swingTick = 0;
-                toad.setDistance(initialDistance);
-                System.out.println("START SWING");
+        caughtEntity = toad.getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).get();
+        centerPosition = toad.position(); // Центр вращения
+        initialDistance = (float) centerPosition.distanceTo(caughtEntity.position()); // Изначальная дистанция
+        angle = (float) Math.atan2(caughtEntity.getZ() - centerPosition.z, caughtEntity.getX() - centerPosition.x);
+        swingTick = 0;
+        toad.setDistance(initialDistance);
+        System.out.println("START SWING");
     }
-
 
     @Override
     protected void tick(ServerLevel level, ToadEntity toad, long pGameTime) {
@@ -103,9 +98,12 @@ public class TongueSwing extends Behavior<ToadEntity> {
                 }
 
                 // Поворачиваем жабу
-
-
+                toad.lookAt(EntityAnchorArgument.Anchor.EYES, caughtEntity.position());
+                initialDistance = (float) centerPosition.distanceTo(caughtEntity.position());
+                toad.setDistance(initialDistance);
                 swingTick++;
+                // 2 секунды
+                int SWING_DURATION = 80;
                 if (swingTick >= SWING_DURATION) {
                     releaseEntity(toad);
                 }

@@ -1,4 +1,4 @@
-package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill;
 
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.world.entity.LivingEntity;

@@ -4,7 +4,8 @@ import com.aleksiyflekssiy.tutorialmod.client.model.NueAnimations;
 import com.aleksiyflekssiy.tutorialmod.entity.ai.NueAI;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
-import com.aleksiyflekssiy.tutorialmod.entity.navigation.FlyingMoveControl;
+import com.aleksiyflekssiy.tutorialmod.entity.navigation.BluntAirNavigation;
+import com.aleksiyflekssiy.tutorialmod.entity.control.FlyingMoveControl;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -21,8 +22,8 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
@@ -41,19 +42,22 @@ public class NueEntity extends Shikigami {
     public AnimationState idleAnimation = new AnimationState();
     public AnimationState flyAnimation = new AnimationState();
     protected static final ImmutableList<SensorType<? extends Sensor<? super NueEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get());
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(),CustomMemoryModuleTypes.GRAB_TARGET.get(), CustomMemoryModuleTypes.GRAB_COOLDOWN.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_COOLDOWN.get());
     private static final EntityDataAccessor<Integer> ANIMATION = SynchedEntityData.defineId(NueEntity.class, EntityDataSerializers.INT);
     public static final int IDLE = 0;
     public static final int FLY = 1;
     private final EntityDimensions defaultDimensions = EntityDimensions.scalable(5F, 6F); // Обычный размер
     private final EntityDimensions flyingDimensions = EntityDimensions.scalable(4F, 5F); // Размер в полёте
+    private String currentActionType = null;
+    private AttackPhase currentAttackPhase = null;
 
     public NueEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new FlyingMoveControl(this);
-        this.navigation = new FlyingPathNavigation(this, level());
+        this.navigation = new BluntAirNavigation(this, level());
         this.entityData.set(ANIMATION, 0);
-
+        NueAI.initializeMemories(this.getBrain());
+        this.currentOrder = NueOrder.NONE;
     }
 
     public enum AttackPhase {
@@ -91,29 +95,21 @@ public class NueEntity extends Shikigami {
     }
 
     @Override
-    public void followOrder(LivingEntity target, IOrder order) {
-        if (order == NueOrder.SIT) return;
-        super.followOrder(target, order);
-        if (this.isTamed() && this.owner != null) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+        if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            if (order == NueOrder.NONE) {}
+            else if (order == NueOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            else if (order == NueOrder.GRAB) this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), target);
+            else if (order == NueOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 5));
+            return true;
         }
-    }
-
-    @Override
-    public void followOrder(BlockPos target, IOrder order) {
-        if (order == NueOrder.SIT) {
-            super.followOrder(target, order);
-            if (this.isTamed() && this.owner != null) {
-                this.getBrain().stopAll((ServerLevel) this.level(), this);
-                this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(target, 1, 1));
-            }
-        }
+        return false;
     }
 
     @Override
     public void clearOrder() {
-        super.clearOrder();
+        this.setOrder(NueOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
     }
 
@@ -126,16 +122,23 @@ public class NueEntity extends Shikigami {
             } else {
                 setAnimation(FLY);
             }
-            if (this.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)){
-                System.out.println("TARGET:" + this.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get().getTarget().currentPosition());
-            }
+
+            this.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).ifPresent(type ->{
+                if (this.getAttackPhase() != currentAttackPhase) {
+                    currentAttackPhase = this.getAttackPhase();
+                    System.out.println(currentAttackPhase + " - " + type);
+                }
+                if (!type.equals(currentActionType)) {
+                    currentActionType = type;
+                    System.out.println(currentAttackPhase + " - " + type);
+                }
+            });
             // Переключение активности
             if (this.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
                 this.getBrain().setActiveActivityIfPossible(Activity.FIGHT);
             } else {
               this.getBrain().setActiveActivityIfPossible(Activity.CORE);
             }
-            this.getBrain().getRunningBehaviors().forEach(System.out::println);
         } else updateAnimation();
         this.refreshDimensions();
     }
@@ -197,46 +200,70 @@ public class NueEntity extends Shikigami {
         this.entityData.define(ANIMATION, 0);
     }
 
-    public void tryGrabEntityBelow() {
+    public void tryGrabEntityBelow(LivingEntity target) {
         if (this.level().isClientSide()) return;
-        if (grabbedEntity == null) {
-            // Определяем область поиска под сущностью
-            double grabRange = 2.0; // Радиус захвата по горизонтали
-            double grabHeight = 5.0; // Высота поиска вниз
-            AABB grabBox = new AABB(
-                    this.getX() - grabRange, this.getY() - grabHeight, this.getZ() - grabRange,
-                    this.getX() + grabRange, this.getY(), this.getZ() + grabRange
-            );
-
-            // Ищем живые сущности в области
-            List<LivingEntity> entitiesBelow = this.level().getEntitiesOfClass(
-                    LivingEntity.class,
-                    grabBox,
-                    entity -> entity != this && entity != this.getControllingPassenger() && !entity.isPassenger()
-            );
-
-            // Если есть сущности, пытаемся схватить ближайшую
-            if (!entitiesBelow.isEmpty()) {
-                LivingEntity target = entitiesBelow.get(0); // Берём первую подходящую сущность
+        if (grabbedEntity == null && checkGrabCooldown()) {
+            if (target == null) {
+                if (findEntityBelow() != null) target = findEntityBelow();
+                else return;
+            }
                 if (this.getPassengers().isEmpty() || this.getPassengers().size() < 2) {
                     // Прикрепляем сущность как пассажира
-                    boolean isWork = target.startRiding(this, true);
-                    if (isWork) grabbedEntity = target;
-                    this.getBrain().setMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), grabbedEntity);
-                    this.playSound(SoundEvents.PHANTOM_BITE, 1.0F, 1.0F); // Звук захвата
+                    boolean grabSuccessed = target.startRiding(this, true);
+                    if (grabSuccessed) {
+                        grabbedEntity = target;
+                        this.getBrain().setMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), grabbedEntity);
+                        this.playSound(SoundEvents.PHANTOM_BITE, 1.0F, 1.0F); // Звук захвата
+                        System.out.println("Grabbed");
+                    }
                 }
-            }
-        } else {
-            dropGrabbedEntity();
         }
     }
 
+    @Nullable
+    private LivingEntity findEntityBelow(){
+        double grabRange = 2.0; // Радиус захвата по горизонтали
+        double grabHeight = 5.0; // Высота поиска вниз
+        AABB grabBox = new AABB(
+                this.getX() - grabRange, this.getY() - grabHeight, this.getZ() - grabRange,
+                this.getX() + grabRange, this.getY(), this.getZ() + grabRange
+        );
+
+        // Ищем живые сущности в области
+        List<LivingEntity> entitiesBelow = this.level().getEntitiesOfClass(
+                LivingEntity.class,
+                grabBox,
+                entity -> entity != this && entity != this.getControllingPassenger() && !entity.isPassenger()
+        );
+
+        return entitiesBelow.get(0);
+    }
+
     public void dropGrabbedEntity() {
-        if (grabbedEntity != null) {
+        if (grabbedEntity != null && checkGrabCooldown()) {
             grabbedEntity.stopRiding();
             grabbedEntity = null;
+            setAttackCooldown();
+            setGrabCooldown();
             this.getBrain().eraseMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get());
+            System.out.println("Dropped");
         }
+    }
+
+    public boolean checkGrabCooldown(){
+        return this.getBrain().checkMemory(CustomMemoryModuleTypes.GRAB_COOLDOWN.get(), MemoryStatus.VALUE_ABSENT);
+    }
+
+    public void setGrabCooldown(){
+        this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_COOLDOWN.get(), 50);
+    }
+
+    public boolean checkAttackCooldown(){
+        return this.getBrain().checkMemory(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get(), MemoryStatus.VALUE_ABSENT);
+    }
+
+    public void setAttackCooldown(){
+        this.getBrain().setMemory(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get(), 50);
     }
 
     protected void tickRidden(Player pPlayer, Vec3 pTravelVector) {
@@ -274,7 +301,7 @@ public class NueEntity extends Shikigami {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 100)
+                .add(Attributes.MAX_HEALTH, 500)
                 .add(Attributes.MOVEMENT_SPEED, 0.5)
                 .add(Attributes.ATTACK_DAMAGE, 10f)
                 .add(Attributes.FOLLOW_RANGE, 100)
@@ -293,7 +320,7 @@ public class NueEntity extends Shikigami {
             if (this.isInWater()) {
                 this.moveRelative(0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                this.setDeltaMovement(this.getDeltaMovement().scale((double) 0.8F));
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.8F));
             } else if (this.isInLava()) {
                 this.moveRelative(0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
@@ -315,7 +342,7 @@ public class NueEntity extends Shikigami {
                 this.move(MoverType.SELF, this.getDeltaMovement());
 
                 if (this.onGround()) {
-                    this.setDeltaMovement(this.getDeltaMovement().scale((double) f));
+                    this.setDeltaMovement(this.getDeltaMovement().scale(f));
                 }
             }
         }
@@ -339,7 +366,7 @@ public class NueEntity extends Shikigami {
         NONE,
         ATTACK,
         GRAB,
-        SIT
+        MOVE
     }
 }
 

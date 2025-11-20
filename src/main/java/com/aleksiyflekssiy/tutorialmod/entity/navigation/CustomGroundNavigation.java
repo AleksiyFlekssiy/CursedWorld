@@ -1,21 +1,16 @@
 package com.aleksiyflekssiy.tutorialmod.entity.navigation;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.*;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
-public class CustomNavigation extends GroundPathNavigation {
+public class CustomGroundNavigation extends GroundPathNavigation {
     private int lastReachedNodeIndex = -1; // Индекс последнего достигнутого узла
 
-    public CustomNavigation(@NotNull Mob entity, Level world) {
+    public CustomGroundNavigation(@NotNull Mob entity, Level world) {
         super(entity, world);
     }
 

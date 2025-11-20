@@ -2,15 +2,13 @@ package com.aleksiyflekssiy.tutorialmod.client.screen;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.network.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.WardenModel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.settings.KeyConflictContext;
@@ -51,7 +49,7 @@ public class KeyHandler {
         if (mc.player == null) return;
 
         if (PRIMARY_SKILL_ACTIVATION.consumeClick()){
-            Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
+            Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
             if (selectedSkill != null) {
                 ModMessages.INSTANCE.sendToServer(new UseSkillPacket(selectedSkill.getName(), Skill.UseType.ACTIVATION, 0));
                 mc.player.sendSystemMessage(Component.literal("Quick activation!"));
@@ -67,7 +65,7 @@ public class KeyHandler {
 
         if (isCharging && isPressed) {
             chargeTicks++;
-            Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
+            Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
             if (selectedSkill != null) {
                 ModMessages.INSTANCE.sendToServer(new UseSkillPacket(selectedSkill.getName(), Skill.UseType.CHARGING, chargeTicks));
                 if (chargeTicks == 1) mc.player.sendSystemMessage(Component.literal("Charging!"));
@@ -76,7 +74,7 @@ public class KeyHandler {
 
         if (!isPressed && wasPressedLastTick && isCharging) {
             if (chargeTicks > 1) {
-                Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
+                Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
                 ModMessages.INSTANCE.sendToServer(new UseSkillPacket(selectedSkill.getName(), Skill.UseType.RELEASING, chargeTicks));
             }
             isCharging = false;
@@ -87,19 +85,19 @@ public class KeyHandler {
 
         if (PREVIOUS_SKILL.consumeClick()) {
             CursedTechniqueCapability.previousSkill(mc.player);
-            Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
+            Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
             if (selectedSkill != null) {
                 ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(selectedSkill.getName()));
             }
         }
 
         if (NEXT_SKILL.consumeClick()) {
-            if (CursedTechniqueCapability.getSkill(mc.player) instanceof ShikigamiSkill && mc.player.isCrouching()){
+            if (CursedTechniqueCapability.getCurrentSkill(mc.player) instanceof ShikigamiSkill && mc.player.isCrouching()){
                 ModMessages.INSTANCE.sendToServer(new SwitchOrderPacket());
             }
             else {
                 CursedTechniqueCapability.nextSkill(mc.player);
-                Skill selectedSkill = CursedTechniqueCapability.getSkill(mc.player);
+                Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
                 if (selectedSkill != null) {
                     ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(selectedSkill.getName()));
                 }

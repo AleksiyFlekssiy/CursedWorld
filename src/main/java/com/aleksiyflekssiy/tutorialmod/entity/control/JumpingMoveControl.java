@@ -1,4 +1,4 @@
-package com.aleksiyflekssiy.tutorialmod.entity.navigation;
+package com.aleksiyflekssiy.tutorialmod.entity.control;
 
 import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;

@@ -2,13 +2,10 @@ package com.aleksiyflekssiy.tutorialmod.command;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.TenShadowsTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
-import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
-import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
-import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
@@ -16,14 +13,12 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
