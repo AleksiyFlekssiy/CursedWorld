@@ -9,15 +9,18 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class SwitchOrderPacket {
+    private final int direction;
 
-    public SwitchOrderPacket() {}
+    public SwitchOrderPacket(int direction) {
+        this.direction = direction;
+    }
 
     public static void encode(SwitchOrderPacket msg, ByteBuf buf) {
-
+        buf.writeInt(msg.direction);
     }
 
     public static SwitchOrderPacket decode(ByteBuf buf) {
-        return new SwitchOrderPacket();
+        return new SwitchOrderPacket(buf.readInt());
     }
 
     public static void handle(SwitchOrderPacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -25,7 +28,7 @@ public class SwitchOrderPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 ShikigamiSkill shikigamiSkill = (ShikigamiSkill) CursedTechniqueCapability.getCurrentSkill(player);
-                shikigamiSkill.switchOrder(player);
+                shikigamiSkill.switchOrder(player, msg.direction);
             }
         });
     }

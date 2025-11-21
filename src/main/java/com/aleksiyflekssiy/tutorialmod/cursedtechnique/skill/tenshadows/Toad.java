@@ -84,9 +84,16 @@ public class Toad extends ShikigamiSkill {
     }
 
     @Override
-    public void switchOrder(LivingEntity owner) {
+    public void switchOrder(LivingEntity owner, int direction) {
         if (isTamed) {
-            if (++orderIndex >= 5) orderIndex = 0;
+            switch (direction){
+                case -1 -> {
+                    if (--orderIndex <= -1) orderIndex = 4;
+                }
+                case 1 -> {
+                    if (++orderIndex >= 5) orderIndex = 0;
+                }
+            }
             switch (orderIndex) {
                 case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
                 case 1 -> owner.sendSystemMessage(Component.literal("PULL"));

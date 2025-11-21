@@ -35,5 +35,7 @@ public abstract class ShikigamiSkill extends Skill{
     }
 
     public abstract List<Shikigami> getShikigami();
-    public abstract void switchOrder(LivingEntity owner);
+
+    //-1 for the previous order, 1 for the next order
+    public abstract void switchOrder(LivingEntity owner, int direction);
 }

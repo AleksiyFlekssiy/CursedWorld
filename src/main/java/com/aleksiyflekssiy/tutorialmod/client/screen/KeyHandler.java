@@ -84,16 +84,21 @@ public class KeyHandler {
         wasPressedLastTick = isPressed;
 
         if (PREVIOUS_SKILL.consumeClick()) {
-            CursedTechniqueCapability.previousSkill(mc.player);
-            Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
-            if (selectedSkill != null) {
-                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(selectedSkill.getName()));
+            if (CursedTechniqueCapability.getCurrentSkill(mc.player) instanceof ShikigamiSkill && mc.player.isCrouching()){
+                ModMessages.INSTANCE.sendToServer(new SwitchOrderPacket(-1));
+            }
+            else {
+                CursedTechniqueCapability.previousSkill(mc.player);
+                Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
+                if (selectedSkill != null) {
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(selectedSkill.getName()));
+                }
             }
         }
 
         if (NEXT_SKILL.consumeClick()) {
             if (CursedTechniqueCapability.getCurrentSkill(mc.player) instanceof ShikigamiSkill && mc.player.isCrouching()){
-                ModMessages.INSTANCE.sendToServer(new SwitchOrderPacket());
+                ModMessages.INSTANCE.sendToServer(new SwitchOrderPacket(1));
             }
             else {
                 CursedTechniqueCapability.nextSkill(mc.player);
