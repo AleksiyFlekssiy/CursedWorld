@@ -6,6 +6,7 @@ import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -20,35 +21,29 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.PartEntity;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class GreatSerpentEntity extends Shikigami {
     public static final float MAX_TURN_ANGLE = 12.25F;
     public static final int MAX_SEGMENT_COUNT = 15;
-    private final List<GreatSerpentEntity> segments =  new ArrayList<>();
+    private final List<GreatSerpentSegment> segments =  new ArrayList<>();
     private int emergeTicks = 0;
     private static final EntityDataAccessor<Integer> SEGMENT_COUNT = SynchedEntityData.defineId(GreatSerpentEntity.class, EntityDataSerializers.INT);
     protected static final ImmutableList<SensorType<? extends Sensor<? super GreatSerpentEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
     private BlockPos spawnPos;
     private Vec3 motionVec;
-    private boolean spawn;
+    private final GreatSerpentSegment headSegment;
 
     public GreatSerpentEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.noCulling = true;
-        this.entityData.set(SEGMENT_COUNT, 5);
-        this.spawn = true;
-    }
-
-    public GreatSerpentEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, boolean spawn) {
-        super(pEntityType, pLevel);
-        this.spawn = spawn;
+        this.entityData.set(SEGMENT_COUNT, 0);
+        this.headSegment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, 0);
+        //headSegment.getBrain().setMemory(MemoryModuleType.WALK_TARGET, this.getBrain().getMemory(MemoryModuleType.WALK_TARGET));
+        segments.add(this.headSegment);
     }
 
     @Override
@@ -65,15 +60,10 @@ public class GreatSerpentEntity extends Shikigami {
     @Override
     public void setPos(double x, double y, double z) {
         super.setPos(x, y, z);
-        this.spawnPos = new BlockPos((int) x, (int) y, (int) z);
     }
 
-    public List<GreatSerpentEntity> getSegments() {
+    public List<GreatSerpentSegment> getSegments() {
         return segments;
-    }
-
-    public int getSegmentCount() {
-        return this.entityData.get(SEGMENT_COUNT);
     }
 
     private void moveToTarget() {
@@ -85,10 +75,8 @@ public class GreatSerpentEntity extends Shikigami {
             Vec3 direction = targetVec.subtract(currentPos).normalize();
             motionVec = direction.scale(speed);
             this.setDeltaMovement(motionVec);
-            for (GreatSerpentEntity segment : segments) {
-                segment.setDeltaMovement(motionVec);
-            }
         });
+        segments.forEach(GreatSerpentSegment::moveToTarget);
     }
 
     @Override
@@ -96,12 +84,8 @@ public class GreatSerpentEntity extends Shikigami {
         super.tick();
         emergeTicks++;
         if (!level().isClientSide()) {
-            if (emergeTicks % 20 == 0 && getSegmentCount() < MAX_SEGMENT_COUNT && this.spawn) {
-                GreatSerpentEntity segment = new GreatSerpentEntity(ModEntities.GREAT_SERPENT.get(), this.level(), false);
-                segment.setPos(spawnPos.getCenter());
-                segments.add(segment);
-                level().addFreshEntity(segment);
-                this.entityData.set(SEGMENT_COUNT, getSegmentCount() + 1);
+            if (emergeTicks % 20 == 0 && segments.size() < MAX_SEGMENT_COUNT) {
+                createSegment();
             }
             moveToTarget();
         }
@@ -110,9 +94,6 @@ public class GreatSerpentEntity extends Shikigami {
 
         for(int j = 0; j < this.segments.size(); ++j) {
             avec3[j] = new Vec3(this.segments.get(j).getX(), this.segments.get(j).getY(), this.segments.get(j).getZ());
-        }
-        for (int i = 0; i < this.segments.size(); i++) {
-            segments.get(i).setPos(this.getX(), this.getY() + (i == 0 ? 2 : i * 2 + 2), this.getZ());
         }
 
         for(int l = 0; l < this.segments.size(); ++l) {
@@ -125,6 +106,19 @@ public class GreatSerpentEntity extends Shikigami {
         }
     }
 
+    private void createSegment() {
+        GreatSerpentSegment segment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, segments.size());
+        segment.setPos(spawnPos == null ? headSegment.blockPosition().getCenter() : spawnPos.getCenter());
+        segment.getBrain().setMemory(MemoryModuleType.WALK_TARGET, this.getBrain().getMemory(MemoryModuleType.WALK_TARGET));
+        segments.add(segment);
+        this.entityData.set(SEGMENT_COUNT, segments.size() + 1);
+        level().addFreshEntity(segment);
+    }
+
+    public void setSpawnPos(BlockPos spawnPos) {
+        this.spawnPos = spawnPos;
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 60)
@@ -135,6 +129,24 @@ public class GreatSerpentEntity extends Shikigami {
                 .add(Attributes.ATTACK_KNOCKBACK, 1)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.5)
                 .add(Attributes.JUMP_STRENGTH, 1);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("segmentCount", this.entityData.get(SEGMENT_COUNT));
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.entityData.set(SEGMENT_COUNT, tag.getInt("segmentCount"));
+    }
+
+    @Override
+    public void remove(RemovalReason pReason) {
+        super.remove(pReason);
+        segments.forEach(segment -> segment.remove(pReason));
     }
 
     @Override

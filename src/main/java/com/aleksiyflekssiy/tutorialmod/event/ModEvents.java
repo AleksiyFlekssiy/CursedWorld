@@ -14,6 +14,6 @@ public class ModEvents {
         event.put(ModEntities.NUE.get(), NueEntity.createAttributes().build());
         event.put(ModEntities.TOAD.get(), ToadEntity.createAttributes().build());
         event.put(ModEntities.GREAT_SERPENT.get(), GreatSerpentEntity.createAttributes().build());
-        event.put(ModEntities.GREAT_SERPENT_SEGMENT.get(),  GreatSerpentPartEntity.createAttributes().build());
+        event.put(ModEntities.GREAT_SERPENT_SEGMENT.get(),  GreatSerpentSegment.createAttributes().build());
     }
 }

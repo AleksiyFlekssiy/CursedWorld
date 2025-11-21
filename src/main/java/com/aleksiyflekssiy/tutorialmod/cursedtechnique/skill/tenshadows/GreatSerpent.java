@@ -3,8 +3,8 @@ package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.GreatSerpentEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
-import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -15,7 +15,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -56,7 +55,9 @@ public class GreatSerpent extends ShikigamiSkill {
                 System.out.println(hitResult.getBlockPos());
             }
             else System.out.println("SOSAL");
-            greatSerpent.setPos(entity.getX(), entity.getY() - 3, entity.getZ());
+            BlockPos initialPos = entity.blockPosition().below(3);
+            greatSerpent.setSpawnPos(initialPos);
+            greatSerpent.setPos(initialPos.getCenter());
             greatSerpent.tame((Player) entity);
             entity.level().addFreshEntity(greatSerpent);
             isActive = true;

@@ -70,8 +70,8 @@ public class ModEntities {
                     .setShouldReceiveVelocityUpdates(true)
                     .build("tutorialmod:great_serpent"));
 
-    public static final RegistryObject<EntityType<GreatSerpentPartEntity>> GREAT_SERPENT_SEGMENT = ENTITIES.register("great_serpent_segment",
-            () -> EntityType.Builder.<GreatSerpentPartEntity>of(GreatSerpentPartEntity::new, MobCategory.CREATURE)
+    public static final RegistryObject<EntityType<GreatSerpentSegment>> GREAT_SERPENT_SEGMENT = ENTITIES.register("great_serpent_segment",
+            () -> EntityType.Builder.<GreatSerpentSegment>of(GreatSerpentSegment::new, MobCategory.CREATURE)
                     .sized(2, 2)
                     .setUpdateInterval(1)
                     .setShouldReceiveVelocityUpdates(true)
