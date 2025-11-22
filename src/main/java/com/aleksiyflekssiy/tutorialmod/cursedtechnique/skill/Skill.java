@@ -1,11 +1,13 @@
 package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.Set;
 
@@ -23,16 +25,23 @@ public abstract class Skill {
     public void onUsing(Player player, Level level){}
     public void stopUsing(Player player, Level level){}
     public void activate(LivingEntity entity){}
-    public void disactivate(LivingEntity entity){}
+    public void deactivate(LivingEntity entity){}
     public void charge(LivingEntity entity, int charge) {}
     public void release(LivingEntity entity){}
 
-    public CompoundTag serializeNBT(){
+    public CompoundTag save(){
         CompoundTag tag = new CompoundTag();
+        tag.putString("skill_name", this.getName());
+        saveAdditional(tag);
         return tag;
     }
 
-    public void deserializeNBT(CompoundTag tag){}
+    public void load(CompoundTag tag){
+        loadAdditional(tag);
+    }
+
+    protected void saveAdditional(CompoundTag tag){}
+    protected void loadAdditional(CompoundTag tag){}
 
     public enum UseType{
         ACTIVATION,
@@ -76,5 +85,11 @@ public abstract class Skill {
         int cooldownTicks = getCooldownDuration();
         int ticksLeft = (int) ((lastUsed + cooldownTicks) - currentTime);
         return Math.max(0, ticksLeft);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Skill other)) return false;
+        return this.getName().equals(other.getName());
     }
 }

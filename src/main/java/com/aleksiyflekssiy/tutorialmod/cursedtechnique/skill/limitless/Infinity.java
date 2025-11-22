@@ -50,7 +50,7 @@ public class Infinity extends Skill {
         if (!(entity instanceof ServerPlayer)) return;
         switch (type){
             case ACTIVATION -> infinitySwitch.activate(entity);
-            case DEACTIVATION -> infinitySwitch.disactivate(entity);
+            case DEACTIVATION -> infinitySwitch.deactivate(entity);
             case CHARGING -> increaseInfinityOutput.charge(entity, charge);
             case RELEASING -> increaseInfinityOutput.release(entity);
         }

@@ -2,6 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
 
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
+import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import net.minecraft.core.BlockPos;
@@ -46,9 +47,10 @@ public class Toad extends ShikigamiSkill {
             if (!isActive) {
                 System.out.println("ACTIVATE");
                 BlockPos spawnPos = entity.blockPosition();
-                if (toad == null || !toad.isAlive()) { // Проверяем, жива ли сущность
+                if (shikigamiUUIDList.isEmpty()) { // Проверяем, жива ли сущность
                     toad = new ToadEntity(ModEntities.TOAD.get(), entity.level());
                     toad.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+                    shikigamiUUIDList.add(toad.getUUID());
                     entity.level().addFreshEntity(toad);
                 }
                 if (isTamed) {
@@ -78,9 +80,15 @@ public class Toad extends ShikigamiSkill {
                 stopBehaviors();
                 toad.discard();
                 toad = null;
+                shikigamiUUIDList.clear();
                 isActive = !isActive;
             }
         }
+    }
+
+    @Override
+    public void setShikigami(List<Shikigami> shikigamiList) {
+        if (this.toad == null && shikigamiList.get(0) instanceof ToadEntity toadEntity) this.toad = toadEntity;
     }
 
     @Override

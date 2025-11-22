@@ -2,6 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.entity;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     protected Player owner;
+    protected UUID ownerUUID;
     protected boolean isTamed = false;
     protected IOrder currentOrder = null;
 
@@ -39,7 +41,7 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
 
     @Override
     public @Nullable UUID getOwnerUUID() {
-        return owner.getUUID();
+        return ownerUUID;
     }
 
     @Override
@@ -83,5 +85,22 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
         if (client.options.keyJump.isDown()) y += 1;
         if (client.options.keySprint.isDown()) y -= 1;
         return new Vec3(x, y, z);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        if (getOwner() != null && getOwnerUUID() != null) {
+            tag.putUUID("ownerUUID", this.getOwnerUUID());
+            System.out.println("UUID: " + this.getOwnerUUID());
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("ownerUUID")) {
+            this.ownerUUID = tag.getUUID("ownerUUID");
+        }
     }
 }

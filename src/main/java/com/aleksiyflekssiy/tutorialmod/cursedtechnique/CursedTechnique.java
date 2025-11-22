@@ -6,7 +6,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.List;
 
-public abstract class CursedTechnique implements INBTSerializable<CompoundTag> {
+public abstract class CursedTechnique {
     public static CursedTechnique DEV_TECHNIQUE = new LimitlessCursedTechnique();
     public final boolean haveDomain;
 
@@ -22,14 +22,8 @@ public abstract class CursedTechnique implements INBTSerializable<CompoundTag> {
 
     public abstract String getName();
 
-    public CompoundTag serializeNBT(){
-        CompoundTag tag = new CompoundTag();
+    public void serializeNBT(CompoundTag tag) {
         tag.putString("technique", this.getName());
-        //tag.putString("current_skill", CursedTechniqueCapability.getCurrentSkill());
-
-        getSkillSet().forEach((skill) -> serializeNBT());
-        return tag;
     }
 
-    public void deserializeNBT(CompoundTag tag){}
 }

@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -39,6 +40,6 @@ public class CursedEnergySyncPacket {
     }
 
     public static void updateToClient(ICursedEnergy energy, Player player) {
-        ModMessages.INSTANCE.sendTo(new CursedEnergySyncPacket(energy.getCursedEnergy()), ((ServerPlayer) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new CursedEnergySyncPacket(energy.getCursedEnergy()));
     }
 }

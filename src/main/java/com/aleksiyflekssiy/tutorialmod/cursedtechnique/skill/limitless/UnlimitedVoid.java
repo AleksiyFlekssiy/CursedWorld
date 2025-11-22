@@ -61,7 +61,7 @@ public class UnlimitedVoid extends Skill {
         switch (type){
             case ACTIVATION -> {
                 if (!domainActive) this.activate((Player) entity, entity.level());
-                else this.disactivate(entity);
+                else this.deactivate(entity);
             }
             case CHARGING -> this.charge(entity, charge);
             case RELEASING -> this.release(entity);
@@ -81,7 +81,7 @@ public class UnlimitedVoid extends Skill {
         }
     }
 
-    public void disactivate(LivingEntity entity) {
+    public void deactivate(LivingEntity entity) {
         if (domainActive) {
             for (LivingEntity trapped : trappedEntities) {
                 trapped.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
@@ -197,7 +197,7 @@ public class UnlimitedVoid extends Skill {
                 domainTicks++;
                 spawnBarrierParticles(serverLevel, domainCenter, DOMAIN_RADIUS);
                 affectEntities(serverLevel);
-                if (domainTicks >= DOMAIN_DURATION || checkBarrierDamage(serverLevel)) this.disactivate(domainOwner);
+                if (domainTicks >= DOMAIN_DURATION || checkBarrierDamage(serverLevel)) this.deactivate(domainOwner);
             }
     }
 

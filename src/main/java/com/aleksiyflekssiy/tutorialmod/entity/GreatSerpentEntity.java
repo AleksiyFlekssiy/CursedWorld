@@ -1,5 +1,8 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
+import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.TenShadowsTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.GreatSerpent;
 import com.aleksiyflekssiy.tutorialmod.entity.ai.GreatSerpentAI;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
@@ -37,10 +40,20 @@ public class GreatSerpentEntity extends Shikigami {
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
     private BlockPos spawnPos;
     private Vec3 motionVec;
+
+    //redundant, cause it's dont even getting spawned
     private final GreatSerpentSegment headSegment;
 
     public GreatSerpentEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        this.noCulling = true;
+        this.entityData.set(SEGMENT_COUNT, 0);
+        this.headSegment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, 0);
+        segments.add(this.headSegment);
+    }
+
+    public GreatSerpentEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, Player owner) {
+        super(pEntityType, pLevel, owner);
         this.noCulling = true;
         this.entityData.set(SEGMENT_COUNT, 0);
         this.headSegment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, 0);
@@ -111,9 +124,13 @@ public class GreatSerpentEntity extends Shikigami {
     private void createSegment() {
         GreatSerpentSegment segment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, segments.size());
         segment.setPos(spawnPos == null ? headSegment.blockPosition().getCenter() : spawnPos.getCenter());
+        addSegment(segment);
+        level().addFreshEntity(segment);
+    }
+
+    public void addSegment(GreatSerpentSegment segment) {
         segments.add(segment);
         this.entityData.set(SEGMENT_COUNT, segments.size() + 1);
-        level().addFreshEntity(segment);
     }
 
     public void setSpawnPos(BlockPos spawnPos) {
@@ -136,17 +153,13 @@ public class GreatSerpentEntity extends Shikigami {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("segmentCount", this.entityData.get(SEGMENT_COUNT));
-        tag.putUUID("ownerUUID", this.getOwnerUUID());
+        if (getOwner() != null) System.out.println("Set Owner: " + getOwner());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.entityData.set(SEGMENT_COUNT, tag.getInt("segmentCount"));
-        UUID ownerUUID = tag.getUUID("ownerUUID");
-        if (ownerUUID != null) {
-            tame(level().getPlayerByUUID(ownerUUID));
-        }
     }
 
     @Override
@@ -159,6 +172,14 @@ public class GreatSerpentEntity extends Shikigami {
     public void tame(Player owner) {
         super.tame(owner);
         this.getBrain().setMemory(CustomMemoryModuleTypes.OWNER.get(), owner);
+        owner.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(technique -> {
+            if (technique instanceof TenShadowsTechnique tenShadowsTechnique) {
+                System.out.println("Technique exists");
+                GreatSerpent greatSerpent = (GreatSerpent) tenShadowsTechnique.getSkillSet().stream().filter(skill -> skill instanceof GreatSerpent).findFirst().orElse(null);
+                greatSerpent.setShikigami(this);
+            }
+        });
+        System.out.println("Owner: " + owner);
     }
 
     @Override

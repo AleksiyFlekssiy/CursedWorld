@@ -7,6 +7,7 @@ import com.aleksiyflekssiy.tutorialmod.entity.navigation.CustomGroundNavigation;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -42,8 +43,6 @@ public class DivineDogEntity extends Shikigami{
         //this.moveControl = new CustomMoveControl(this, this);
         this.entityData.set(REAL_SPEED, 0.33F);
         this.setMaxUpStep(1);
-        System.out.println("Is tamed: " + isTamed);
-        System.out.println("UUID: " + getStringUUID());
         entityData.set(COLOR, Color.WHITE.ordinal());
     }
 
@@ -113,6 +112,18 @@ public class DivineDogEntity extends Shikigami{
         super.defineSynchedData();
         entityData.define(REAL_SPEED, 0.7F);
         entityData.define(COLOR, Color.WHITE.ordinal());
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("color", this.entityData.get(COLOR));
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.entityData.set(COLOR, tag.getInt("color"));
     }
 
     public float getRealSpeed() {

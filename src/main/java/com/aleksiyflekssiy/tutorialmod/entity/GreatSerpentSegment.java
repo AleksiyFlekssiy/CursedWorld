@@ -19,14 +19,13 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class GreatSerpentSegment extends Shikigami {
+public class GreatSerpentSegment extends Mob {
     public int index;
     private GreatSerpentEntity parent;
     protected static final ImmutableList<SensorType<? extends Sensor<? super GreatSerpentSegment>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
 
-
-    public GreatSerpentSegment(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
+    public GreatSerpentSegment(EntityType<? extends Mob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         //this.noPhysics = true;
         this.refreshDimensions();
@@ -34,7 +33,7 @@ public class GreatSerpentSegment extends Shikigami {
         parent = null;
     }
 
-    public GreatSerpentSegment(EntityType<? extends Shikigami> pEntityType, Level pLevel, GreatSerpentEntity parent, int index) {
+    public GreatSerpentSegment(EntityType<? extends Mob> pEntityType, Level pLevel, GreatSerpentEntity parent, int index) {
         super(pEntityType, pLevel);
         //this.noPhysics = true;
         this.refreshDimensions();
@@ -111,14 +110,14 @@ public class GreatSerpentSegment extends Shikigami {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("index", index);
-        tag.putUUID("parent", parent.getUUID());
+        //tag.putUUID("parent", parent.getUUID());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.index = tag.getInt("index");
-        this.parent = (GreatSerpentEntity) ((ServerLevel) this.level()).getEntity(tag.getUUID("parent"));
+        //this.parent = (GreatSerpentEntity) ((ServerLevel) this.level()).getEntity(tag.getUUID("parent"));
     }
 
     @Override

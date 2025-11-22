@@ -8,6 +8,7 @@ import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
@@ -18,7 +19,9 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Nue extends ShikigamiSkill {
@@ -36,8 +39,7 @@ public class Nue extends ShikigamiSkill {
         }
     }
 
-    @Override
-    public void activate(LivingEntity entity) {
+    public void aactivate(LivingEntity entity) {
         if (isDead) {
             System.out.println("DEAD");
             return;
@@ -91,6 +93,66 @@ public class Nue extends ShikigamiSkill {
         }
     }
 
+    public void activate(LivingEntity entity) {
+        if (isDead) {
+            System.out.println("DEAD");
+            return;
+        }
+
+        if (!entity.isCrouching()) {
+            if (!isActive) {
+                System.out.println("ACTIVATE");
+                BlockPos spawnPos = entity.blockPosition();
+                if (shikigamiUUIDList.isEmpty()) { // Проверяем, жива ли сущность
+                    nue = new NueEntity(ModEntities.NUE.get(), entity.level());
+                    nue.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+                    entity.level().addFreshEntity(nue);
+                    shikigamiUUIDList.add(nue.getUUID());
+                }
+                if (isTamed) {
+                    nue.tame((Player) entity);
+                } else {
+                    if (nue.canAttack(entity)) nue.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, entity);
+                }
+                isActive = !isActive;
+            } else if (isActive && isTamed) {
+                if (nue.getControllingPassenger() == null) {
+                    HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(nue), 50);
+                    if (result.getType() == HitResult.Type.ENTITY) {
+                        EntityHitResult hitResult = (EntityHitResult) result;
+                        if (hitResult.getEntity() instanceof LivingEntity target) {
+                            System.out.println(target.getClass().getSimpleName());
+                            nue.followOrder(target, null, NueEntity.NueOrder.values()[orderIndex]);
+                        }
+                    } else if (result.getType() == HitResult.Type.BLOCK) {
+                        BlockHitResult hitResult = (BlockHitResult) result;
+                        System.out.println(hitResult.getBlockPos());
+                        nue.followOrder(null, hitResult.getBlockPos(), NueEntity.NueOrder.values()[orderIndex]);
+                    } else {
+                        System.out.println("MISS");
+                    }
+                }
+                else if (entity.equals(nue.getControllingPassenger())){
+                    nue.tryGrabEntityBelow(null);
+                }
+            }
+        }
+        else {
+            if (isActive && isTamed) {
+                if (nue.getControllingPassenger() == null) {
+                    System.out.println("DEACTIVATE");
+                    nue.discard();
+                    nue = null;
+                    shikigamiUUIDList.clear();
+                    isActive = !isActive;
+                }
+            }
+        }
+    }
+
+    public void setShikigami(List<Shikigami> shikigamiList) {
+        if (this.nue == null && shikigamiList.get(0) instanceof NueEntity nueEntity) this.nue = nueEntity;
+    }
 
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
@@ -116,7 +178,9 @@ public class Nue extends ShikigamiSkill {
 
     @Override
     public List<Shikigami> getShikigami() {
-        return List.of(nue);
+        List<Shikigami> shikigamiList = new ArrayList<>();
+        shikigamiList.add(nue);
+        return shikigamiList;
     }
 
     @Override

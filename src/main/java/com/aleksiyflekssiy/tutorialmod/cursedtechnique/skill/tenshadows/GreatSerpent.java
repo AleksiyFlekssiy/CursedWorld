@@ -1,11 +1,9 @@
 package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
 
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
-import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
-import com.aleksiyflekssiy.tutorialmod.entity.GreatSerpentEntity;
-import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
-import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import com.aleksiyflekssiy.tutorialmod.entity.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,6 +35,13 @@ public class GreatSerpent extends ShikigamiSkill {
         }
     }
 
+    public void setShikigami(GreatSerpentEntity greatSerpent){
+        if (this.greatSerpent == null) {
+            this.greatSerpent = greatSerpent;
+            System.out.println("The Great Serpent has set");
+        }
+    }
+
     public List<Shikigami> getShikigami() {
         return List.of(greatSerpent);
     }
@@ -45,7 +50,7 @@ public class GreatSerpent extends ShikigamiSkill {
     public void activate(LivingEntity entity) {
         if (!entity.isCrouching()) {
             if (!isActive) {
-                greatSerpent = new GreatSerpentEntity(ModEntities.GREAT_SERPENT.get(), entity.level());
+                if (shikigamiUUIDList.isEmpty()) greatSerpent = new GreatSerpentEntity(ModEntities.GREAT_SERPENT.get(), entity.level());
                 HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(greatSerpent), 50);
                 if (result.getType() == HitResult.Type.ENTITY) {
                     EntityHitResult hitResult = (EntityHitResult) result;
@@ -60,7 +65,8 @@ public class GreatSerpent extends ShikigamiSkill {
                 BlockPos initialPos = entity.blockPosition().below(3);
                 greatSerpent.setSpawnPos(initialPos);
                 greatSerpent.setPos(initialPos.getCenter());
-                greatSerpent.tame((Player) entity);
+                shikigamiUUIDList.add(greatSerpent.getUUID());
+                if (isTamed) greatSerpent.tame((Player) entity);
                 entity.level().addFreshEntity(greatSerpent);
                 isActive = true;
             }
@@ -86,6 +92,7 @@ public class GreatSerpent extends ShikigamiSkill {
                 if (greatSerpent != null && greatSerpent.isAlive()) {
                     greatSerpent.discard();
                     greatSerpent = null;
+                    shikigamiUUIDList.clear();
                     isActive = false;
                 }
             }
@@ -94,11 +101,16 @@ public class GreatSerpent extends ShikigamiSkill {
 
     @SubscribeEvent
     public void tick(LivingEvent.LivingTickEvent event) {
-        if (!isActive) return;
-        if (greatSerpent == null || !greatSerpent.isAlive()) {
-            greatSerpent = null;
-            isActive = false;
-        }
+//        if (!isActive) return;
+//        if (greatSerpent == null || !greatSerpent.isAlive()) {
+//            greatSerpent = null;
+//            isActive = false;
+//        }
+    }
+
+    @Override
+    public void setShikigami(List<Shikigami> shikigamiList) {
+        if (this.greatSerpent == null && shikigamiList.get(0) instanceof GreatSerpentEntity greatSerpentEntity) this.greatSerpent = greatSerpentEntity;
     }
 
     @Override
@@ -126,6 +138,6 @@ public class GreatSerpent extends ShikigamiSkill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/nue.png");
+        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/great_serpent.png");
     }
 }

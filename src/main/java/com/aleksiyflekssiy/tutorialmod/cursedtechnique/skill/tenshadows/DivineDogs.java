@@ -6,6 +6,7 @@ import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +21,9 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DivineDogs extends ShikigamiSkill {
@@ -55,17 +58,19 @@ public class DivineDogs extends ShikigamiSkill {
         if (!isActive) {
             System.out.println("ACTIVATE");
             BlockPos spawnPos = entity.blockPosition();
-            if ((whiteDivineDog == null || !whiteDivineDog.isAlive()) && !whiteDogDead) { // Проверяем, жива ли сущность
+            if (shikigamiUUIDList.isEmpty() || !whiteDogDead) { // Проверяем, жива ли сущность
                 whiteDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
                 whiteDivineDog.setColor(DivineDogEntity.Color.WHITE);
                 whiteDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 entity.level().addFreshEntity(whiteDivineDog);
+                shikigamiUUIDList.add(whiteDivineDog.getUUID());
             }
-            if ((blackDivineDog == null || !blackDivineDog.isAlive()) && !blackDogDead) {
+            if (shikigamiUUIDList.isEmpty() || !blackDogDead) {
                 blackDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
                 blackDivineDog.setColor(DivineDogEntity.Color.BLACK);
                 blackDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 entity.level().addFreshEntity(blackDivineDog);
+                shikigamiUUIDList.add(blackDivineDog.getUUID());
             }
             if (isTamed) {
                 if (!whiteDogDead) whiteDivineDog.tame((Player) entity);
@@ -103,9 +108,36 @@ public class DivineDogs extends ShikigamiSkill {
                 whiteDivineDog = null;
                 if (!blackDogDead) blackDivineDog.discard();
                 blackDivineDog = null;
+                shikigamiUUIDList.clear();
                 isActive = false;
             }
         }
+    }
+
+    @Override
+    public void setShikigami(List<Shikigami> shikigamiList) {
+        if (shikigamiList.size() == 1 && shikigamiList.get(0) instanceof DivineDogEntity divineDogEntity) {
+            if (whiteDogDead && blackDivineDog == null) this.blackDivineDog = divineDogEntity;
+            else if (blackDogDead && whiteDivineDog == null) this.whiteDivineDog = divineDogEntity;
+        }
+        else if (shikigamiList.size() == 2){
+            this.whiteDivineDog = (DivineDogEntity) shikigamiList.get(0);
+            this.blackDivineDog = (DivineDogEntity) shikigamiList.get(1);
+        }
+    }
+
+    @Override
+    public void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        tag.putBoolean("whiteDogDead", whiteDogDead);
+        tag.putBoolean("blackDogDead", blackDogDead);
+    }
+
+    @Override
+    public void loadAdditional(CompoundTag tag) {
+        super.loadAdditional(tag);
+        whiteDogDead = tag.getBoolean("whiteDogDead");
+        blackDogDead = tag.getBoolean("blackDogDead");
     }
 
     public boolean isDead(){
@@ -153,7 +185,10 @@ public class DivineDogs extends ShikigamiSkill {
 
     @Override
     public List<Shikigami> getShikigami() {
-        return List.of(whiteDivineDog, blackDivineDog);
+        List<Shikigami> shikigami = new ArrayList<>();
+        shikigami.add(whiteDivineDog);
+        shikigami.add(blackDivineDog);
+        return shikigami;
     }
 
     @Override

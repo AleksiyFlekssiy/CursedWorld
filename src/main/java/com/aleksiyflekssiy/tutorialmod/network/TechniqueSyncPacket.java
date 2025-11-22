@@ -1,8 +1,11 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
@@ -27,9 +30,22 @@ public class TechniqueSyncPacket {
     public static void handle(TechniqueSyncPacket packet, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Player clientPlayer = Minecraft.getInstance().player;
+            CompoundTag tag = packet.techniqueData;
+            System.out.println("Client NBT: "+tag);
             if (clientPlayer != null) {
                 clientPlayer.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(technique -> {
                     technique.deserializeNBT(packet.techniqueData);
+
+//                    ListTag skillsTag = tag.getList("skills", ListTag.TAG_COMPOUND);
+//                    for (int i = 0; i < skillsTag.size(); i++) {
+//                        CompoundTag skillTag = skillsTag.getCompound(i);
+//                        String skillName = skillTag.getString("skill_name");
+//                        if (skillName.equals("GreatSerpent")){
+//                            System.out.println("Is active: " + skillTag.getBoolean("isActive"));
+//                            System.out.println("Is tamed: " + skillTag.getBoolean("isTamed"));
+//                            System.out.println("Is dead: " + skillTag.getBoolean("isDead"));
+//                        }
+//                    }
                 });
             }
         });

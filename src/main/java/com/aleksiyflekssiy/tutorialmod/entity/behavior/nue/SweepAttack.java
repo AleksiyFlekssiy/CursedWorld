@@ -47,7 +47,7 @@ public class SweepAttack extends Behavior<NueEntity> {
         else if (nue.getOrder() == NueEntity.NueOrder.GRAB) {
             return nue.getBrain().getMemory(CustomMemoryModuleTypes.GRAB_TARGET.get()).orElse(null);
         }
-        System.out.println("WTF WITH THIS SHIT");
+        //System.out.println("WTF WITH THIS SHIT");
         return null;
     }
 

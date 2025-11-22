@@ -35,6 +35,7 @@ public class ModMessages {
                 SyncSkillPacket::encode,
                 SyncSkillPacket::decode,
                 SyncSkillPacket::handle);
+
         INSTANCE.registerMessage(id++, TechniqueSyncPacket.class,
                 TechniqueSyncPacket::encode,
                 TechniqueSyncPacket::decode,
