@@ -63,7 +63,6 @@ public class GreatSerpent extends ShikigamiSkill {
                     System.out.println(hitResult.getBlockPos());
                 } else System.out.println("SOSAL");
                 BlockPos initialPos = entity.blockPosition().below(3);
-                greatSerpent.setSpawnPos(initialPos);
                 greatSerpent.setPos(initialPos.getCenter());
                 shikigamiUUIDList.add(greatSerpent.getUUID());
                 if (isTamed) greatSerpent.tame((Player) entity);

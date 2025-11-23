@@ -10,6 +10,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -33,7 +35,8 @@ import java.util.UUID;
 public class GreatSerpentEntity extends Shikigami {
     public static final float MAX_TURN_ANGLE = 12.25F;
     public static final int MAX_SEGMENT_COUNT = 15;
-    private final List<GreatSerpentSegment> segments =  new ArrayList<>();
+    private final List<GreatSerpentSegment> segments = new ArrayList<>();
+    private final List<UUID> uuids = new ArrayList<>();
     private int emergeTicks = 0;
     private static final EntityDataAccessor<Integer> SEGMENT_COUNT = SynchedEntityData.defineId(GreatSerpentEntity.class, EntityDataSerializers.INT);
     protected static final ImmutableList<SensorType<? extends Sensor<? super GreatSerpentEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
@@ -41,23 +44,22 @@ public class GreatSerpentEntity extends Shikigami {
     private BlockPos spawnPos;
     private Vec3 motionVec;
 
-    //redundant, cause it's dont even getting spawned
-    private final GreatSerpentSegment headSegment;
-
     public GreatSerpentEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.noCulling = true;
         this.entityData.set(SEGMENT_COUNT, 0);
-        this.headSegment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, 0);
-        segments.add(this.headSegment);
     }
 
     public GreatSerpentEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, Player owner) {
         super(pEntityType, pLevel, owner);
         this.noCulling = true;
         this.entityData.set(SEGMENT_COUNT, 0);
-        this.headSegment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, 0);
-        segments.add(this.headSegment);
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        this.spawnPos = this.blockPosition();
     }
 
     @Override
@@ -99,6 +101,12 @@ public class GreatSerpentEntity extends Shikigami {
         super.tick();
         emergeTicks++;
         if (!level().isClientSide()) {
+            if (!uuids.isEmpty() && segments.size() < entityData.get(SEGMENT_COUNT)) {
+                for (UUID uuid : uuids) {
+                    GreatSerpentSegment segment = (GreatSerpentSegment) ((ServerLevel) level()).getEntity(uuid);
+                    segments.add(segment);
+                }
+            }
             if (emergeTicks % 20 == 0 && segments.size() < MAX_SEGMENT_COUNT) {
                 createSegment();
             }
@@ -123,7 +131,7 @@ public class GreatSerpentEntity extends Shikigami {
 
     private void createSegment() {
         GreatSerpentSegment segment = new GreatSerpentSegment(ModEntities.GREAT_SERPENT_SEGMENT.get(), this.level(), this, segments.size());
-        segment.setPos(spawnPos == null ? headSegment.blockPosition().getCenter() : spawnPos.getCenter());
+        segment.setPos(spawnPos.getCenter());
         addSegment(segment);
         level().addFreshEntity(segment);
     }
@@ -131,10 +139,6 @@ public class GreatSerpentEntity extends Shikigami {
     public void addSegment(GreatSerpentSegment segment) {
         segments.add(segment);
         this.entityData.set(SEGMENT_COUNT, segments.size() + 1);
-    }
-
-    public void setSpawnPos(BlockPos spawnPos) {
-        this.spawnPos = spawnPos;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -152,14 +156,29 @@ public class GreatSerpentEntity extends Shikigami {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putInt("segmentCount", this.entityData.get(SEGMENT_COUNT));
+        if (!segments.isEmpty()) {
+            ListTag segmentsUUID = new ListTag();
+            for (int i = 0; i < segments.size(); i++) {
+                CompoundTag segmentUUID = new CompoundTag();
+                segmentUUID.putUUID("segment" + i, segments.get(i).getUUID());
+                segmentsUUID.add(segmentUUID);
+            }
+            tag.put("segments", segmentsUUID);
+            System.out.println(segmentsUUID.size() + " segments saved");
+        }
         if (getOwner() != null) System.out.println("Set Owner: " + getOwner());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        this.entityData.set(SEGMENT_COUNT, tag.getInt("segmentCount"));
+        ListTag segmentsUUID = tag.getList("segments", Tag.TAG_COMPOUND);
+        for (int i = 0; i < segmentsUUID.size(); ++i) {
+            CompoundTag segmentUUID = segmentsUUID.getCompound(i);
+            uuids.add(segmentUUID.getUUID("segment" + i));
+        }
+        this.entityData.set(SEGMENT_COUNT, segmentsUUID.size());
+        System.out.println(segmentsUUID.size() + " segments loaded");
     }
 
     @Override

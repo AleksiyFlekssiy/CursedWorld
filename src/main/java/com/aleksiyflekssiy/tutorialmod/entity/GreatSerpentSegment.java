@@ -19,9 +19,12 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.UUID;
+
 public class GreatSerpentSegment extends Mob {
     public int index;
     private GreatSerpentEntity parent;
+    private UUID parentUUID;
     protected static final ImmutableList<SensorType<? extends Sensor<? super GreatSerpentSegment>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
 
@@ -31,6 +34,7 @@ public class GreatSerpentSegment extends Mob {
         this.refreshDimensions();
         index = 0;
         parent = null;
+        parentUUID = null;
     }
 
     public GreatSerpentSegment(EntityType<? extends Mob> pEntityType, Level pLevel, GreatSerpentEntity parent, int index) {
@@ -38,6 +42,7 @@ public class GreatSerpentSegment extends Mob {
         //this.noPhysics = true;
         this.refreshDimensions();
         this.parent = parent;
+        this.parentUUID = parent.getUUID();
         this.index = index;
     }
 
@@ -51,6 +56,15 @@ public class GreatSerpentSegment extends Mob {
             Vec3 motionVec = direction.scale(speed);
             this.setDeltaMovement(motionVec);
         });
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (!level().isClientSide() && parent == null && parentUUID != null){
+            parent = (GreatSerpentEntity) ((ServerLevel) level()).getEntity(parentUUID);
+        }
     }
 
     @Override
@@ -110,14 +124,14 @@ public class GreatSerpentSegment extends Mob {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("index", index);
-        //tag.putUUID("parent", parent.getUUID());
+        tag.putUUID("parentUUID", parent.getUUID());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.index = tag.getInt("index");
-        //this.parent = (GreatSerpentEntity) ((ServerLevel) this.level()).getEntity(tag.getUUID("parent"));
+        this.parentUUID = tag.getUUID("parentUUID");
     }
 
     @Override
