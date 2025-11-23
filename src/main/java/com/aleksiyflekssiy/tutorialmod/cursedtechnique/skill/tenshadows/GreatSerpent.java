@@ -3,7 +3,6 @@ package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,6 +14,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -48,9 +48,14 @@ public class GreatSerpent extends ShikigamiSkill {
 
     @Override
     public void activate(LivingEntity entity) {
+        if (isDead){
+            entity.sendSystemMessage(Component.literal("Your Great Serpent is dead"));
+            return;
+        }
+
         if (!entity.isCrouching()) {
             if (!isActive) {
-                if (shikigamiUUIDList.isEmpty()) greatSerpent = new GreatSerpentEntity(ModEntities.GREAT_SERPENT.get(), entity.level());
+                if (shikigamiUUIDList.isEmpty()) greatSerpent = new GreatSerpentEntity(ModEntities.GREAT_SERPENT.get(), entity.level(), (Player) entity);
                 HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(greatSerpent), 50);
                 if (result.getType() == HitResult.Type.ENTITY) {
                     EntityHitResult hitResult = (EntityHitResult) result;
@@ -99,12 +104,22 @@ public class GreatSerpent extends ShikigamiSkill {
     }
 
     @SubscribeEvent
-    public void tick(LivingEvent.LivingTickEvent event) {
-//        if (!isActive) return;
-//        if (greatSerpent == null || !greatSerpent.isAlive()) {
-//            greatSerpent = null;
-//            isActive = false;
-//        }
+    public void onEntityDeath(LivingDeathEvent event) {
+        if (event.getEntity() instanceof GreatSerpentEntity greatSerpentEntity && !greatSerpentEntity.level().isClientSide){
+            if (greatSerpent != null && greatSerpent.equals(greatSerpentEntity)){
+                if (isTamed){
+                    isDead = true;
+                    greatSerpent.getOwner().sendSystemMessage(Component.literal("Your Great Serpent has died"));
+                }
+                else if (!isTamed && event.getSource().getEntity() instanceof Player player && player.equals(greatSerpent.getOwner())){
+                    isTamed = true;
+                    player.sendSystemMessage(Component.literal("You have tamed Great Serpent"));
+                }
+                isActive = false;
+                greatSerpent = null;
+                shikigamiUUIDList.clear();
+            }
+        }
     }
 
     @Override

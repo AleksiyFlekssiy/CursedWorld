@@ -32,7 +32,7 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
 
     public void tame(Player owner){
         this.isTamed = true;
-        this.owner = owner;
+        if (this.owner != owner) this.owner = owner;
     }
 
     public boolean isTamed() {

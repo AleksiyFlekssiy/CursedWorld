@@ -4,8 +4,8 @@ import com.aleksiyflekssiy.tutorialmod.client.model.NueAnimations;
 import com.aleksiyflekssiy.tutorialmod.entity.ai.NueAI;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
-import com.aleksiyflekssiy.tutorialmod.entity.navigation.BluntAirNavigation;
 import com.aleksiyflekssiy.tutorialmod.entity.control.FlyingMoveControl;
+import com.aleksiyflekssiy.tutorialmod.entity.navigation.BluntAirNavigation;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -37,22 +37,22 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class NueEntity extends Shikigami {
-    private LivingEntity grabbedEntity;
-    private NueEntity.AttackPhase attackPhase = AttackPhase.ASCEND;
-    public AnimationState idleAnimation = new AnimationState();
-    public AnimationState flyAnimation = new AnimationState();
-    protected static final ImmutableList<SensorType<? extends Sensor<? super NueEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(),CustomMemoryModuleTypes.GRAB_TARGET.get(), CustomMemoryModuleTypes.GRAB_COOLDOWN.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_COOLDOWN.get());
-    private static final EntityDataAccessor<Integer> ANIMATION = SynchedEntityData.defineId(NueEntity.class, EntityDataSerializers.INT);
     public static final int IDLE = 0;
     public static final int FLY = 1;
+    protected static final ImmutableList<SensorType<? extends Sensor<? super NueEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRAB_TARGET.get(), CustomMemoryModuleTypes.GRAB_COOLDOWN.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_COOLDOWN.get());
+    private static final EntityDataAccessor<Integer> ANIMATION = SynchedEntityData.defineId(NueEntity.class, EntityDataSerializers.INT);
     private final EntityDimensions defaultDimensions = EntityDimensions.scalable(5F, 6F); // Обычный размер
     private final EntityDimensions flyingDimensions = EntityDimensions.scalable(4F, 5F); // Размер в полёте
+    public AnimationState idleAnimation = new AnimationState();
+    public AnimationState flyAnimation = new AnimationState();
+    private LivingEntity grabbedEntity;
+    private NueEntity.AttackPhase attackPhase = AttackPhase.ASCEND;
     private String currentActionType = null;
     private AttackPhase currentAttackPhase = null;
 
-    public NueEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
+    public NueEntity(EntityType<? extends Shikigami> entityType, Level level) {
+        super(entityType, level);
         this.moveControl = new FlyingMoveControl(this);
         this.navigation = new BluntAirNavigation(this, level());
         this.entityData.set(ANIMATION, 0);
@@ -60,9 +60,25 @@ public class NueEntity extends Shikigami {
         this.currentOrder = NueOrder.NONE;
     }
 
-    public enum AttackPhase {
-        SWOOP,
-        ASCEND
+    public NueEntity(EntityType<? extends Shikigami> entityType, Level level, Player owner) {
+        super(entityType, level, owner);
+        this.moveControl = new FlyingMoveControl(this);
+        this.navigation = new BluntAirNavigation(this, level());
+        this.entityData.set(ANIMATION, 0);
+        NueAI.initializeMemories(this.getBrain());
+        this.currentOrder = NueOrder.NONE;
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createLivingAttributes()
+                .add(Attributes.MAX_HEALTH, 500)
+                .add(Attributes.MOVEMENT_SPEED, 0.5)
+                .add(Attributes.ATTACK_DAMAGE, 10f)
+                .add(Attributes.FOLLOW_RANGE, 100)
+                .add(Attributes.ATTACK_SPEED, 1)
+                .add(Attributes.ATTACK_KNOCKBACK, 2.5)
+                .add(Attributes.ARMOR_TOUGHNESS, 2.5)
+                .add(Attributes.JUMP_STRENGTH, 1);
     }
 
     @Override
@@ -89,7 +105,7 @@ public class NueEntity extends Shikigami {
 
     @Override
     protected void customServerAiStep() {
-        this.getBrain().tick((ServerLevel)this.level(), this);
+        this.getBrain().tick((ServerLevel) this.level(), this);
         NueAI.updateActivity(this.getBrain());
         super.customServerAiStep();
     }
@@ -98,10 +114,12 @@ public class NueEntity extends Shikigami {
     public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            if (order == NueOrder.NONE) {}
-            else if (order == NueOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
-            else if (order == NueOrder.GRAB) this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), target);
-            else if (order == NueOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 5));
+            if (order == NueOrder.NONE) {
+            } else if (order == NueOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            else if (order == NueOrder.GRAB)
+                this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), target);
+            else if (order == NueOrder.MOVE)
+                this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 5));
             return true;
         }
         return false;
@@ -123,7 +141,7 @@ public class NueEntity extends Shikigami {
                 setAnimation(FLY);
             }
 
-            this.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).ifPresent(type ->{
+            this.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).ifPresent(type -> {
                 if (this.getAttackPhase() != currentAttackPhase) {
                     currentAttackPhase = this.getAttackPhase();
                     System.out.println(currentAttackPhase + " - " + type);
@@ -137,7 +155,7 @@ public class NueEntity extends Shikigami {
             if (this.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
                 this.getBrain().setActiveActivityIfPossible(Activity.FIGHT);
             } else {
-              this.getBrain().setActiveActivityIfPossible(Activity.CORE);
+                this.getBrain().setActiveActivityIfPossible(Activity.CORE);
             }
         } else updateAnimation();
         this.refreshDimensions();
@@ -168,12 +186,12 @@ public class NueEntity extends Shikigami {
         return idleAnimation; // По умолчанию
     }
 
-    public void setAnimation(int animation) {
-        this.entityData.set(ANIMATION, animation);
-    }
-
     public int getAnimation() {
         return this.entityData.get(ANIMATION);
+    }
+
+    public void setAnimation(int animation) {
+        this.entityData.set(ANIMATION, animation);
     }
 
     @Override
@@ -207,21 +225,21 @@ public class NueEntity extends Shikigami {
                 if (findEntityBelow() != null) target = findEntityBelow();
                 else return;
             }
-                if (this.getPassengers().isEmpty() || this.getPassengers().size() < 2) {
-                    // Прикрепляем сущность как пассажира
-                    boolean grabSuccessed = target.startRiding(this, true);
-                    if (grabSuccessed) {
-                        grabbedEntity = target;
-                        this.getBrain().setMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), grabbedEntity);
-                        this.playSound(SoundEvents.PHANTOM_BITE, 1.0F, 1.0F); // Звук захвата
-                        System.out.println("Grabbed");
-                    }
+            if (this.getPassengers().isEmpty() || this.getPassengers().size() < 2) {
+                // Прикрепляем сущность как пассажира
+                boolean grabSuccessed = target.startRiding(this, true);
+                if (grabSuccessed) {
+                    grabbedEntity = target;
+                    this.getBrain().setMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), grabbedEntity);
+                    this.playSound(SoundEvents.PHANTOM_BITE, 1.0F, 1.0F); // Звук захвата
+                    System.out.println("Grabbed");
                 }
+            }
         }
     }
 
     @Nullable
-    private LivingEntity findEntityBelow(){
+    private LivingEntity findEntityBelow() {
         double grabRange = 2.0; // Радиус захвата по горизонтали
         double grabHeight = 5.0; // Высота поиска вниз
         AABB grabBox = new AABB(
@@ -250,19 +268,19 @@ public class NueEntity extends Shikigami {
         }
     }
 
-    public boolean checkGrabCooldown(){
+    public boolean checkGrabCooldown() {
         return this.getBrain().checkMemory(CustomMemoryModuleTypes.GRAB_COOLDOWN.get(), MemoryStatus.VALUE_ABSENT);
     }
 
-    public void setGrabCooldown(){
+    public void setGrabCooldown() {
         this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_COOLDOWN.get(), 50);
     }
 
-    public boolean checkAttackCooldown(){
+    public boolean checkAttackCooldown() {
         return this.getBrain().checkMemory(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get(), MemoryStatus.VALUE_ABSENT);
     }
 
-    public void setAttackCooldown(){
+    public void setAttackCooldown() {
         this.getBrain().setMemory(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get(), 50);
     }
 
@@ -280,7 +298,7 @@ public class NueEntity extends Shikigami {
     }
 
     protected Vec3 getRiddenInput(Player player, Vec3 travelVector) {
-       return super.getRiddenInput(player, travelVector);
+        return super.getRiddenInput(player, travelVector);
     }
 
     protected float getRiddenSpeed(Player pPlayer) {
@@ -297,18 +315,6 @@ public class NueEntity extends Shikigami {
             double offsetY = -nueHeight / 2; // Смещение до нижней границы NueEntity
             callback.accept(passenger, this.getX(), this.getY() + offsetY, this.getZ());
         }
-    }
-
-    public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 500)
-                .add(Attributes.MOVEMENT_SPEED, 0.5)
-                .add(Attributes.ATTACK_DAMAGE, 10f)
-                .add(Attributes.FOLLOW_RANGE, 100)
-                .add(Attributes.ATTACK_SPEED, 1)
-                .add(Attributes.ATTACK_KNOCKBACK, 2.5)
-                .add(Attributes.ARMOR_TOUGHNESS, 2.5)
-                .add(Attributes.JUMP_STRENGTH, 1);
     }
 
     protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
@@ -362,7 +368,12 @@ public class NueEntity extends Shikigami {
         this.attackPhase = attackPhase;
     }
 
-    public enum NueOrder implements IOrder{
+    public enum AttackPhase {
+        SWOOP,
+        ASCEND
+    }
+
+    public enum NueOrder implements IOrder {
         NONE,
         ATTACK,
         GRAB,

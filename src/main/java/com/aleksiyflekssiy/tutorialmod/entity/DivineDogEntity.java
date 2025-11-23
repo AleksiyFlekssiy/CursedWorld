@@ -46,6 +46,14 @@ public class DivineDogEntity extends Shikigami{
         entityData.set(COLOR, Color.WHITE.ordinal());
     }
 
+    public DivineDogEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel, Player owner) {
+        super(pEntityType, pLevel, owner);
+        //this.moveControl = new CustomMoveControl(this, this);
+        this.entityData.set(REAL_SPEED, 0.33F);
+        this.setMaxUpStep(1);
+        entityData.set(COLOR, Color.WHITE.ordinal());
+    }
+
     @Override
     public void tick() {
         super.tick();

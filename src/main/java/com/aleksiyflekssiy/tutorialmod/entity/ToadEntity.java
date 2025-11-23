@@ -26,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -37,8 +38,16 @@ public class ToadEntity extends Shikigami {
     protected static final ImmutableList<SensorType<? extends Sensor<? super ToadEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
 
-    public ToadEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
+    public ToadEntity(EntityType<? extends Shikigami> entityType, Level level) {
+        super(entityType, level);
+        //this.moveControl = new JumpingMoveControl(this);
+        this.lookControl = new CustomLookControl(this, true);
+        setDistance(0);
+        this.currentOrder = ToadOrder.NONE;
+    }
+
+    public ToadEntity(EntityType<? extends Shikigami> entityType, Level level, Player owner) {
+        super(entityType, level, owner);
         //this.moveControl = new JumpingMoveControl(this);
         this.lookControl = new CustomLookControl(this, true);
         setDistance(0);

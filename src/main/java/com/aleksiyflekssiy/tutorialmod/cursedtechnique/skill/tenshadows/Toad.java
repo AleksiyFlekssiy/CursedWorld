@@ -48,7 +48,7 @@ public class Toad extends ShikigamiSkill {
                 System.out.println("ACTIVATE");
                 BlockPos spawnPos = entity.blockPosition();
                 if (shikigamiUUIDList.isEmpty()) { // Проверяем, жива ли сущность
-                    toad = new ToadEntity(ModEntities.TOAD.get(), entity.level());
+                    toad = new ToadEntity(ModEntities.TOAD.get(), entity.level(), (Player) entity);
                     toad.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                     shikigamiUUIDList.add(toad.getUUID());
                     entity.level().addFreshEntity(toad);
@@ -114,22 +114,20 @@ public class Toad extends ShikigamiSkill {
 
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof ToadEntity entity && entity.equals(toad)) {
-            if (toad != null && !toad.isAlive()) {
+        if (event.getEntity() instanceof ToadEntity entity && !entity.level().isClientSide) {
+            if (entity.equals(toad)) {
                 if (isTamed) {
                     isDead = true;
-                    toad.getOwner().sendSystemMessage(Component.literal("Toad has died"));
-                } else if (event.getSource().getEntity() instanceof Player player) {
-                    if (!isTamed) {
-                        isTamed = true;
-                        System.out.println("TAMED");
-                        player.sendSystemMessage(Component.literal("You tamed Toad"));
-                    }
+                    toad.getOwner().sendSystemMessage(Component.literal("Your Toad has died"));
+                } else if (!isTamed && event.getSource().getEntity() instanceof Player player) {
+                    isTamed = true;
+                    player.sendSystemMessage(Component.literal("You have tamed Toad"));
                 }
                 stopBehaviors();
                 toad = null;
+                shikigamiUUIDList.clear();
+                isActive = false;
             }
-            isActive = false;
         }
         //MinecraftForge.EVENT_BUS.unregister(this);
     }

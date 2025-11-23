@@ -39,60 +39,6 @@ public class Nue extends ShikigamiSkill {
         }
     }
 
-    public void aactivate(LivingEntity entity) {
-        if (isDead) {
-            System.out.println("DEAD");
-            return;
-        }
-        if (!entity.isCrouching()) {
-            if (!isActive) {
-                System.out.println("ACTIVATE");
-                BlockPos spawnPos = entity.blockPosition();
-                if (nue == null || !nue.isAlive()) { // Проверяем, жива ли сущность
-                    nue = new NueEntity(ModEntities.NUE.get(), entity.level());
-                    nue.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-                    entity.level().addFreshEntity(nue);
-                }
-                if (isTamed) {
-                    nue.tame((Player) entity);
-                } else {
-                    if (nue.canAttack(entity)) nue.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, entity);
-                }
-                isActive = !isActive;
-            } else if (isActive && isTamed) {
-                if (nue.getControllingPassenger() == null) {
-                    HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(nue), 50);
-                    if (result.getType() == HitResult.Type.ENTITY) {
-                        EntityHitResult hitResult = (EntityHitResult) result;
-                        if (hitResult.getEntity() instanceof LivingEntity target) {
-                            System.out.println(target.getClass().getSimpleName());
-                            nue.followOrder(target, null, NueEntity.NueOrder.values()[orderIndex]);
-                        }
-                    } else if (result.getType() == HitResult.Type.BLOCK) {
-                        BlockHitResult hitResult = (BlockHitResult) result;
-                        System.out.println(hitResult.getBlockPos());
-                        nue.followOrder(null, hitResult.getBlockPos(), NueEntity.NueOrder.values()[orderIndex]);
-                    } else {
-                        System.out.println("MISS");
-                    }
-                }
-                else if (entity.equals(nue.getControllingPassenger())){
-                    nue.tryGrabEntityBelow(null);
-                }
-            }
-        }
-        else {
-            if (isActive && isTamed) {
-                if (nue.getControllingPassenger() == null) {
-                    System.out.println("DEACTIVATE");
-                    nue.discard();
-                    nue = null;
-                    isActive = !isActive;
-                }
-            }
-        }
-    }
-
     public void activate(LivingEntity entity) {
         if (isDead) {
             System.out.println("DEAD");
@@ -104,10 +50,10 @@ public class Nue extends ShikigamiSkill {
                 System.out.println("ACTIVATE");
                 BlockPos spawnPos = entity.blockPosition();
                 if (shikigamiUUIDList.isEmpty()) { // Проверяем, жива ли сущность
-                    nue = new NueEntity(ModEntities.NUE.get(), entity.level());
+                    nue = new NueEntity(ModEntities.NUE.get(), entity.level(), (Player) entity);
                     nue.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-                    entity.level().addFreshEntity(nue);
                     shikigamiUUIDList.add(nue.getUUID());
+                    entity.level().addFreshEntity(nue);
                 }
                 if (isTamed) {
                     nue.tame((Player) entity);
@@ -156,22 +102,19 @@ public class Nue extends ShikigamiSkill {
 
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof NueEntity entity && entity.equals(nue)) {
-            if (nue != null && !nue.isAlive()) {
+        if (event.getEntity() instanceof NueEntity nueEntity && !nueEntity.level().isClientSide) {
+            if (nueEntity.equals(nue)) {
                 if (isTamed) {
                     isDead = true;
-                    nue.getOwner().sendSystemMessage(Component.literal("Nue has died"));
-                }
-                else if (event.getSource().getEntity() instanceof Player player) {
-                    if (!isTamed) {
-                        isTamed = true;
-                        System.out.println("TAMED");
-                        player.sendSystemMessage(Component.literal("You tamed Nue"));
-                    }
+                    nue.getOwner().sendSystemMessage(Component.literal("Your Nue has died"));
+                } else if (!isTamed && event.getSource().getEntity() instanceof Player player) {
+                    isTamed = true;
+                    player.sendSystemMessage(Component.literal("You have tamed Nue"));
                 }
                 nue = null;
+                isActive = false;
+                shikigamiUUIDList.clear();
             }
-            isActive = false;
         }
         //MinecraftForge.EVENT_BUS.unregister(this);
     }

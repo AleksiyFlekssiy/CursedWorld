@@ -47,17 +47,17 @@ public class ModEntities {
                     .build("tutorialmod:hollow_purple_entity"));
 
     public static final RegistryObject<EntityType<DivineDogEntity>> DIVINE_DOG = ENTITIES.register("divine_dog",
-            () -> EntityType.Builder.of(DivineDogEntity::new, MobCategory.CREATURE)
+            () -> EntityType.Builder.<DivineDogEntity>of(DivineDogEntity::new, MobCategory.CREATURE)
                     .sized(1.5f,1.5f)
                     .build("tutorialmod:divine_dog"));
 
     public static final RegistryObject<EntityType<NueEntity>> NUE = ENTITIES.register("nue",
-            () -> EntityType.Builder.of(NueEntity::new, MobCategory.CREATURE)
+            () -> EntityType.Builder.<NueEntity>of(NueEntity::new, MobCategory.CREATURE)
                     .sized(5f, 6f)
                     .build("tutorialmod:nue"));
 
     public static final RegistryObject<EntityType<ToadEntity>> TOAD = ENTITIES.register("toad",
-            () -> EntityType.Builder.of(ToadEntity::new, MobCategory.CREATURE)
+            () -> EntityType.Builder.<ToadEntity>of(ToadEntity::new, MobCategory.CREATURE)
                     .sized(1.5f, 2.5f)
                     .setUpdateInterval(1)
                     .setShouldReceiveVelocityUpdates(true)

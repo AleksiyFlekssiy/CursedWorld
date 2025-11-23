@@ -31,7 +31,6 @@ public class DivineDogs extends ShikigamiSkill {
     private DivineDogEntity blackDivineDog = null;
     private boolean whiteDogDead, blackDogDead;
     private byte orderIndex = 0;
-    private Player owner = null;
 
     public DivineDogs() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -53,21 +52,20 @@ public class DivineDogs extends ShikigamiSkill {
             System.out.println("DEAD");
             return;
         }
-        owner = (Player) entity;
+
         if (!entity.isCrouching()) {
         if (!isActive) {
             System.out.println("ACTIVATE");
             BlockPos spawnPos = entity.blockPosition();
             if (!whiteDogDead) { // Проверяем, жива ли сущность
-                whiteDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
+                whiteDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level(), (Player) entity);
                 whiteDivineDog.setColor(DivineDogEntity.Color.WHITE);
                 whiteDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 entity.level().addFreshEntity(whiteDivineDog);
                 shikigamiUUIDList.add(whiteDivineDog.getUUID());
             }
-            //TODO Белая собака спавнится с черной даже после свой смерти
             if (!blackDogDead) {
-                blackDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
+                blackDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level(), (Player) entity);
                 blackDivineDog.setColor(DivineDogEntity.Color.BLACK);
                 blackDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 entity.level().addFreshEntity(blackDivineDog);
@@ -159,11 +157,11 @@ public class DivineDogs extends ShikigamiSkill {
             if (divineDogEntity.equals(whiteDivineDog)) {
                 whiteDogDead = true;
                 shikigamiUUIDList.remove(divineDogEntity.getUUID());
-                System.out.println("White dog killed by " + event.getSource().getEntity());
+                if (isTamed) whiteDivineDog.getOwner().sendSystemMessage(Component.literal("Your White Divine Dog has died"));
             } else if (divineDogEntity.equals(blackDivineDog)) {
                 blackDogDead = true;
                 shikigamiUUIDList.remove(divineDogEntity.getUUID());
-                System.out.println("Black dog killed by " + event.getSource().getEntity());
+                if (isTamed) blackDivineDog.getOwner().sendSystemMessage(Component.literal("Your Black Divine Dog has died"));
             }
             if (whiteDogDead && blackDogDead) {
                 if (isTamed) {
@@ -172,9 +170,9 @@ public class DivineDogs extends ShikigamiSkill {
                     else if (blackDivineDog != null) blackDivineDog.getOwner().sendSystemMessage(Component.literal("Your Divine Dogs have died"));
                 } else {
                     whiteDogDead = blackDogDead = false;
-                    if (owner.equals(event.getSource().getEntity())) {
+                    if (event.getSource().getEntity() instanceof Player player && player.equals(divineDogEntity.getOwner())) {
                         isTamed = true;
-                        owner.sendSystemMessage(Component.literal("You tamed divine dogs"));
+                        player.sendSystemMessage(Component.literal("You tamed divine dogs"));
                     }
                 }
                 whiteDivineDog = null;
