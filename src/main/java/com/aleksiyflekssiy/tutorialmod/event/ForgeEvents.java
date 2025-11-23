@@ -44,8 +44,14 @@ public class ForgeEvents {
                         List<Shikigami> mutableShikigamiList = new ArrayList<>(shikigamiList);
                         shikigamiList.forEach(shikigami -> {
                             if (shikigami != null){
-                                shikigami.tame(player);
-                                System.out.println(skill.getName() + " tamed");
+                                if (shikigamiSkill.isTamed()) {
+                                    shikigami.tame(player);
+                                    System.out.println(skill.getName() + " has tamed");
+                                }
+                                else {
+                                    shikigami.setOwner(player);
+                                    System.out.println(skill.getName() + " has gained the owner");
+                                }
                             }
                             else System.out.println(skill.getName() + " is null");
                         });

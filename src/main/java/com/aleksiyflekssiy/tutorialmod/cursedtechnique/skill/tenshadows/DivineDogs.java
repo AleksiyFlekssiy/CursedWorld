@@ -58,14 +58,15 @@ public class DivineDogs extends ShikigamiSkill {
         if (!isActive) {
             System.out.println("ACTIVATE");
             BlockPos spawnPos = entity.blockPosition();
-            if (shikigamiUUIDList.isEmpty() || !whiteDogDead) { // Проверяем, жива ли сущность
+            if (!whiteDogDead) { // Проверяем, жива ли сущность
                 whiteDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
                 whiteDivineDog.setColor(DivineDogEntity.Color.WHITE);
                 whiteDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 entity.level().addFreshEntity(whiteDivineDog);
                 shikigamiUUIDList.add(whiteDivineDog.getUUID());
             }
-            if (shikigamiUUIDList.isEmpty() || !blackDogDead) {
+            //TODO Белая собака спавнится с черной даже после свой смерти
+            if (!blackDogDead) {
                 blackDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level());
                 blackDivineDog.setColor(DivineDogEntity.Color.BLACK);
                 blackDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
@@ -154,30 +155,32 @@ public class DivineDogs extends ShikigamiSkill {
 
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof DivineDogEntity divineDogEntity) {
-            if (!divineDogEntity.level().isClientSide) {
-                if (divineDogEntity.equals(whiteDivineDog)) {
-                    whiteDogDead = true;
-                    System.out.println("White dog killed by " + event.getSource().getEntity());
-                } else if (divineDogEntity.equals(blackDivineDog)) {
-                    blackDogDead = true;
-                    System.out.println("Black dog killed by " + event.getSource().getEntity());
-                }
-                if (whiteDogDead && blackDogDead) {
-                    if (isTamed) {
-                        isDead = true;
-                        whiteDivineDog.getOwner().sendSystemMessage(Component.literal("Your Divine Dogs have died")); //TODO Овнера может не быть
-                    } else {
-                        whiteDogDead = blackDogDead = false;
-                        if (owner.equals(event.getSource().getEntity())) {
-                            isTamed = true;
-                            owner.sendSystemMessage(Component.literal("You tamed divine dogs"));
-                        }
+         if (event.getEntity() instanceof DivineDogEntity divineDogEntity && !divineDogEntity.level().isClientSide) {
+            if (divineDogEntity.equals(whiteDivineDog)) {
+                whiteDogDead = true;
+                shikigamiUUIDList.remove(divineDogEntity.getUUID());
+                System.out.println("White dog killed by " + event.getSource().getEntity());
+            } else if (divineDogEntity.equals(blackDivineDog)) {
+                blackDogDead = true;
+                shikigamiUUIDList.remove(divineDogEntity.getUUID());
+                System.out.println("Black dog killed by " + event.getSource().getEntity());
+            }
+            if (whiteDogDead && blackDogDead) {
+                if (isTamed) {
+                    isDead = true;
+                    if (whiteDivineDog != null) whiteDivineDog.getOwner().sendSystemMessage(Component.literal("Your Divine Dogs have died"));
+                    else if (blackDivineDog != null) blackDivineDog.getOwner().sendSystemMessage(Component.literal("Your Divine Dogs have died"));
+                } else {
+                    whiteDogDead = blackDogDead = false;
+                    if (owner.equals(event.getSource().getEntity())) {
+                        isTamed = true;
+                        owner.sendSystemMessage(Component.literal("You tamed divine dogs"));
                     }
-                    whiteDivineDog = null;
-                    blackDivineDog = null;
-                    isActive = false;
                 }
+                whiteDivineDog = null;
+                blackDivineDog = null;
+                shikigamiUUIDList.clear();
+                isActive = false;
             }
         }
         //MinecraftForge.EVENT_BUS.unregister(this);
