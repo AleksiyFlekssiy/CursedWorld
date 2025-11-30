@@ -2,60 +2,65 @@ package com.aleksiyflekssiy.tutorialmod.entity;
 
 import com.aleksiyflekssiy.tutorialmod.entity.ai.GreatSerpentAI;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
-import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
+import com.aleksiyflekssiy.tutorialmod.entity.control.CustomFlyingMoveControl;
+import com.aleksiyflekssiy.tutorialmod.entity.control.NueMoveControl;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-public class GreatSerpentSegment extends Mob {
+public class GreatSerpentSegment extends PathfinderMob {
     public int index;
     private GreatSerpentEntity parent;
     private UUID parentUUID;
-    protected static final ImmutableList<SensorType<? extends Sensor<? super GreatSerpentSegment>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+    protected static final ImmutableList<SensorType<? extends Sensor<? super GreatSerpentSegment>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS);
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.GRABBED_ENTITY.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
 
-    public GreatSerpentSegment(EntityType<? extends Mob> pEntityType, Level pLevel) {
+    public GreatSerpentSegment(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        //this.noPhysics = true;
         this.refreshDimensions();
         index = 0;
         parent = null;
         parentUUID = null;
+        this.navigation = new FlyingPathNavigation(this, pLevel);
+        this.moveControl = new CustomFlyingMoveControl(this);
     }
 
-    public GreatSerpentSegment(EntityType<? extends Mob> pEntityType, Level pLevel, GreatSerpentEntity parent, int index) {
+    public GreatSerpentSegment(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, GreatSerpentEntity parent, int index) {
         super(pEntityType, pLevel);
-        //this.noPhysics = true;
         this.refreshDimensions();
+        this.index = index;
         this.parent = parent;
         this.parentUUID = parent.getUUID();
-        this.index = index;
+        this.navigation = new FlyingPathNavigation(this, pLevel);
+        this.moveControl = new CustomFlyingMoveControl(this);
     }
 
-    public void moveToTarget() {
-        this.getBrain().getMemory(MemoryModuleType.WALK_TARGET).ifPresent(walkTarget -> {
-            BlockPos targetPos = walkTarget.getTarget().currentBlockPosition();
-            double speed = this.getAttributeValue(Attributes.MOVEMENT_SPEED);
-            Vec3 currentPos = this.position();
-            Vec3 targetVec = new Vec3(targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5);
-            Vec3 direction = targetVec.subtract(currentPos).normalize();
-            Vec3 motionVec = direction.scale(speed);
-            this.setDeltaMovement(motionVec);
-        });
+    public GreatSerpentEntity getParent() {
+        return parent;
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     @Override
@@ -65,6 +70,11 @@ public class GreatSerpentSegment extends Mob {
         if (!level().isClientSide() && parent == null && parentUUID != null){
             parent = (GreatSerpentEntity) ((ServerLevel) level()).getEntity(parentUUID);
         }
+    }
+
+    @Override
+    protected void setRot(float pYRot, float pXRot) {
+        super.setRot(pYRot, pXRot);
     }
 
     @Override
@@ -93,14 +103,12 @@ public class GreatSerpentSegment extends Mob {
         return 0;
     }
 
-    @Override
     public boolean isPushable() {
-        return false;
+        return true;
     }
 
-    @Override
     public boolean canBeCollidedWith() {
-        return true;
+        return false;
     }
 
     @Override
@@ -117,7 +125,8 @@ public class GreatSerpentSegment extends Mob {
                 .add(Attributes.ATTACK_SPEED, 1)
                 .add(Attributes.ATTACK_KNOCKBACK, 1)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.5)
-                .add(Attributes.JUMP_STRENGTH, 1);
+                .add(Attributes.JUMP_STRENGTH, 1)
+                .add(Attributes.FLYING_SPEED, 0.5);
     }
 
     @Override

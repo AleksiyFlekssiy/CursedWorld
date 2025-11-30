@@ -8,11 +8,11 @@ import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.world.entity.LivingEntity;
 
-public class FlyingMoveControl extends MoveControl {
+public class NueMoveControl extends MoveControl {
     private final LivingEntity entity;
     private float speed = 0.1F;
 
-    public FlyingMoveControl(Mob entity) {
+    public NueMoveControl(Mob entity) {
         super(entity);
         this.entity = entity;
     }
@@ -61,11 +61,11 @@ public class FlyingMoveControl extends MoveControl {
         return new Vec3(wantedX, wantedY, wantedZ);
     }
 }
-//public class FlyingMoveControl extends MoveControl {
+//public class NueMoveControl extends MoveControl {
 //    private final int maxTurn;
 //    private final boolean hoversInPlace;
 //
-//    public FlyingMoveControl(Mob entity) {
+//    public NueMoveControl(Mob entity) {
 //        super(entity);
 //        this.maxTurn = 20;
 //        this.hoversInPlace = false;

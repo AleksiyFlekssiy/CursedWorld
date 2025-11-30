@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.entity.behavior;
 
+import com.aleksiyflekssiy.tutorialmod.entity.GreatSerpentSegment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;

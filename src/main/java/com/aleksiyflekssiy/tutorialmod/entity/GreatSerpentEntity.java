@@ -6,6 +6,7 @@ import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.GreatSer
 import com.aleksiyflekssiy.tutorialmod.entity.ai.GreatSerpentAI;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
+import com.aleksiyflekssiy.tutorialmod.entity.control.CustomFlyingMoveControl;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
@@ -16,25 +17,26 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class GreatSerpentEntity extends Shikigami {
-    public static final float MAX_TURN_ANGLE = 12.25F;
-    public static final int MAX_SEGMENT_COUNT = 15;
+
+    private int supposedSegmentCount;
     private final List<GreatSerpentSegment> segments = new ArrayList<>();
     private final List<UUID> uuids = new ArrayList<>();
     private int emergeTicks = 0;
@@ -42,24 +44,21 @@ public class GreatSerpentEntity extends Shikigami {
     protected static final ImmutableList<SensorType<? extends Sensor<? super GreatSerpentEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), CustomMemoryModuleTypes.GRABBED_ENTITY.get(), CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
     private BlockPos spawnPos;
-    private Vec3 motionVec;
 
     public GreatSerpentEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.noCulling = true;
         this.entityData.set(SEGMENT_COUNT, 0);
+        this.navigation = new FlyingPathNavigation(this, pLevel);
+        this.moveControl = new CustomFlyingMoveControl(this);
     }
 
     public GreatSerpentEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, Player owner) {
         super(pEntityType, pLevel, owner);
         this.noCulling = true;
         this.entityData.set(SEGMENT_COUNT, 0);
-    }
-
-    @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        this.spawnPos = this.blockPosition();
+        this.navigation = new FlyingPathNavigation(this, pLevel);
+        this.moveControl = new CustomFlyingMoveControl(this);
     }
 
     @Override
@@ -67,10 +66,30 @@ public class GreatSerpentEntity extends Shikigami {
         return true;
     }
 
+    public void setSpawnPos(BlockPos spawnPos) {
+        this.spawnPos = spawnPos;
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(SEGMENT_COUNT, 0);
+    }
+
+    public void calculateAndSetSegmentCount(BlockPos targetPos){
+        int xDistance = targetPos.getX() - this.spawnPos.getX();
+        int yDistance = targetPos.getY() - this.spawnPos.getY();
+        int zDistance = targetPos.getZ() - this.spawnPos.getZ();
+
+        double totalDistance = Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
+        double outerVerticesMargin = Math.sqrt(this.getBbHeight() * this.getBbHeight() + this.getBbWidth() * this.getBbWidth());
+        this.supposedSegmentCount = Math.toIntExact(Math.round(totalDistance / outerVerticesMargin));
+        System.out.println(supposedSegmentCount);
+    }
+
+    @Override
+    protected int calculateFallDamage(float pFallDistance, float pDamageMultiplier) {
+        return 0;
     }
 
     @Override
@@ -82,18 +101,14 @@ public class GreatSerpentEntity extends Shikigami {
         return segments;
     }
 
-    private void moveToTarget() {
-        this.getBrain().getMemory(MemoryModuleType.WALK_TARGET).ifPresent(walkTarget -> {
-            BlockPos targetPos = walkTarget.getTarget().currentBlockPosition();
-            double speed = this.getAttributeValue(Attributes.MOVEMENT_SPEED);
-            Vec3 currentPos = this.position();
-            Vec3 targetVec = new Vec3(targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5);
-            Vec3 direction = targetVec.subtract(currentPos).normalize();
-            motionVec = direction.scale(speed);
-            this.setDeltaMovement(motionVec);
-            segments.forEach(segment -> segment.getBrain().setMemory(MemoryModuleType.WALK_TARGET, this.getBrain().getMemory(MemoryModuleType.WALK_TARGET)));
-        });
-        segments.forEach(GreatSerpentSegment::moveToTarget);
+    @Override
+    public boolean canBeCollidedWith() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return false;
     }
 
     @Override
@@ -107,10 +122,9 @@ public class GreatSerpentEntity extends Shikigami {
                     segments.add(segment);
                 }
             }
-            if (emergeTicks % 20 == 0 && segments.size() < MAX_SEGMENT_COUNT) {
+            if (emergeTicks % 20 == 0 && segments.size() < supposedSegmentCount) {
                 createSegment();
             }
-            moveToTarget();
         }
 
         Vec3[] avec3 = new Vec3[this.segments.size()];
@@ -150,7 +164,8 @@ public class GreatSerpentEntity extends Shikigami {
                 .add(Attributes.ATTACK_SPEED, 1)
                 .add(Attributes.ATTACK_KNOCKBACK, 1)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.5)
-                .add(Attributes.JUMP_STRENGTH, 1);
+                .add(Attributes.JUMP_STRENGTH, 1)
+                .add(Attributes.FLYING_SPEED, 0.5);
     }
 
     @Override
@@ -178,6 +193,7 @@ public class GreatSerpentEntity extends Shikigami {
             uuids.add(segmentUUID.getUUID("segment" + i));
         }
         this.entityData.set(SEGMENT_COUNT, segmentsUUID.size());
+        this.supposedSegmentCount = segmentsUUID.size();
         System.out.println(segmentsUUID.size() + " segments loaded");
     }
 
@@ -232,6 +248,9 @@ public class GreatSerpentEntity extends Shikigami {
     public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
+            segments.forEach(segment -> {
+                segment.getBrain().stopAll((ServerLevel) level(), segment);
+            });
             if (order == GreatSerpentOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
             return true;
         }
@@ -242,6 +261,9 @@ public class GreatSerpentEntity extends Shikigami {
     public void clearOrder() {
         this.setOrder(GreatSerpentOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
+        segments.forEach(segment -> {
+            segment.getBrain().stopAll((ServerLevel) level(), segment);
+        });
     }
 
     public enum GreatSerpentOrder implements IOrder{

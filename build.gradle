@@ -158,6 +158,7 @@ dependencies {
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
+    implementation fg.deobf("curse.maven:mob-path-visualizer-1120194:5806831")
     //implementation fg.deobf("curse.maven:ferritecore-429235:4810975")
     //implementation fg.deobf("curse.maven:modernfix-790626:6837713")
     //implementation fg.deobf("curse.maven:embeddium-908741:5681725")

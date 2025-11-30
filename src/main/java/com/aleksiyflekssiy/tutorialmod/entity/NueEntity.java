@@ -4,7 +4,7 @@ import com.aleksiyflekssiy.tutorialmod.client.model.NueAnimations;
 import com.aleksiyflekssiy.tutorialmod.entity.ai.NueAI;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
-import com.aleksiyflekssiy.tutorialmod.entity.control.FlyingMoveControl;
+import com.aleksiyflekssiy.tutorialmod.entity.control.NueMoveControl;
 import com.aleksiyflekssiy.tutorialmod.entity.navigation.BluntAirNavigation;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
@@ -53,7 +53,7 @@ public class NueEntity extends Shikigami {
 
     public NueEntity(EntityType<? extends Shikigami> entityType, Level level) {
         super(entityType, level);
-        this.moveControl = new FlyingMoveControl(this);
+        this.moveControl = new NueMoveControl(this);
         this.navigation = new BluntAirNavigation(this, level());
         this.entityData.set(ANIMATION, 0);
         NueAI.initializeMemories(this.getBrain());
@@ -62,7 +62,7 @@ public class NueEntity extends Shikigami {
 
     public NueEntity(EntityType<? extends Shikigami> entityType, Level level, Player owner) {
         super(entityType, level, owner);
-        this.moveControl = new FlyingMoveControl(this);
+        this.moveControl = new NueMoveControl(this);
         this.navigation = new BluntAirNavigation(this, level());
         this.entityData.set(ANIMATION, 0);
         NueAI.initializeMemories(this.getBrain());
