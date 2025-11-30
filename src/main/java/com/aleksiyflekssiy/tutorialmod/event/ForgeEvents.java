@@ -6,12 +6,16 @@ import com.aleksiyflekssiy.tutorialmod.cursedtechnique.TenShadowsTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import com.aleksiyflekssiy.tutorialmod.item.custom.WheelOfHarmonyItem;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,7 +23,6 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -73,6 +76,20 @@ public class ForgeEvents {
         });
     }
 
+    @SubscribeEvent
+    public static void onPlayerTakenDamage(LivingDamageEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && !player.level().isClientSide) {
+            ItemStack item = player.getInventory().getArmor(3);
+            if (item != null && item.getItem() instanceof WheelOfHarmonyItem wheel){
+                if (!wheel.checkAdaptation(event.getSource().type(), player)) {
+                    wheel.addOrSpeedUpAdaptationToDamage(event.getSource().type(), event.getAmount(), player);
+                }
+                else {
+                    event.setCanceled(true);
+                }
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.Clone event) {

@@ -70,5 +70,14 @@
         "stream": false
       }
     ]
+  },
+  "wheel_rotation": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "tutorialmod:wheel_rotation",
+        "stream": false
+      }
+    ]
   }
 }

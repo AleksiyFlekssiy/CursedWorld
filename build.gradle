@@ -148,6 +148,14 @@ repositories {
     maven {
         url "https://cursemaven.com"
     }
+    maven {
+        name = 'GeckoLib'
+        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content {
+            includeGroupByRegex("software\\.bernie.*")
+            includeGroup("com.eliotlash.mclib")
+        }
+    }
 }
 
 dependencies {
@@ -159,6 +167,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
     implementation fg.deobf("curse.maven:mob-path-visualizer-1120194:5806831")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:4.8.2")
+    implementation("com.eliotlash.mclib:mclib:20")
     //implementation fg.deobf("curse.maven:ferritecore-429235:4810975")
     //implementation fg.deobf("curse.maven:modernfix-790626:6837713")
     //implementation fg.deobf("curse.maven:embeddium-908741:5681725")

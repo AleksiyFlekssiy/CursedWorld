@@ -1,0 +1,37 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+      "wheel_idle": {
+        "loop": true,
+        "bones": {
+          "wheel": {
+            "rotation": {
+              "vector": [0, -90, 0]
+            }
+          }
+        }
+      },
+      "wheel_rotation": {
+        "loop": false,
+        "animation_length": 1.75,
+        "bones": {
+          "wheel": {
+            "rotation": {
+              "0.0": {
+                "vector": [0, 0, 0]
+              },
+              "0.5": {
+                "vector": [0, -90, 0],
+                "easing": "easeInQuint"
+              }
+            }
+          }
+        },
+        "sound_effects": {
+          "0.0": {
+            "effect": "wheel_rotation"
+          }
+        }
+      }
+    }
+}

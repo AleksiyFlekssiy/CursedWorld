@@ -35,6 +35,9 @@ public class ModSoundEvents {
     public static final RegistryObject<SoundEvent> CHANT_3 = SOUND_EVENTS.register("chant_3",
             () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "chant_3")));
 
+    public static final RegistryObject<SoundEvent> WHEEL_ROTATION = SOUND_EVENTS.register("wheel_rotation",
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "wheel_rotation")));
+
     public static void register(IEventBus eventBus) {
         SOUND_EVENTS.register(eventBus);
     }

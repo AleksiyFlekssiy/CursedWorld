@@ -57,6 +57,12 @@ public class ModItems {
     public static final RegistryObject<Item> COPPER_BOOTS = ITEMS.register("copper_boots",
             () -> new ModArmorItem(ModArmorMaterials.COPPER, ArmorItem.Type.BOOTS, new Item.Properties()));
 
+    public static final RegistryObject<Item> WHEEL_OF_HARMONY = ITEMS.register("wheel_of_harmony",
+            () -> new WheelOfHarmonyItem(ArmorMaterials.NETHERITE, ArmorItem.Type.HELMET, new Item.Properties()
+                    .stacksTo(1)
+                    .fireResistant()
+                    .setNoRepair()));
+
     public static void register(IEventBus bus) {
         ITEMS.register(bus);
     }

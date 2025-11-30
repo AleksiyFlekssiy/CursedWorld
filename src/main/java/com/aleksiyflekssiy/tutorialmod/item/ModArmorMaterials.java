@@ -11,8 +11,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import java.util.function.Supplier;
 
 public enum ModArmorMaterials implements ArmorMaterial {
-    COPPER("copper", 15, new int[]{5, 7, 6, 4}, 20, SoundEvents.ARMOR_EQUIP_GOLD, 1f, 0f, () -> Ingredient.of(Items.COPPER_INGOT))
-    ;
+    COPPER("copper", 15, new int[]{5, 7, 6, 4}, 20, SoundEvents.ARMOR_EQUIP_GOLD, 1f, 0f, () -> Ingredient.of(Items.COPPER_INGOT));
 
     private final String name;
     private final int durabilityMultiplier;
