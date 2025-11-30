@@ -82,7 +82,7 @@ public class DivineDogs extends ShikigamiSkill {
             isActive = true;
         }
         else if (isActive && isTamed) {
-            HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(entity), 50);
+            HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(entity), 100);
             if (result.getType() == HitResult.Type.ENTITY) {
                 EntityHitResult hitResult = (EntityHitResult) result;
                 if (hitResult.getEntity() instanceof LivingEntity target) {

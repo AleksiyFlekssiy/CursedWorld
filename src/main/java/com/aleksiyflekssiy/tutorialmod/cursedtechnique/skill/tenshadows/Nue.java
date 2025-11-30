@@ -63,7 +63,7 @@ public class Nue extends ShikigamiSkill {
                 isActive = !isActive;
             } else if (isActive && isTamed) {
                 if (nue.getControllingPassenger() == null) {
-                    HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(nue), 50);
+                    HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(nue), 100);
                     if (result.getType() == HitResult.Type.ENTITY) {
                         EntityHitResult hitResult = (EntityHitResult) result;
                         if (hitResult.getEntity() instanceof LivingEntity target) {

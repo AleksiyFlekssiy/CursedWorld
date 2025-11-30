@@ -59,7 +59,7 @@ public class Toad extends ShikigamiSkill {
                 else toad.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, entity);
                 isActive = !isActive;
             } else if (isActive && isTamed) {
-                HitResult result = ProjectileUtil.getHitResultOnViewVector(toad.getOwner(), target -> !target.equals(toad), 50);
+                HitResult result = ProjectileUtil.getHitResultOnViewVector(toad.getOwner(), target -> !target.equals(toad), 100);
                 if (result.getType() == HitResult.Type.ENTITY) {
                     EntityHitResult hitResult = (EntityHitResult) result;
                     if (hitResult.getEntity() instanceof LivingEntity target) {
