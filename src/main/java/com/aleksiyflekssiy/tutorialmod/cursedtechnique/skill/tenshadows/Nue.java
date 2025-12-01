@@ -80,6 +80,7 @@ public class Nue extends ShikigamiSkill {
                 }
                 else if (entity.equals(nue.getControllingPassenger())){
                     nue.tryGrabEntityBelow(null);
+                    //TODO сделать сброс цели
                 }
             }
         }

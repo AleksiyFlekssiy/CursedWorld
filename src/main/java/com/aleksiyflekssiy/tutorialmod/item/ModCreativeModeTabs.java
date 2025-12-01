@@ -51,6 +51,7 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.COPPER_CHESTPLATE.get());
                         output.accept(ModItems.COPPER_LEGGINGS.get());
                         output.accept(ModItems.COPPER_BOOTS.get());
+                        output.accept(ModItems.WHEEL_OF_HARMONY.get());
                     }))
                     .build());
 

@@ -61,6 +61,7 @@ public class ModItems {
             () -> new WheelOfHarmonyItem(ArmorMaterials.NETHERITE, ArmorItem.Type.HELMET, new Item.Properties()
                     .stacksTo(1)
                     .fireResistant()
+                    .durability(0)
                     .setNoRepair()));
 
     public static void register(IEventBus bus) {
