@@ -5,6 +5,7 @@ import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -79,8 +80,10 @@ public class Nue extends ShikigamiSkill {
                     }
                 }
                 else if (entity.equals(nue.getControllingPassenger())){
-                    nue.tryGrabEntityBelow(null);
-                    //TODO сделать сброс цели
+                    if (nue.getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).isPresent()){
+                        nue.dropGrabbedEntity();
+                    }
+                    else nue.tryGrabEntityBelow(null);
                 }
             }
         }
