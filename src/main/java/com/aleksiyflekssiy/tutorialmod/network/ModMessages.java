@@ -40,5 +40,10 @@ public class ModMessages {
                 SwitchOrderPacket::encode,
                 SwitchOrderPacket::decode,
                 SwitchOrderPacket::handle);
+
+        INSTANCE.registerMessage(id++, InputLockPacket.class,
+                InputLockPacket::encode,
+                InputLockPacket::decode,
+                InputLockPacket::handle);
     }
 }

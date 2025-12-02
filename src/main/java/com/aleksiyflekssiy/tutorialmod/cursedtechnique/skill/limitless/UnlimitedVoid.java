@@ -7,6 +7,12 @@ import com.aleksiyflekssiy.tutorialmod.cursedtechnique.LimitlessCursedTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.item.custom.*;
+import com.aleksiyflekssiy.tutorialmod.network.InputLockPacket;
+import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
+import com.aleksiyflekssiy.tutorialmod.util.MovementUtils;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -27,12 +33,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
@@ -89,6 +98,7 @@ public class UnlimitedVoid extends Skill {
                 if (trapped instanceof Player affectedPlayer) {
                     affectedPlayer.getAbilities().mayBuild = true;
                     affectedPlayer.getAbilities().mayfly = affectedPlayer.getAbilities().instabuild;
+                    ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) affectedPlayer), new InputLockPacket(false, 0, 0));
                 }
             }
             applyTechniqueBurnout(domainOwner);
@@ -159,11 +169,12 @@ public class UnlimitedVoid extends Skill {
                 entity.setPos(entity.getX(), newY, entity.getZ());
                 entity.setDeltaMovement(0, 0, 0);
                 trappedEntities.add(entity);
-                //entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, DOMAIN_DURATION, 255, false, false));
                 entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, DOMAIN_DURATION, 1, false, false));
-                //entity.addEffect(new MobEffectInstance(MobEffects.JUMP, DOMAIN_DURATION, 128, false, false));
                 if (entity instanceof Mob mob) {
                     mob.setNoAi(true);
+                }
+                else if (entity instanceof Player player1){
+                    ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() ->  (ServerPlayer) player1), new InputLockPacket(true, player.getYRot(), player.getXRot()));
                 }
             }
         }
@@ -171,7 +182,14 @@ public class UnlimitedVoid extends Skill {
 
     private void affectEntities(Level level) {
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, domainArea)) {
-            if (entity == domainOwner || !canAffect(entity)) continue;
+            if (entity == domainOwner || !canAffect(entity)) {
+                if (entity instanceof Player player && trappedEntities.contains(player)) ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new InputLockPacket(false, 0, 0));
+                trappedEntities.remove(entity);
+                continue;
+            }
+            if (entity instanceof Player player && !trappedEntities.contains(player)) {
+                ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() ->  (ServerPlayer) player), new InputLockPacket(true, player.getYRot(), player.getXRot()));
+            }
             trappedEntities.add(entity);
         }
         for (LivingEntity entity : trappedEntities){
@@ -199,7 +217,7 @@ public class UnlimitedVoid extends Skill {
             if (domainActive && domainCenter != null) {
                 domainTicks++;
                 spawnBarrierParticles(serverLevel, domainCenter, DOMAIN_RADIUS);
-                if (domainTicks % 200 == 0) affectEntities(serverLevel);
+                affectEntities(serverLevel);
                 if (domainTicks >= DOMAIN_DURATION || checkBarrierDamage(serverLevel)) this.deactivate(domainOwner);
             }
     }
@@ -279,67 +297,46 @@ public class UnlimitedVoid extends Skill {
     }
 
     @Mod.EventBusSubscriber(modid = "tutorialmod", bus = Mod.EventBusSubscriber.Bus.FORGE)
-    public class PlayerDisabler {
+    public static class PlayerDisabler {
 
         @SubscribeEvent
-        public static void onPlayerAttack(AttackEntityEvent event) {
-            Player player = event.getEntity();
-            checkAndCancel(player, event);
-        }
+        public static void immobilize(TickEvent.ClientTickEvent event) {
+            if (event.phase == TickEvent.Phase.END) return;
+            Minecraft mc = Minecraft.getInstance();
+            LocalPlayer player = mc.player;
+            if (player == null) return;
 
-        @SubscribeEvent
-        public static void onPlayerInteract(PlayerInteractEvent event) {
-            Player player = event.getEntity();
-            checkAndCancel(player, event);
-        }
+            if (player.getPersistentData().contains("lock")){
+                if (player.getPersistentData().getBoolean("lock")) {
+                    mc.options.keyUp.setDown(false);
+                    mc.options.keyDown.setDown(false);
+                    mc.options.keyLeft.setDown(false);
+                    mc.options.keyRight.setDown(false);
+                    mc.options.keyJump.setDown(false);
+                    mc.options.keySprint.setDown(false);
+                    mc.options.keyShift.setDown(false);
 
-        @SubscribeEvent
-        public static void onPlayerInteractEntity(PlayerInteractEvent.EntityInteract event) {
-            Player player = event.getEntity();
-            checkAndCancel(player, event);
-        }
+                    mc.options.keyAttack.setDown(false);
+                    mc.options.keyUse.setDown(false);
+                    mc.options.keyPickItem.setDown(false);
+                    mc.options.keyDrop.setDown(false);
+                    mc.options.keySwapOffhand.setDown(false);
 
-        @SubscribeEvent
-        public static void onPlayerInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
-            Player player = event.getEntity();
-            checkAndCancel(player, event);
-        }
+                    mc.options.keyInventory.setDown(false);
+                    mc.options.keyChat.setDown(false);
+                    mc.options.keyCommand.setDown(false);
 
-        @SubscribeEvent
-        public static void onPlayerInteractBlock(PlayerInteractEvent.RightClickBlock event) {
-            Player player = event.getEntity();
-            checkAndCancel(player, event);
-        }
+                    Arrays.stream(mc.options.keyHotbarSlots).toList().forEach(keyMapping -> keyMapping.setDown(false));
 
-        @SubscribeEvent
-        public static void onPlayerInteractItem(PlayerInteractEvent.RightClickItem event) {
-            Player player = event.getEntity();
-            checkAndCancel(player, event);
-        }
+                    mc.options.keyPlayerList.setDown(false);
+                    mc.options.keyTogglePerspective.setDown(false);
 
-        private static void checkAndCancel(Player player, net.minecraftforge.eventbus.api.Event event) {
-            System.out.println("In the method");
-            if (player.level() instanceof ServerLevel serverLevel) {
-                for (Player serverPlayer : serverLevel.players()) {
-                    if (CursedTechniqueCapability.getCursedTechnique(serverPlayer) instanceof LimitlessCursedTechnique limitless){
-                        UnlimitedVoid unlimitedVoid = (UnlimitedVoid) limitless.getDomain();
-                        if (unlimitedVoid.trappedEntities.contains(player) && player != unlimitedVoid.domainOwner) event.setCanceled(true);
-                    }
+                    player.setYRot(player.getPersistentData().getFloat("yaw"));
+                    player.setXRot(player.getPersistentData().getFloat("pitch"));
+                    System.out.println("SHOULD WORK");
                 }
             }
         }
-    }
-
-    private Player getDomainOwner() {
-        return domainOwner;
-    }
-
-    public boolean isDomainActive() {
-        return domainActive;
-    }
-
-    private Set<LivingEntity> getTrappedEntities() {
-        return trappedEntities;
     }
 
     @Override
