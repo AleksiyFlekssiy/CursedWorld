@@ -26,11 +26,6 @@ public class ModMessages {
                 UseSkillPacket::decode,
                 UseSkillPacket::handle);
 
-        INSTANCE.registerMessage(id++, HoldSkillPacket.class,
-                HoldSkillPacket::encode,
-                HoldSkillPacket::decode,
-                HoldSkillPacket::handle);
-
         INSTANCE.registerMessage(id++, SyncSkillPacket.class,
                 SyncSkillPacket::encode,
                 SyncSkillPacket::decode,

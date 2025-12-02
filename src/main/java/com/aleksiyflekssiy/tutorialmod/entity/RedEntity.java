@@ -1,8 +1,11 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
 import com.aleksiyflekssiy.tutorialmod.client.particle.LaunchRingParticleData;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.HollowPurple;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.Red;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
-import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
+import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import com.aleksiyflekssiy.tutorialmod.util.CustomExplosion;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -20,6 +23,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -32,6 +36,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.joml.Vector3f;
 
@@ -84,7 +89,12 @@ public class RedEntity extends Projectile {
     }
 
     protected boolean canHitEntity(Entity entity) {
-        return entity != this && entity != this.getOwner() && entity.isAlive();
+        if (this == entity) return false;
+        return getSkill().canAffect(entity);
+    }
+
+    private static Skill getSkill(){
+        return new Red();
     }
 
     @Override
@@ -96,7 +106,6 @@ public class RedEntity extends Projectile {
             return;
         }
         super.tick();
-        Vec3 vec = Vec3.ZERO;
         // Логика на сервере: только управление состоянием и временем жизни
         if (!this.level().isClientSide()) {
             isCharged = this.entityData.get(IS_LAUNCHED);
@@ -124,7 +133,6 @@ public class RedEntity extends Projectile {
                 } else {
                     if (this.attackType == ATTACK_TYPE.MELEE) meleeAttack();
                     else rangedAttack(lookVec);
-                    vec = lookVec;
                     this.entityData.set(IS_LAUNCHED, true); // Синхронизируем запуск
                     isCharged = true;
                 }
@@ -137,7 +145,6 @@ public class RedEntity extends Projectile {
                 this.discard();
             }
             if (isCharged && !level().isClientSide() &&  level() instanceof ServerLevel serverLevel) {
-                Vec3i delta = getMotionDirection().getNormal();
                 serverLevel.sendParticles(
                         new LaunchRingParticleData(this.getId()),
                         this.getX(), this.getY(), this.getZ(),
@@ -158,10 +165,16 @@ public class RedEntity extends Projectile {
                 Vec3 vec = owner.getLookAngle();
                 owner.push(-vec.x * explosionPower * 2, -vec.y * explosionPower * 2, -vec.z * explosionPower * 2);
             } else {
-                Vec3 toPlayer = this.position().subtract(entity.position()).normalize().scale(explosionPower * 2);
-                entity.setDeltaMovement(entity.getDeltaMovement().add(toPlayer).scale(speed));
-                entity.hurt(ModDamageSources.red(this, this.owner), explosionPower * 2f);
-                entity.hurtMarked = true;
+                if (canHitEntity(entity)) {
+                    Vec3 toPlayer = this.position().subtract(entity.position()).normalize().scale(explosionPower * 2);
+                    entity.setDeltaMovement(entity.getDeltaMovement().add(toPlayer).scale(speed));
+                    entity.hurt(ModDamageSources.red(this, this.owner), explosionPower * 2f);
+                    entity.hurtMarked = true;
+                    if (entity instanceof LivingEntity livingEntity) {
+                        SkillEvent.Hit hitEvent = new SkillEvent.Hit(this.owner, new Red(), livingEntity);
+                        MinecraftForge.EVENT_BUS.post(hitEvent);
+                    }
+                }
             }
         }
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.NEUTRAL, 1.0f, 1.0f);
@@ -286,8 +299,14 @@ public class RedEntity extends Projectile {
             if (result.getType() == HitResult.Type.ENTITY) {
                 EntityHitResult entityHit = (EntityHitResult) result;
                 Entity hitEntity = entityHit.getEntity();
-                hitEntity.hurt(ModDamageSources.red(this, this.owner), speed * explosionPower);
-                hitEntity.setDeltaMovement(this.getDeltaMovement().scale(speed));
+                if (canHitEntity(hitEntity)) {
+                    hitEntity.hurt(ModDamageSources.red(this, this.owner), speed * explosionPower);
+                    hitEntity.setDeltaMovement(this.getDeltaMovement().scale(speed));
+                    if (hitEntity instanceof LivingEntity livingEntity) {
+                        SkillEvent.Hit hitEvent = new SkillEvent.Hit(this.owner, getSkill(), livingEntity);
+                        MinecraftForge.EVENT_BUS.post(hitEvent);
+                    }
+                }
                 if (hitEntity instanceof BlueEntity blueEntity) {
                     // Гигантский взрыв
                     System.out.println("Blue: " + blueEntity.getChant() + " Red: " + this.getChant());
@@ -353,7 +372,13 @@ public class RedEntity extends Projectile {
                 double distance = entity.distanceToSqr(x, y, z);
                 if (distance <= radius * radius) {
                     float damage = 1000.0F * (float) (1.0 - Math.sqrt(distance) / radius); // Урон уменьшается с расстоянием
-                    entity.hurt(ModDamageSources.hollow_purple(this, this.owner), entity == owner ? damage / 10 : damage);
+                    if (new HollowPurple().canAffect(entity)) {
+                        entity.hurt(ModDamageSources.hollow_purple(this, this.owner), entity == owner ? damage / 10 : damage);
+                        if (entity instanceof LivingEntity livingEntity) {
+                            SkillEvent.Hit hitEvent = new SkillEvent.Hit(this.owner, getSkill(), livingEntity);
+                            MinecraftForge.EVENT_BUS.post(hitEvent);
+                        }
+                    }
                 }
             }
 

@@ -223,7 +223,7 @@ public class CursedTechniqueCapability {
             };
         }
 
-        private static Skill createSkillByName(String name) {
+        public static Skill createSkillByName(String name) {
             return switch (name) {
                 case "Infinity" -> new Infinity();
                 case "Blue" -> new Blue();

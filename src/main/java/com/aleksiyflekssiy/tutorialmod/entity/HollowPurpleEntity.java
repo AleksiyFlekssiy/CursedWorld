@@ -1,5 +1,9 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.HollowPurple;
+import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
+import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -8,6 +12,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -16,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.List;
 
@@ -28,7 +34,9 @@ public class HollowPurpleEntity extends Projectile {
     private float radius;
     private float speed;
     private final Player owner;
-    private int lifetime = 200;
+    private int lifetime = 300;
+    private BlockPos launchPos;
+
     protected HollowPurpleEntity(EntityType<? extends Projectile> entityType, Level level) {
         this(entityType, level, null, 0,0);
     }
@@ -46,13 +54,17 @@ public class HollowPurpleEntity extends Projectile {
 
     public void chant(){
         this.radius *= 1.5F;
-        this.speed *= 1.5F;
+        this.speed *= 1.25F;
         this.lifetime += 200;
         this.entityData.set(CHANT, getChant() + 1);
     }
 
     public int getChant(){
         return entityData.get(CHANT);
+    }
+
+    private static Skill getSkill(){
+        return new HollowPurple();
     }
 
     @Override
@@ -81,6 +93,7 @@ public class HollowPurpleEntity extends Projectile {
     public void launch(Vec3 direction) {
         setDeltaMovement(direction.scale(speed));
         entityData.set(IS_LAUNCHED, true);
+        this.launchPos = this.blockPosition();
     }
 
     public boolean isLaunched() {
@@ -99,7 +112,6 @@ public class HollowPurpleEntity extends Projectile {
         double z = vec.z;
         int radiusInt = (int) Math.ceil(radius);
         BlockPos center = new BlockPos((int) x, (int) y, (int) z);
-        DamageSources damageSources = this.level().damageSources();
 
         // Разрушение блоков и урон сущностям
         int blocksPerTick = 1000; // Обрабатываем 1000 блоков за тик
@@ -130,10 +142,13 @@ public class HollowPurpleEntity extends Projectile {
         AABB explosionArea = new AABB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
         List<Entity> entities = this.level().getEntities(this, explosionArea, e -> e != this && e.isAlive());
         for (Entity entity : entities) {
-            double distance = entity.distanceToSqr(x, y, z);
-            if (distance <= radius * radius) {
-                float damage = 500.0F * (float) (1.0 - Math.sqrt(distance) / radius); // Урон уменьшается с расстоянием
-                entity.hurt(damageSources.explosion(this, this.getOwner()), entity == owner ? damage / 10 : damage);
+            float damage = 500.0F - this.blockPosition().distManhattan(launchPos) * 2; // Урон уменьшается с расстоянием
+            if (damage > 0 && getSkill().canAffect(entity)) {
+                entity.hurt(ModDamageSources.hollow_purple(this, this.owner), entity == owner ? damage / 10 : damage);
+                if (entity instanceof LivingEntity livingEntity) {
+                    SkillEvent.Hit hitEvent = new SkillEvent.Hit(this.owner, getSkill(), livingEntity);
+                    MinecraftForge.EVENT_BUS.post(hitEvent);
+                }
             }
         }
     }

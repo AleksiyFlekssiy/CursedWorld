@@ -5,6 +5,7 @@ import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.LimitlessCursedTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.item.custom.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -153,14 +154,14 @@ public class UnlimitedVoid extends Skill {
         domainArea = new AABB(center.add(-radius, -radius, -radius),
                 center.add(radius, radius, radius));
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, domainArea)) {
-            if (entity != player) {
+            if (entity != player && canAffect(entity)) {
                 double newY = floorY + 1.0;
                 entity.setPos(entity.getX(), newY, entity.getZ());
                 entity.setDeltaMovement(0, 0, 0);
                 trappedEntities.add(entity);
-                entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, DOMAIN_DURATION, 255, false, false));
+                //entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, DOMAIN_DURATION, 255, false, false));
                 entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, DOMAIN_DURATION, 1, false, false));
-                entity.addEffect(new MobEffectInstance(MobEffects.JUMP, DOMAIN_DURATION, 128, false, false));
+                //entity.addEffect(new MobEffectInstance(MobEffects.JUMP, DOMAIN_DURATION, 128, false, false));
                 if (entity instanceof Mob mob) {
                     mob.setNoAi(true);
                 }
@@ -170,7 +171,7 @@ public class UnlimitedVoid extends Skill {
 
     private void affectEntities(Level level) {
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, domainArea)) {
-            if (entity == domainOwner) continue;
+            if (entity == domainOwner || !canAffect(entity)) continue;
             trappedEntities.add(entity);
         }
         for (LivingEntity entity : trappedEntities){
@@ -185,6 +186,8 @@ public class UnlimitedVoid extends Skill {
                 player.getAbilities().flying = false;
                 player.setSprinting(false);
             }
+            SkillEvent.Hit hitEvent = new SkillEvent.Hit(domainOwner, this, entity);
+            MinecraftForge.EVENT_BUS.post(hitEvent);
         }
     }
 
@@ -196,7 +199,7 @@ public class UnlimitedVoid extends Skill {
             if (domainActive && domainCenter != null) {
                 domainTicks++;
                 spawnBarrierParticles(serverLevel, domainCenter, DOMAIN_RADIUS);
-                affectEntities(serverLevel);
+                if (domainTicks % 200 == 0) affectEntities(serverLevel);
                 if (domainTicks >= DOMAIN_DURATION || checkBarrierDamage(serverLevel)) this.deactivate(domainOwner);
             }
     }

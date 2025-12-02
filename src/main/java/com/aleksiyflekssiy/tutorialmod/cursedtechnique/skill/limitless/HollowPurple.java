@@ -121,8 +121,6 @@ public class HollowPurple extends Skill {
         }
     }
 
-
-
     private void createBlue(Level level, Player player, AnimationBlueEntity entity) {
         Vec3 eyePos = player.getEyePosition(1f);
         Vec3 lookVec = player.getLookAngle();

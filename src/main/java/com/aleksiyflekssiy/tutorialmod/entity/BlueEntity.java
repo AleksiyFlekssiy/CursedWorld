@@ -1,6 +1,10 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
+import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.Blue;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
+import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.item.custom.BlueItem;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
@@ -15,11 +19,14 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -68,6 +75,10 @@ public class BlueEntity extends Entity {
         startAmbientSound();
         this.entityData.set(CHANT, chant);
         this.entityData.set(IS_FOLLOWING, isFollowing);
+    }
+
+    private static Skill getSkill(){
+        return new Blue();
     }
 
     private void startAmbientSound() {
@@ -141,7 +152,8 @@ public class BlueEntity extends Entity {
         Level level = this.level();
 
         for (Entity entity : level.getEntitiesOfClass(Entity.class, area)) {
-            if (entity == owner || entity instanceof RedEntity) continue;
+            if (entity == owner || entity instanceof RedEntity
+            || !getSkill().canAffect(entity)) continue;
 
             Vec3 entityPos = entity.position();
             double distance = targetPos.distanceTo(entityPos);
@@ -157,6 +169,10 @@ public class BlueEntity extends Entity {
             if (distance < 0.5 || entity.horizontalCollision || entity.verticalCollision) {
                 float damage = (float) (pullStrength * 2.0);
                 entity.hurt(ModDamageSources.blue(this, this.owner), damage);
+                if (entity instanceof LivingEntity livingEntity) {
+                    SkillEvent.Hit hitEvent = new SkillEvent.Hit(this.owner, new Blue(), livingEntity);
+                    MinecraftForge.EVENT_BUS.post(hitEvent);
+                }
             }
         }
 

@@ -4,6 +4,8 @@ import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.effect.ModEffects;
+import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
+import com.aleksiyflekssiy.tutorialmod.util.AdaptationUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -117,14 +120,19 @@ public class Infinity extends Skill {
                 Vec3 direction = entityPos.subtract(playerPos).normalize();
                 Vec3 currentMotion = entity.getDeltaMovement();
 
-                if (isOutputIncreased) {
-                    repelEntity(entity, direction, player, distance);
-
-                } else if (distance <= MIN_RADIUS) {
-                    entity.setDeltaMovement(direction.scale(0.2));
-                    entity.hurtMarked = true;
-                } else {
-                    slowdownEntity(entity, distance, currentMotion);
+                if (Infinity.this.canAffect(entity)) {
+                    if (isOutputIncreased) {
+                        repelEntity(entity, direction, player, distance);
+                    } else if (distance <= MIN_RADIUS) {
+                        entity.setDeltaMovement(direction.scale(0.2));
+                        entity.hurtMarked = true;
+                    } else {
+                        slowdownEntity(entity, distance, currentMotion);
+                    }
+                }
+                if (entity instanceof LivingEntity livingEntity && Infinity.this.canAffect(livingEntity)) {
+                    SkillEvent.Hit hitEvent = new SkillEvent.Hit(player, Infinity.this, livingEntity);
+                    MinecraftForge.EVENT_BUS.post(hitEvent);
                 }
 
                 spawnAmbientParticles(entityPos, level, isCrouching);
@@ -135,22 +143,21 @@ public class Infinity extends Skill {
             }
         }
 
-        private static void slowdownEntity(Entity entity, double distance, Vec3 currentMotion) {
+        private void slowdownEntity(Entity entity, double distance, Vec3 currentMotion) {
             double slowdownFactor = Math.max(0, (distance - MIN_RADIUS) / (MAX_RADIUS - MIN_RADIUS));
             Vec3 newMotion = currentMotion.scale(slowdownFactor);
             entity.setDeltaMovement(newMotion);
             entity.hurtMarked = true;
         }
 
-        private static void repelEntity(Entity entity, Vec3 direction, LivingEntity causer, double distance) {
+        private void repelEntity(Entity entity, Vec3 direction, LivingEntity causer, double distance) {
+            if (entity instanceof LivingEntity livingEntity) applyPressureDamage(livingEntity, causer, distance);
             Vec3 newMotion = direction.scale(REPEL_FORCE);
             entity.setDeltaMovement(newMotion);
             entity.hurtMarked = true;
-
-            if (entity instanceof LivingEntity livingEntity) applyPressureDamage(livingEntity, causer, distance);
         }
 
-        private static void applyPressureDamage(LivingEntity entity, LivingEntity causer, double distance) {
+        private void applyPressureDamage(LivingEntity entity, LivingEntity causer, double distance) {
             if (entity.horizontalCollision) {
                 // Урон = (сила отталкивания / расстояние) для обратной пропорции
                 float damage = (float) (REPEL_FORCE * (MAX_RADIUS - Math.max(0.1, distance))); // Избегаем деления на 0
@@ -251,6 +258,9 @@ public class Infinity extends Skill {
     @SubscribeEvent
     public static void onLivingAttack(LivingAttackEvent event) {
         if (event.getEntity().hasEffect(ModEffects.INFINITY.get())){
+            if (event.getSource().getDirectEntity() != null && event.getSource().getDirectEntity() instanceof LivingEntity livingEntity) {
+                if (AdaptationUtil.checkAdaptation(new Infinity(), livingEntity)) return;
+            }
             event.setCanceled(true);
         }
     }

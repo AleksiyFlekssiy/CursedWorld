@@ -9,7 +9,9 @@ import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import com.aleksiyflekssiy.tutorialmod.item.custom.WheelOfHarmonyItem;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
+import com.aleksiyflekssiy.tutorialmod.util.AdaptationUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -78,16 +80,22 @@ public class ForgeEvents {
     }
 
     @SubscribeEvent
+    public static void onPlayerHitSkill(SkillEvent.Hit event) {
+        if (event.getTarget() instanceof Player player) {
+            if (!AdaptationUtil.checkAdaptation(event.getSkill(), player)) {
+                AdaptationUtil.addOrSpeedUpAdaptationToSkill(event.getSkill(), player);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void playerAboutToTakeDamage(LivingHurtEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && !player.level().isClientSide) {
-            ItemStack item = player.getInventory().getArmor(3);
-            if (item.getItem() instanceof WheelOfHarmonyItem wheel){
-                if (!wheel.checkAdaptation(event.getSource().type(), null, player)) {
-                    wheel.addOrSpeedUpAdaptationToDamage(event.getSource().type(), event.getAmount(), player);
-                }
-                else {
-                    event.setCanceled(true);
-                }
+            if (!AdaptationUtil.checkAdaptation(event.getSource().type(), player)) {
+                AdaptationUtil.addOrSpeedUpAdaptationToDamage(event.getSource().type(), event.getAmount(), player);
+            }
+            else {
+                event.setCanceled(true);
             }
         }
     }
@@ -96,13 +104,10 @@ public class ForgeEvents {
     public static void beforeEffectApplication(MobEffectEvent.Applicable event) {
         if (event.getEntity() instanceof ServerPlayer player && !player.level().isClientSide) {
             if (!event.getEffectInstance().getEffect().isBeneficial()){
-                ItemStack item = player.getInventory().getArmor(3);
-                if (item.getItem() instanceof WheelOfHarmonyItem wheel){
-                    if (!wheel.checkAdaptation(null, event.getEffectInstance().getEffect(), player)) {
-                        wheel.addOrSpeedUpAdaptationToEffect(event.getEffectInstance(), player);
-                    }
-                    else event.setResult(Event.Result.DENY);
+                if (!AdaptationUtil.checkAdaptation(event.getEffectInstance().getEffect(), player)) {
+                    AdaptationUtil.addOrSpeedUpAdaptationToEffect(event.getEffectInstance(), player);
                 }
+                else event.setResult(Event.Result.DENY);
             }
         }
     }
