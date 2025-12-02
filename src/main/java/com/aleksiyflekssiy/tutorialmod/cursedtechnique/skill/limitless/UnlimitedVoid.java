@@ -193,9 +193,6 @@ public class UnlimitedVoid extends Skill {
             trappedEntities.add(entity);
         }
         for (LivingEntity entity : trappedEntities){
-            entity.setPos(entity.getX(), entity.getY(), entity.getZ());
-            //entity.setDeltaMovement(0, 0, 0);
-            entity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
             if (entity instanceof Mob mob) {
                 mob.setNoAi(true);
             } else if (entity instanceof Player player) {
