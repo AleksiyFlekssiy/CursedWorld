@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
+import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.item.custom.BlueItem;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
@@ -155,7 +156,7 @@ public class BlueEntity extends Entity {
 
             if (distance < 0.5 || entity.horizontalCollision || entity.verticalCollision) {
                 float damage = (float) (pullStrength * 2.0);
-                entity.hurt(entity.damageSources().magic(), damage);
+                entity.hurt(ModDamageSources.blue(this, this.owner), damage);
             }
         }
 

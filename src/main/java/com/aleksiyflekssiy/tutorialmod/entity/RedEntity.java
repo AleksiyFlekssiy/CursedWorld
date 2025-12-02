@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
 import com.aleksiyflekssiy.tutorialmod.client.particle.LaunchRingParticleData;
+import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import com.aleksiyflekssiy.tutorialmod.util.CustomExplosion;
@@ -159,7 +160,7 @@ public class RedEntity extends Projectile {
             } else {
                 Vec3 toPlayer = this.position().subtract(entity.position()).normalize().scale(explosionPower * 2);
                 entity.setDeltaMovement(entity.getDeltaMovement().add(toPlayer).scale(speed));
-                entity.hurt(level().damageSources().explosion(this, this.owner), explosionPower * 2f);
+                entity.hurt(ModDamageSources.red(this, this.owner), explosionPower * 2f);
                 entity.hurtMarked = true;
             }
         }
@@ -285,7 +286,7 @@ public class RedEntity extends Projectile {
             if (result.getType() == HitResult.Type.ENTITY) {
                 EntityHitResult entityHit = (EntityHitResult) result;
                 Entity hitEntity = entityHit.getEntity();
-                hitEntity.hurt(level().damageSources().generic(), speed * explosionPower);
+                hitEntity.hurt(ModDamageSources.red(this, this.owner), speed * explosionPower);
                 hitEntity.setDeltaMovement(this.getDeltaMovement().scale(speed));
                 if (hitEntity instanceof BlueEntity blueEntity) {
                     // Гигантский взрыв
@@ -352,7 +353,7 @@ public class RedEntity extends Projectile {
                 double distance = entity.distanceToSqr(x, y, z);
                 if (distance <= radius * radius) {
                     float damage = 1000.0F * (float) (1.0 - Math.sqrt(distance) / radius); // Урон уменьшается с расстоянием
-                    entity.hurt(damageSources.generic(), entity == owner ? damage / 10 : damage);
+                    entity.hurt(ModDamageSources.hollow_purple(this, this.owner), entity == owner ? damage / 10 : damage);
                 }
             }
 

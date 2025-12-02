@@ -2,6 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.effect.ModEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -55,7 +56,6 @@ public class Infinity extends Skill {
             case RELEASING -> increaseInfinityOutput.release(entity);
         }
     }
-
 
     public class InfinitySwitch extends Skill{
 
@@ -118,7 +118,7 @@ public class Infinity extends Skill {
                 Vec3 currentMotion = entity.getDeltaMovement();
 
                 if (isOutputIncreased) {
-                    repelEntity(entity, direction, level, distance);
+                    repelEntity(entity, direction, player, distance);
 
                 } else if (distance <= MIN_RADIUS) {
                     entity.setDeltaMovement(direction.scale(0.2));
@@ -142,22 +142,22 @@ public class Infinity extends Skill {
             entity.hurtMarked = true;
         }
 
-        private static void repelEntity(Entity entity, Vec3 direction, Level level, double distance) {
+        private static void repelEntity(Entity entity, Vec3 direction, LivingEntity causer, double distance) {
             Vec3 newMotion = direction.scale(REPEL_FORCE);
             entity.setDeltaMovement(newMotion);
             entity.hurtMarked = true;
 
-            applyPressureDamage(entity, level, distance);
+            if (entity instanceof LivingEntity livingEntity) applyPressureDamage(livingEntity, causer, distance);
         }
 
-        private static void applyPressureDamage(Entity entity, Level level, double distance) {
+        private static void applyPressureDamage(LivingEntity entity, LivingEntity causer, double distance) {
             if (entity.horizontalCollision) {
                 // Урон = (сила отталкивания / расстояние) для обратной пропорции
                 float damage = (float) (REPEL_FORCE * (MAX_RADIUS - Math.max(0.1, distance))); // Избегаем деления на 0
-                entity.hurt(entity.damageSources().magic(), damage);
+                entity.hurt(ModDamageSources.infinity(causer), damage);
 
                 Vec3 entityPos = entity.position();
-                if (level instanceof ServerLevel serverLevel) {
+                if (entity.level() instanceof ServerLevel serverLevel) {
                     serverLevel.sendParticles(
                             ParticleTypes.CRIT,
                             entityPos.x, entityPos.y, entityPos.z,

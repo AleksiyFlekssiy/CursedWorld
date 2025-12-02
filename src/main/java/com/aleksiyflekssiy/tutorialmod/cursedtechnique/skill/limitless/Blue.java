@@ -49,6 +49,7 @@ public class Blue extends Skill {
         // Длительность следа: 0.5 секунды (10 тиков)
         public void activate(LivingEntity entity){
             if (entity.level().isClientSide() || !(entity instanceof ServerPlayer player)) return;
+            if (this.canUse(player)) {
                 AABB pullArea = new AABB(player.position().add(-PULL_RANGE, -PULL_RANGE, -PULL_RANGE), player.position().add(PULL_RANGE, PULL_RANGE, PULL_RANGE));
                 List<Entity> entitiesSelf = player.level().getEntitiesOfClass(Entity.class, pullArea);
                 for (Entity affectedEntity : entitiesSelf) {
@@ -56,6 +57,9 @@ public class Blue extends Skill {
                     affectedEntity.setDeltaMovement(affectedEntity.getDeltaMovement().add(toPlayer));
                     spawnTrailParticles((ServerLevel) player.level(), affectedEntity);
                 }
+                this.setCooldown(player, 100);
+            }
+            else System.out.println("Can't use");
         }
 
         public void spawnTrailParticles(ServerLevel level, Entity entity) {
@@ -83,28 +87,25 @@ public class Blue extends Skill {
 
         public void activate(LivingEntity entity){
             if (entity instanceof ServerPlayer player) {
-                    Vec3 eyePos = player.getEyePosition(1.0F); // Позиция глаз игрока
-                    Vec3 lookVec = player.getViewVector(1.0F); // Вектор взгляда
-                    Vec3 endPos = eyePos.add(lookVec.x * TELEPORT_RANGE, lookVec.y * TELEPORT_RANGE, lookVec.z * TELEPORT_RANGE);
-
-                    // Трассировка взгляда
-                    ClipContext context = new ClipContext(eyePos, endPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
-                    HitResult result = player.level().clip(context);
-
-                    if (result.getType() == HitResult.Type.BLOCK) {
-                        // Если попали в блок, телепортируемся на верхнюю поверхность
-                        BlockHitResult blockHit = (BlockHitResult) result;
-                        int blockX = blockHit.getBlockPos().getX();
-                        int blockY = blockHit.getBlockPos().getY();
-                        int blockZ = blockHit.getBlockPos().getZ();
-
-                        // Устанавливаем точку на верхней грани блока
-                        Vec3 teleportPos = new Vec3(blockX + 0.5, blockY + 1.0, blockZ + 0.5);
-                        player.teleportTo(teleportPos.x, teleportPos.y, teleportPos.z);
-                    } else {
-                        // Если в воздухе, телепортируемся на максимальную дистанцию
-                        player.teleportTo(endPos.x, endPos.y, endPos.z);
-                    }
+                Vec3 eyePos = player.getEyePosition(1.0F); // Позиция глаз игрока
+                Vec3 lookVec = player.getViewVector(1.0F); // Вектор взгляда
+                Vec3 endPos = eyePos.add(lookVec.x * TELEPORT_RANGE, lookVec.y * TELEPORT_RANGE, lookVec.z * TELEPORT_RANGE);
+                // Трассировка взгляда
+                ClipContext context = new ClipContext(eyePos, endPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
+                HitResult result = player.level().clip(context);
+                if (result.getType() == HitResult.Type.BLOCK) {
+                    // Если попали в блок, телепортируемся на верхнюю поверхность
+                    BlockHitResult blockHit = (BlockHitResult) result;
+                    int blockX = blockHit.getBlockPos().getX();
+                    int blockY = blockHit.getBlockPos().getY();
+                    int blockZ = blockHit.getBlockPos().getZ();
+                    // Устанавливаем точку на верхней грани блока
+                    Vec3 teleportPos = new Vec3(blockX + 0.5, blockY + 1.0, blockZ + 0.5);
+                    player.teleportTo(teleportPos.x, teleportPos.y, teleportPos.z);
+                } else {
+                    // Если в воздухе, телепортируемся на максимальную дистанцию
+                    player.teleportTo(endPos.x, endPos.y, endPos.z);
+                }
             }
         }
 
@@ -125,7 +126,7 @@ public class Blue extends Skill {
             if (!entity.level().isClientSide()) {
                 Level level = entity.level();
                 boolean isFollowing = false;
-                if (entity instanceof Player player) {
+                if (entity instanceof Player player && this.canUse(player)) {
                     if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
                     if (player.isCrouching()) {
                         isFollowing = true;
@@ -134,33 +135,37 @@ public class Blue extends Skill {
                     createSimpleBlue(level, player, blue);
                     CHANT = 0;
                     CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
+                    this.setCooldown(player, 100);
                 }
             }
         }
 
         public void charge(LivingEntity livingEntity, int chargeTicks) {
             if (livingEntity instanceof Player player &&  player.level() instanceof ServerLevel serverLevel) {
-                // Проверка достижения фаз
-                if (chargeTicks == 100 && CHANT == 2) {
-                    if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                    player.sendSystemMessage(Component.literal("Eyes of Wisdom"));
-                    CHANT = 3;
-                    serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_3.get(), SoundSource.NEUTRAL, 1f, 1f);
-                    CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                } else if (chargeTicks == 75 && CHANT == 1) {
-                    if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                    player.sendSystemMessage(Component.literal("Twilight"));
-                    CHANT = 2;
-                    serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_2.get(), SoundSource.NEUTRAL, 1f, 1f);
-                    CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                } else if (chargeTicks == 50 && CHANT == 0) {
-                    if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                    player.sendSystemMessage(Component.literal("Phase"));
-                    CHANT = 1;
-                    serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_1.get(), SoundSource.NEUTRAL, 1f, 1f);
-                    CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
+                if (this.canUse(player)) {
+                    // Проверка достижения фаз
+                    if (chargeTicks == 100 && CHANT == 2) {
+                        if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
+                        player.sendSystemMessage(Component.literal("Eyes of Wisdom"));
+                        CHANT = 3;
+                        serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_3.get(), SoundSource.NEUTRAL, 1f, 1f);
+                        CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
+                    } else if (chargeTicks == 75 && CHANT == 1) {
+                        if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
+                        player.sendSystemMessage(Component.literal("Twilight"));
+                        CHANT = 2;
+                        serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_2.get(), SoundSource.NEUTRAL, 1f, 1f);
+                        CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
+                    } else if (chargeTicks == 50 && CHANT == 0) {
+                        if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
+                        player.sendSystemMessage(Component.literal("Phase"));
+                        CHANT = 1;
+                        serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_1.get(), SoundSource.NEUTRAL, 1f, 1f);
+                        CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
+                    }
+                    spawnRotatingParticles(serverLevel, player.position(), 5f, 10, chargeTicks);
                 }
-                spawnRotatingParticles(serverLevel, player.position(), 5f, 10, chargeTicks);
+                else System.out.println("Can't use");
             }
         }
 
