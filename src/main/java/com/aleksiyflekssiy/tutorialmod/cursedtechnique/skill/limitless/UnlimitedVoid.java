@@ -2,16 +2,15 @@ package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
-import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.LimitlessCursedTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.item.custom.*;
 import com.aleksiyflekssiy.tutorialmod.network.InputLockPacket;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
-import com.aleksiyflekssiy.tutorialmod.util.MovementUtils;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -33,12 +32,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.MovementInputUpdateEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
@@ -296,6 +292,11 @@ public class UnlimitedVoid extends Skill {
     @Mod.EventBusSubscriber(modid = "tutorialmod", bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class PlayerDisabler {
 
+        public static boolean isScreenBanned(Screen screen) {
+            return screen instanceof AbstractContainerScreen<?> ||
+                    screen instanceof ChatScreen;
+        }
+
         @SubscribeEvent
         public static void immobilize(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END) return;
@@ -319,7 +320,6 @@ public class UnlimitedVoid extends Skill {
                     mc.options.keyDrop.setDown(false);
                     mc.options.keySwapOffhand.setDown(false);
 
-                    mc.options.keyInventory.setDown(false);
                     mc.options.keyChat.setDown(false);
                     mc.options.keyCommand.setDown(false);
 
@@ -328,12 +328,42 @@ public class UnlimitedVoid extends Skill {
                     mc.options.keyPlayerList.setDown(false);
                     mc.options.keyTogglePerspective.setDown(false);
 
-                    player.setYRot(player.getPersistentData().getFloat("yaw"));
+                    player.setYRot(player.getPersistentData().getFloat("yaw") + 180f);
                     player.setXRot(player.getPersistentData().getFloat("pitch"));
+
+                    mc.options.keyInventory.setDown(false);
+                    if (isScreenBanned(mc.screen)) mc.screen = null;
                     System.out.println("SHOULD WORK");
                 }
             }
+            if (mc.screen == null) System.out.println("No screen");
+            else System.out.println(mc.screen.getClass().getSimpleName());
         }
+
+        @SubscribeEvent
+        public static void lockScreenOpening(ScreenEvent.Opening event) {
+            Minecraft mc = Minecraft.getInstance();
+            LocalPlayer player = mc.player;
+            if (player == null) return;
+            if (player.getPersistentData().contains("lock")){
+                if (player.getPersistentData().getBoolean("lock")) {
+                    if (isScreenBanned(event.getNewScreen())) event.setCanceled(true);
+                }
+            }
+        }
+
+        @SubscribeEvent
+        public static void lockMouseButtonInput(InputEvent.MouseButton.Pre event) {
+            Minecraft mc = Minecraft.getInstance();
+            LocalPlayer player = mc.player;
+            if (player == null) return;
+            if (player.getPersistentData().contains("lock")){
+                if (player.getPersistentData().getBoolean("lock")) {
+                    if (isScreenBanned(mc.screen)) event.setCanceled(true);
+                }
+            }
+        }
+
     }
 
     @Override
