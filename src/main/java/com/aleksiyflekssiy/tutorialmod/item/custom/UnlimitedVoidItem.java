@@ -283,7 +283,6 @@ public class UnlimitedVoidItem extends Item {
         }
 
         private static void checkAndCancel(Player player, net.minecraftforge.eventbus.api.Event event) {
-            System.out.println("In the method");
             if (player.level() instanceof ServerLevel serverLevel) {
                 for (Player serverPlayer : serverLevel.players()) {
                     for (ItemStack stack : serverPlayer.getInventory().items) {

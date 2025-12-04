@@ -2,7 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.DomainExpansionSkill;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.item.custom.*;
 import com.aleksiyflekssiy.tutorialmod.network.InputLockPacket;
@@ -42,129 +42,16 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.*;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class UnlimitedVoid extends Skill {
-    private static final float DOMAIN_RADIUS = 15.0F;
-    private static final float BOUNDARY_THICKNESS = 1.2F;
-    private static final int DOMAIN_DURATION = 600;
-
-    private boolean domainActive = false;
-    private int charge = 0;
-    private int domainTicks = 0;
-    private final Map<BlockPos, BlockState> originalBlocks = new HashMap<>();
-    private final List<BlockPos> barrierBlocks = new ArrayList<>();
-    private AABB domainArea = null;
-    private Vec3 domainCenter = null;
-    private final Set<LivingEntity> trappedEntities = new HashSet<>();
-    private Player domainOwner = null;
+public class UnlimitedVoid extends DomainExpansionSkill {
 
     public UnlimitedVoid(){
-        MinecraftForge.EVENT_BUS.register(this);
+
     }
 
     @Override
-    public void use(LivingEntity entity, UseType type, int charge) {
-        if (!(entity instanceof ServerPlayer)) return;
-        switch (type){
-            case ACTIVATION -> {
-                if (!domainActive) this.activate((Player) entity, entity.level());
-                else this.deactivate(entity);
-            }
-            case CHARGING -> this.charge(entity, charge);
-            case RELEASING -> this.release(entity);
-        }
-    }
-
-    public void activate(Player player, Level level) {
-        if (level.isClientSide()) return;
-
-        if (!domainActive) {
-            if (!CursedEnergyCapability.isEnoughEnergy(player, 50)) return;
-            // Центр сферы над игроком, пол под ногами
-            activateDomainExpansion((ServerLevel) level, player);
-            player.sendSystemMessage(Component.literal("Domain Expansion: Unlimited Void activated!"));
-
-            CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 50);
-        }
-    }
-
-    public void deactivate(LivingEntity entity) {
-        if (domainActive) {
-            for (LivingEntity trapped : trappedEntities) {
-                trapped.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
-                if (trapped instanceof Player affectedPlayer) {
-                    affectedPlayer.getAbilities().mayBuild = true;
-                    affectedPlayer.getAbilities().mayfly = affectedPlayer.getAbilities().instabuild;
-                    ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) affectedPlayer), new InputLockPacket(false, 0, 0));
-                }
-            }
-            applyTechniqueBurnout(domainOwner);
-            restoreOriginalBlocks((ServerLevel) entity.level());
-        }
-    }
-
-    public void charge(LivingEntity entity, int charge){
-        if (charge <= 200){
-            if (charge % 100 == 0) {
-                this.charge++;
-                entity.sendSystemMessage(Component.literal("Charge: " + this.charge));
-            }
-        }
-    }
-
-    public void release(LivingEntity entity){
-        if (!domainActive) activateDomainExpansion((ServerLevel) entity.level(), (Player) entity);
-        this.charge = 0;
-    }
-
-    private void activateDomainExpansion(ServerLevel level, Player player) {
-        float radius = DOMAIN_RADIUS + DOMAIN_RADIUS * charge;
-        double floorY = player.blockPosition().getY() - 0.1; // Пол на уровне ног игрока
-
-        Vec3 center = new Vec3(player.getX(), floorY + radius / 2.0, player.getZ());
-        level.playSound(null, player.blockPosition(), SoundEvents.WITHER_SPAWN, player.getSoundSource(), 1.0F, 1.0F);
-        level.sendParticles(ParticleTypes.FLASH, center.x, center.y, center.z, 1, 0, 0, 0, 0);
-
-        domainActive = true;
-        domainCenter = center;
-        domainTicks = 0;
-        domainOwner = player;
-
-        BlockPos centerPos = new BlockPos((int) center.x, (int) center.y, (int) center.z);
-        int radiusInt = (int) Math.ceil(radius);
-        player.setPos(player.getX(), floorY + 1.1, player.getZ());
-
-        for (int x = -radiusInt; x <= radiusInt; x++) {
-            for (int y = -radiusInt; y <= radiusInt; y++) {
-                for (int z = -radiusInt; z <= radiusInt; z++) {
-                    BlockPos pos = centerPos.offset(x, y, z);
-                    double distanceSq = center.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-                    double distance = Math.sqrt(distanceSq);
-
-                    if (distance <= radius) {
-                        originalBlocks.put(pos.immutable(), level.getBlockState(pos));
-                        if (distance >= radius - BOUNDARY_THICKNESS && distance <= radius + BOUNDARY_THICKNESS) {
-                            level.setBlock(pos, Blocks.BLACK_CONCRETE.defaultBlockState(), 3);
-                            barrierBlocks.add(pos);
-                        } else if (Math.abs(pos.getY() - floorY) < 1.0) {
-                            level.setBlock(pos, Blocks.BLACK_CONCRETE.defaultBlockState(), 3);
-                            barrierBlocks.add(pos);
-                        } else {
-                            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Фиксация всех сущностей, включая игроков (кроме владельца)
-        domainArea = new AABB(center.add(-radius, -radius, -radius),
-                center.add(radius, radius, radius));
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, domainArea)) {
+    protected void setupActivation(Player player) {
+        for (LivingEntity entity : affectedEntities) {
             if (entity != player && canAffect(entity)) {
-                double newY = floorY + 1.0;
-                entity.setPos(entity.getX(), newY, entity.getZ());
-                entity.setDeltaMovement(0, 0, 0);
-                trappedEntities.add(entity);
                 entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, DOMAIN_DURATION, 1, false, false));
                 if (entity instanceof Mob mob) {
                     mob.setNoAi(true);
@@ -176,19 +63,38 @@ public class UnlimitedVoid extends Skill {
         }
     }
 
-    private void affectEntities(Level level) {
+    @Override
+    protected void setupDeactivation(Player player) {
+        for (LivingEntity trapped : affectedEntities) {
+            if (trapped instanceof Player affectedPlayer) {
+                affectedPlayer.getAbilities().mayBuild = true;
+                affectedPlayer.getAbilities().mayfly = affectedPlayer.getAbilities().instabuild;
+                ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) affectedPlayer), new InputLockPacket(false, 0, 0));
+            }
+        }
+    }
+
+    @Override
+    protected void applySureHitEffect() {
+        Level level = domainOwner.level();
+        //Вторгающийся не имеет domainArea.
+        if (domainArea == null) return;
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, domainArea)) {
             if (entity == domainOwner || !canAffect(entity)) {
-                if (entity instanceof Player player && trappedEntities.contains(player)) ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new InputLockPacket(false, 0, 0));
-                trappedEntities.remove(entity);
+                if (entity instanceof Player player && affectedEntities.contains(player)) {
+                    System.out.println(player.getDisplayName().getString() + " is either an owner or can't be affected");
+                    ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new InputLockPacket(false, 0, 0));
+                }
+                affectedEntities.remove(entity);
                 continue;
             }
-            if (entity instanceof Player player && !trappedEntities.contains(player)) {
+            if (entity instanceof Player player && !affectedEntities.contains(player)) {
+                System.out.println(player.getDisplayName().getString() + " is affected");
                 ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() ->  (ServerPlayer) player), new InputLockPacket(true, player.getYRot(), player.getXRot()));
             }
-            trappedEntities.add(entity);
+            affectedEntities.add(entity);
         }
-        for (LivingEntity entity : trappedEntities){
+        for (LivingEntity entity : affectedEntities){
             if (entity instanceof Mob mob) {
                 mob.setNoAi(true);
             } else if (entity instanceof Player player) {
@@ -199,65 +105,6 @@ public class UnlimitedVoid extends Skill {
             }
             SkillEvent.Hit hitEvent = new SkillEvent.Hit(domainOwner, this, entity);
             MinecraftForge.EVENT_BUS.post(hitEvent);
-        }
-    }
-
-    @SubscribeEvent
-    public void tick(TickEvent.ServerTickEvent event) {
-            if (domainOwner == null || event.phase == TickEvent.Phase.END) return;
-            ServerLevel serverLevel = (ServerLevel) domainOwner.level();
-            domainOwner.sendSystemMessage(Component.literal(String.valueOf(domainTicks)));
-            if (domainActive && domainCenter != null) {
-                domainTicks++;
-                spawnBarrierParticles(serverLevel, domainCenter, DOMAIN_RADIUS);
-                affectEntities(serverLevel);
-                if (domainTicks >= DOMAIN_DURATION || checkBarrierDamage(serverLevel)) this.deactivate(domainOwner);
-            }
-    }
-
-    private void restoreOriginalBlocks(ServerLevel level) {
-        for (Map.Entry<BlockPos, BlockState> entry : originalBlocks.entrySet()) {
-            level.setBlock(entry.getKey(), entry.getValue(), 3);
-        }
-        level.playSound(null, new BlockPos((int) domainCenter.x, (int) domainCenter.y, (int) domainCenter.z),
-                SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 1.0F, 1.0F);
-        spawnParticles(level, domainCenter, DOMAIN_RADIUS);
-
-        for (LivingEntity trapped : trappedEntities) {
-            trapped.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
-            if (trapped instanceof Mob mob) {
-                mob.setNoAi(false);
-            }
-            if (trapped instanceof Player player) {
-                player.getAbilities().mayBuild = true;
-                player.getAbilities().mayfly = player.getAbilities().instabuild;
-            }
-        }
-        trappedEntities.clear();
-        barrierBlocks.clear();
-        originalBlocks.clear();
-        domainActive = false;
-        domainCenter = null;
-        domainOwner = null;
-        domainArea = null;
-    }
-
-    private boolean checkBarrierDamage(Level level) {
-        int blocks = barrierBlocks.size();
-        int brokenBlocks = 0;
-        for (BlockPos barrierBlock : barrierBlocks) {
-            if (level.getBlockState(barrierBlock).getBlock() != Blocks.BLACK_CONCRETE) brokenBlocks++;
-        }
-        return ((float) brokenBlocks / blocks) >= 0.125f;
-    }
-
-    private void applyTechniqueBurnout(Player player){
-        for (ItemStack stack : player.getInventory().items){
-            if (stack.getItem() instanceof InfinityItem item) player.getCooldowns().addCooldown(item, 1200);
-            else if (stack.getItem() instanceof BlueItem item) player.getCooldowns().addCooldown(item, 1200);
-            else if (stack.getItem() instanceof RedItem item) player.getCooldowns().addCooldown(item, 1200);
-            else if (stack.getItem() instanceof HollowPurpleItem item) player.getCooldowns().addCooldown(item, 1200);
-            else if (stack.getItem() instanceof UnlimitedVoidItem item) player.getCooldowns().addCooldown(item, 1200);
         }
     }
 
@@ -328,7 +175,7 @@ public class UnlimitedVoid extends Skill {
                     mc.options.keyPlayerList.setDown(false);
                     mc.options.keyTogglePerspective.setDown(false);
 
-                    player.setYRot(player.getPersistentData().getFloat("yaw") + 180f);
+                    player.setYRot(player.getPersistentData().getFloat("yaw"));
                     player.setXRot(player.getPersistentData().getFloat("pitch"));
 
                     mc.options.keyInventory.setDown(false);
@@ -336,8 +183,6 @@ public class UnlimitedVoid extends Skill {
                     System.out.println("SHOULD WORK");
                 }
             }
-            if (mc.screen == null) System.out.println("No screen");
-            else System.out.println(mc.screen.getClass().getSimpleName());
         }
 
         @SubscribeEvent
