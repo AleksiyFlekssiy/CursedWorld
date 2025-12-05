@@ -80,7 +80,7 @@ public abstract class Skill {
         }
     }
 
-    protected void setCooldown(Player player, int cd) {
+    public void setCooldown(Player player, int cd) {
         CompoundTag data = player.getPersistentData();
         String cooldownKey = "cooldown_" + getName().toLowerCase();
         data.putLong(cooldownKey, player.level().getGameTime());
