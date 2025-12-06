@@ -3,6 +3,7 @@ package com.aleksiyflekssiy.tutorialmod.capability;
 import com.aleksiyflekssiy.tutorialmod.network.CursedEnergySyncPacket;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -15,21 +16,21 @@ import org.jetbrains.annotations.Nullable;
 public class CursedEnergyCapability {
     public static final Capability<ICursedEnergy> CURSED_ENERGY = CapabilityManager.get(new CapabilityToken<>() {});
 
-    public static int getCursedEnergy(Player player) {
-        return player.getCapability(CURSED_ENERGY)
+    public static int getCursedEnergy(Entity entity) {
+        return entity.getCapability(CURSED_ENERGY)
                 .map(ICursedEnergy::getCursedEnergy)
                 .orElse(0);
     }
 
-    public static void setCursedEnergy(Player player, int energy) {
-        player.getCapability(CURSED_ENERGY).ifPresent(e -> {
+    public static void setCursedEnergy(Entity entity, int energy) {
+        entity.getCapability(CURSED_ENERGY).ifPresent(e -> {
             e.setCursedEnergy(energy);
-            CursedEnergySyncPacket.updateToClient(e, player);
+            CursedEnergySyncPacket.updateToClient(e, entity);
         });
     }
 
-    public static boolean isEnoughEnergy(Player player, int amount) {
-        return getCursedEnergy(player) >= amount;
+    public static boolean isEnoughEnergy(Entity entity, int amount) {
+        return getCursedEnergy(entity) >= amount;
     }
 
     public static class Provider implements ICapabilitySerializable<CompoundTag>{

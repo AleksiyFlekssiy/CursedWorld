@@ -6,6 +6,7 @@ import com.aleksiyflekssiy.tutorialmod.capability.ICursedEnergy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -39,7 +40,7 @@ public class CursedEnergySyncPacket {
         ctx.get().setPacketHandled(true);
     }
 
-    public static void updateToClient(ICursedEnergy energy, Player player) {
+    public static void updateToClient(ICursedEnergy energy, Entity player) {
         ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new CursedEnergySyncPacket(energy.getCursedEnergy()));
     }
 }

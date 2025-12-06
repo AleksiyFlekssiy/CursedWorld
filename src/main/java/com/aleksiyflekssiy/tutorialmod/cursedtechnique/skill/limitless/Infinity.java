@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
 
+import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
@@ -32,7 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-@Mod.EventBusSubscriber(modid = "tutorialmod", bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Infinity extends Skill {
     private static final float MIN_RADIUS = 2.0F;
     private static final float MAX_RADIUS = 5.0F;
@@ -76,11 +77,11 @@ public class Infinity extends Skill {
         }
 
         public void applyInfinityEffect(Player player, Level level) {
-            if (!(player instanceof ServerPlayer) || !CursedEnergyCapability.isEnoughEnergy(player, 1)) return;
-            int INTERVAL = 20;
+            if (!(player instanceof ServerPlayer)) return;
+            int INTERVAL = 10;
             if (tick >= INTERVAL){
-                CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 1);
                 tick = 0;
+                if (!spendCursedEnergy(player, 1)) return;
             }
             else tick++;
             Vec3 playerPos = player.position();
@@ -122,6 +123,7 @@ public class Infinity extends Skill {
 
                 if (Infinity.this.canAffect(entity)) {
                     if (isOutputIncreased) {
+                        if (!spendCursedEnergy(player, 1)) return;
                         repelEntity(entity, direction, player, distance);
                     } else if (distance <= MIN_RADIUS) {
                         entity.setDeltaMovement(direction.scale(0.2));

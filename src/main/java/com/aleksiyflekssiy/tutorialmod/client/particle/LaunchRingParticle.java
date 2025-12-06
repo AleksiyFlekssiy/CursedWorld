@@ -40,7 +40,6 @@ public class LaunchRingParticle extends TextureSheetParticle {
                 this.direction = motion.normalize();
             }
         }
-        else System.out.println("NOTHING");
         // Не меняем direction на (0, 0, 1), чтобы сохранить последнее валидное значение
     }
 

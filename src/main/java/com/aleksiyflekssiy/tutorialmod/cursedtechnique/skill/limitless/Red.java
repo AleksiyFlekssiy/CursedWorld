@@ -1,13 +1,12 @@
 package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
 
-import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,10 +38,9 @@ public class Red extends Skill {
 
         public void activate(LivingEntity entity) {
             if (entity instanceof Player player) {
-                if (!CursedEnergyCapability.isEnoughEnergy(player, 15)) return;
+                if (!spendCursedEnergy(entity, 15)) return;
                 RedEntity redEntity = new RedEntity(ModEntities.RED_ENTITY.get(), player.level(), player, 60, 5, 5f, RedEntity.ATTACK_TYPE.MELEE, 0);
                 createRed(player.level(), player, redEntity);
-                CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 15);
             }
         }
 
@@ -60,37 +58,36 @@ public class Red extends Skill {
     public class RedSummon extends Skill{
 
         public void charge(LivingEntity entity, int charge){
-            if (entity instanceof Player player &&  player.level() instanceof ServerLevel serverLevel) {
-                // Проверка достижения фаз
-                if (charge == 100 && CHANT == 2) {
-                    if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                    player.sendSystemMessage(Component.literal("Pillar of Light"));
-                    CHANT = 3;
-                    serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_3.get(), SoundSource.NEUTRAL, 1f, 1f);
-                    CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                } else if (charge == 75 && CHANT == 1) {
-                    if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                    player.sendSystemMessage(Component.literal("Paramita"));
-                    CHANT = 2;
-                    serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_2.get(), SoundSource.NEUTRAL, 1f, 1f);
-                    CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                } else if (charge == 50 && CHANT == 0) {
-                    if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                    player.sendSystemMessage(Component.literal("Phase"));
-                    CHANT = 1;
-                    serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_1.get(), SoundSource.NEUTRAL, 1f, 1f);
-                    CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                }
+            chant(entity, charge);
+        }
+
+        public boolean chant(LivingEntity entity, int charge) {
+            Level serverLevel = entity.level();
+            boolean bool = ModConfig.SERVER.FAST_CHANT.get() == true || (charge == 50 || charge == 75 || charge == 100);
+            if (bool && CHANT == 2) {
+                if (!spendCursedEnergy(entity, 10)) return false;
+                entity.sendSystemMessage(Component.literal("Pillar of Light"));
+                CHANT = 3;
+                serverLevel.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSoundEvents.CHANT_3.get(), SoundSource.NEUTRAL, 1f, 1f);
+            } else if (bool && CHANT == 1) {
+                if (!spendCursedEnergy(entity, 10)) return false;
+                entity.sendSystemMessage(Component.literal("Paramita"));
+                CHANT = 2;
+                serverLevel.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSoundEvents.CHANT_2.get(), SoundSource.NEUTRAL, 1f, 1f);
+            } else if (bool && CHANT == 0) {
+                if (!spendCursedEnergy(entity, 10)) return false;
+                entity.sendSystemMessage(Component.literal("Phase"));
+                CHANT = 1;
+                serverLevel.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSoundEvents.CHANT_1.get(), SoundSource.NEUTRAL, 1f, 1f);
             }
+            return true;
         }
 
         public void release(LivingEntity entity) {
             if (entity instanceof Player player && !player.level().isClientSide()){
-                if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
                 RedEntity orb = new RedEntity(ModEntities.RED_ENTITY.get(), player.level(), player, LIFETIME, SPEED, EXPLOSION_POWER, RedEntity.ATTACK_TYPE.RANGED, CHANT    );
                 createRed(player.level(), player, orb);
                 CHANT = 0;
-                CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
             }
         }
 

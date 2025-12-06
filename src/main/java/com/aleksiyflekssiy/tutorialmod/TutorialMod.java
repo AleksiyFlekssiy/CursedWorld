@@ -9,6 +9,7 @@ import com.aleksiyflekssiy.tutorialmod.client.particle.LaunchRingParticle;
 import com.aleksiyflekssiy.tutorialmod.client.renderer.*;
 import com.aleksiyflekssiy.tutorialmod.client.screen.JujutsuHUD;
 import com.aleksiyflekssiy.tutorialmod.client.screen.KeyHandler;
+import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
 import com.aleksiyflekssiy.tutorialmod.effect.ModEffects;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
@@ -71,6 +72,7 @@ public class TutorialMod
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
 
+        ModConfig.register(context);
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new JujutsuHUD());

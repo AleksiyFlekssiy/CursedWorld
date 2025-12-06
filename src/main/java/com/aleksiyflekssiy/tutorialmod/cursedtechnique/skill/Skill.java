@@ -1,16 +1,14 @@
 package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill;
 
-import com.aleksiyflekssiy.tutorialmod.item.custom.WheelOfHarmonyItem;
+import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
 import com.aleksiyflekssiy.tutorialmod.util.AdaptationUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.Set;
 
@@ -27,6 +25,25 @@ public abstract class Skill {
     public void deactivate(LivingEntity entity){}
     public void charge(LivingEntity entity, int charge) {}
     public void release(LivingEntity entity){}
+
+    public boolean spendCursedEnergy(LivingEntity entity, int amount){
+        if (ModConfig.SERVER.NO_CE_COST.get() == true) {
+            System.out.println("NOT SPEND CE");
+            return true;
+        }
+        if (entity.getCapability(CursedEnergyCapability.CURSED_ENERGY).isPresent()){
+            if (CursedEnergyCapability.isEnoughEnergy(entity, amount)){
+                CursedEnergyCapability.setCursedEnergy(entity, CursedEnergyCapability.getCursedEnergy(entity) - amount);
+                System.out.println("SPEND CE");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean chant(LivingEntity entity, int charge){
+        return false;
+    }
 
     public boolean canAffect(Entity entity){
         if (entity instanceof Player player) {
@@ -64,26 +81,26 @@ public abstract class Skill {
         return cooldownTicks;
     }
 
-    public boolean canUse(Player player) {
-        CompoundTag data = player.getPersistentData();
+    public boolean canUse(Entity entity) {
+        CompoundTag data = entity.getPersistentData();
         String cooldownKey = "cooldown_" + getName().toLowerCase();
         long lastUsed = data.getLong(cooldownKey);
-        long currentTime = player.level().getGameTime();
+        long currentTime = entity.level().getGameTime();
         int cooldownTicks = getCooldownDuration();
 
         if (currentTime >= lastUsed + cooldownTicks) {
             return true;
         } else {
             int ticksLeft = (int) ((lastUsed + cooldownTicks) - currentTime);
-            player.sendSystemMessage(Component.literal(getName() + " on cooldown for " + (ticksLeft / 20) + " seconds!"));
+            entity.sendSystemMessage(Component.literal(getName() + " on cooldown for " + (ticksLeft / 20) + " seconds!"));
             return false;
         }
     }
 
-    public void setCooldown(Player player, int cd) {
-        CompoundTag data = player.getPersistentData();
+    public void setCooldown(Entity entity, int cd) {
+        CompoundTag data = entity.getPersistentData();
         String cooldownKey = "cooldown_" + getName().toLowerCase();
-        data.putLong(cooldownKey, player.level().getGameTime());
+        data.putLong(cooldownKey, entity.level().getGameTime());
         this.cooldownTicks = cd;
     }
 

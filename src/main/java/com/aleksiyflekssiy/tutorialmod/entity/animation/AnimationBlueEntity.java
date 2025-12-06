@@ -15,15 +15,15 @@ import net.minecraft.world.phys.Vec3;
 import static com.aleksiyflekssiy.tutorialmod.util.RotationUtil.getOffsetLookPosition;
 
 public class AnimationBlueEntity extends Entity {
-    private final Player owner;
+    private final Entity owner;
     private static final EntityDataAccessor<Boolean> START_FUSION = SynchedEntityData.defineId(AnimationBlueEntity.class, EntityDataSerializers.BOOLEAN);
     public AnimationBlueEntity(EntityType<?> pEntityType, Level pLevel) {
         this(pEntityType, pLevel, null);
     }
 
-    public AnimationBlueEntity(EntityType<?> pEntityType, Level level, Player player) {
+    public AnimationBlueEntity(EntityType<?> pEntityType, Level level, Entity entity) {
         super(pEntityType, level);
-        this.owner = player;
+        this.owner = entity;
         entityData.set(START_FUSION, false);
     }
 

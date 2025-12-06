@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.BlueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
@@ -48,16 +49,16 @@ public class Blue extends Skill {
 
         // Длительность следа: 0.5 секунды (10 тиков)
         public void activate(LivingEntity entity){
-            if (entity.level().isClientSide() || !(entity instanceof ServerPlayer player)) return;
-            if (this.canUse(player)) {
-                AABB pullArea = new AABB(player.position().add(-PULL_RANGE, -PULL_RANGE, -PULL_RANGE), player.position().add(PULL_RANGE, PULL_RANGE, PULL_RANGE));
-                List<Entity> entitiesSelf = player.level().getEntitiesOfClass(Entity.class, pullArea);
+            if (entity.level().isClientSide()) return;
+            if (this.canUse(entity) && spendCursedEnergy(entity, 10)) {
+                AABB pullArea = new AABB(entity.position().add(-PULL_RANGE, -PULL_RANGE, -PULL_RANGE), entity.position().add(PULL_RANGE, PULL_RANGE, PULL_RANGE));
+                List<Entity> entitiesSelf = entity.level().getEntitiesOfClass(Entity.class, pullArea);
                 for (Entity affectedEntity : entitiesSelf) {
-                    Vec3 toPlayer = player.position().subtract(affectedEntity.position()).normalize().scale(PULL_FORCE * 2);
+                    Vec3 toPlayer = entity.position().subtract(affectedEntity.position()).normalize().scale(PULL_FORCE * 2);
                     affectedEntity.setDeltaMovement(affectedEntity.getDeltaMovement().add(toPlayer));
-                    spawnTrailParticles((ServerLevel) player.level(), affectedEntity);
+                    spawnTrailParticles((ServerLevel) entity.level(), affectedEntity);
                 }
-                this.setCooldown(player, 100);
+                this.setCooldown(entity, 100);
             }
             else System.out.println("Can't use");
         }
@@ -86,27 +87,21 @@ public class Blue extends Skill {
     public class Teleport extends Skill{
 
         public void activate(LivingEntity entity){
-            if (entity instanceof ServerPlayer player) {
-                Vec3 eyePos = player.getEyePosition(1.0F); // Позиция глаз игрока
-                Vec3 lookVec = player.getViewVector(1.0F); // Вектор взгляда
-                Vec3 endPos = eyePos.add(lookVec.x * TELEPORT_RANGE, lookVec.y * TELEPORT_RANGE, lookVec.z * TELEPORT_RANGE);
-                // Трассировка взгляда
-                ClipContext context = new ClipContext(eyePos, endPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
-                HitResult result = player.level().clip(context);
-                if (result.getType() == HitResult.Type.BLOCK) {
-                    // Если попали в блок, телепортируемся на верхнюю поверхность
-                    BlockHitResult blockHit = (BlockHitResult) result;
-                    int blockX = blockHit.getBlockPos().getX();
-                    int blockY = blockHit.getBlockPos().getY();
-                    int blockZ = blockHit.getBlockPos().getZ();
-                    // Устанавливаем точку на верхней грани блока
-                    Vec3 teleportPos = new Vec3(blockX + 0.5, blockY + 1.0, blockZ + 0.5);
-                    player.teleportTo(teleportPos.x, teleportPos.y, teleportPos.z);
-                } else {
-                    // Если в воздухе, телепортируемся на максимальную дистанцию
-                    player.teleportTo(endPos.x, endPos.y, endPos.z);
-                }
+            Vec3 eyePos = entity.getEyePosition(1.0F); // Позиция глаз игрока
+            Vec3 lookVec = entity.getViewVector(1.0F); // Вектор взгляда
+            Vec3 endPos = eyePos.add(lookVec.x * TELEPORT_RANGE, lookVec.y * TELEPORT_RANGE, lookVec.z * TELEPORT_RANGE);
+            ClipContext context = new ClipContext(eyePos, endPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity);
+            HitResult result = entity.level().clip(context);
+
+            if (result.getType() == HitResult.Type.BLOCK) {
+                BlockHitResult blockHit = (BlockHitResult) result;
+                int blockX = blockHit.getBlockPos().getX();
+                int blockY = blockHit.getBlockPos().getY();
+                int blockZ = blockHit.getBlockPos().getZ();
+                Vec3 teleportPos = new Vec3(blockX + 0.5, blockY + 1.0, blockZ + 0.5);
+                entity.teleportTo(teleportPos.x, teleportPos.y, teleportPos.z);
             }
+            else entity.teleportTo(endPos.x, endPos.y, endPos.z);
         }
 
         @Override
@@ -123,57 +118,49 @@ public class Blue extends Skill {
     public class BlueSummon extends Skill{
 
         public void release(LivingEntity entity){
-            if (!entity.level().isClientSide()) {
-                Level level = entity.level();
-                boolean isFollowing = false;
-                if (entity instanceof Player player && this.canUse(player)) {
-                    if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                    if (player.isCrouching()) {
-                        isFollowing = true;
-                    }
-                    BlueEntity blue = new BlueEntity(ModEntities.BLUE_ENTITY.get(), level, player, isFollowing, 60, 5, 3, 1.5f, CHANT);
-                    createSimpleBlue(level, player, blue);
-                    CHANT = 0;
-                    CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                    this.setCooldown(player, 100);
+            Level level = entity.level();
+            boolean isFollowing = false;
+            if (this.canUse(entity)) {
+                if (entity.isCrouching()) {
+                    isFollowing = true;
                 }
+                BlueEntity blue = new BlueEntity(ModEntities.BLUE_ENTITY.get(), level, (Player) entity, isFollowing, 60, 5, 3, 1.5f, CHANT);
+                createSimpleBlue(level, entity, blue);
+                CHANT = 0;
+                this.setCooldown(entity, 100);
             }
         }
 
-        public void charge(LivingEntity livingEntity, int chargeTicks) {
-            if (livingEntity instanceof Player player &&  player.level() instanceof ServerLevel serverLevel) {
-                if (this.canUse(player)) {
-                    // Проверка достижения фаз
-                    if (chargeTicks == 100 && CHANT == 2) {
-                        if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                        player.sendSystemMessage(Component.literal("Eyes of Wisdom"));
+        public void charge(LivingEntity entity, int charge) {
+            Level serverLevel = entity.level();
+                if (this.canUse(entity)) {
+                    boolean bool = ModConfig.SERVER.FAST_CHANT.get() == true || (charge == 50 || charge == 75 || charge == 100);
+                    if (bool && CHANT == 2) {
+                        if (!spendCursedEnergy(entity, 10)) return;
+                        entity.sendSystemMessage(Component.literal("Eyes of Wisdom"));
                         CHANT = 3;
-                        serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_3.get(), SoundSource.NEUTRAL, 1f, 1f);
-                        CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                    } else if (chargeTicks == 75 && CHANT == 1) {
-                        if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                        player.sendSystemMessage(Component.literal("Twilight"));
+                        serverLevel.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSoundEvents.CHANT_3.get(), SoundSource.NEUTRAL, 1f, 1f);
+                    } else if (bool && CHANT == 1) {
+                        if (!spendCursedEnergy(entity, 10)) return;
+                        entity.sendSystemMessage(Component.literal("Twilight"));
                         CHANT = 2;
-                        serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_2.get(), SoundSource.NEUTRAL, 1f, 1f);
-                        CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
-                    } else if (chargeTicks == 50 && CHANT == 0) {
-                        if (!CursedEnergyCapability.isEnoughEnergy(player, 10)) return;
-                        player.sendSystemMessage(Component.literal("Phase"));
+                        serverLevel.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSoundEvents.CHANT_2.get(), SoundSource.NEUTRAL, 1f, 1f);
+                    } else if (bool && CHANT == 0) {
+                        if (!spendCursedEnergy(entity, 10)) return;
+                        entity.sendSystemMessage(Component.literal("Phase"));
                         CHANT = 1;
-                        serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), ModSoundEvents.CHANT_1.get(), SoundSource.NEUTRAL, 1f, 1f);
-                        CursedEnergyCapability.setCursedEnergy(player, CursedEnergyCapability.getCursedEnergy(player) - 10);
+                        serverLevel.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSoundEvents.CHANT_1.get(), SoundSource.NEUTRAL, 1f, 1f);
                     }
-                    spawnRotatingParticles(serverLevel, player.position(), 5f, 10, chargeTicks);
+                    spawnRotatingParticles((ServerLevel) serverLevel, entity.position(), 5f, 10, charge);
                 }
                 else System.out.println("Can't use");
-            }
         }
 
-        private void createSimpleBlue(Level level, Player player, BlueEntity blue) {
-            Vec3 eyePos = player.getEyePosition(1.0f);
-            Vec3 lookVec = player.getLookAngle();
+        private void createSimpleBlue(Level level, LivingEntity entity, BlueEntity blue) {
+            Vec3 eyePos = entity.getEyePosition(1.0f);
+            Vec3 lookVec = entity.getLookAngle();
             Vec3 maxReach = eyePos.add(lookVec.scale(10.0));
-            ClipContext clipContext = new ClipContext(eyePos, maxReach, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
+            ClipContext clipContext = new ClipContext(eyePos, maxReach, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity);
             BlockHitResult hitResult = level.clip(clipContext);
 
             Vec3 targetPos = hitResult.getType() == HitResult.Type.BLOCK ?

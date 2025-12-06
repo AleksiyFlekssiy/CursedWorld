@@ -1,8 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
@@ -10,14 +8,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DomainExpansionManager {
     public static final List<DomainExpansionSkill> domains = new ArrayList<>();
-
-    //Первый в паре - старший домен, второй - младший (вторженец)
     public static final List<DomainClash> domainClashesNew = new ArrayList<>();
+    public static final Map<DomainExpansionSkill, List<Thread>> threads = new HashMap<>();
 
     public static void addDomainExpansion(DomainExpansionSkill domainExpansionSkill) {
         domains.add(domainExpansionSkill);
@@ -25,7 +25,7 @@ public class DomainExpansionManager {
 
     public static boolean willBeDomainClash(DomainExpansionSkill newDomain) {
         Vec3 center = newDomain.domainCenter;
-        double radius = newDomain.domainRadius;
+        double radius = newDomain.getCurrentDomainRadius();
 
         AABB potentialAABB = new AABB(
                 center.x - radius - 2, center.y - radius - 2, center.z - radius - 2,
@@ -40,6 +40,17 @@ public class DomainExpansionManager {
             }
         }
         return false;
+    }
+
+    public static void toGenerate(DomainExpansionSkill domain, Thread thread){
+        if (threads.containsKey(domain)){
+            threads.get(domain).add(thread);
+        }
+        else {
+            List<Thread> domainThreads = new ArrayList<>();
+            domainThreads.add(thread);
+            threads.put(domain, domainThreads);
+        }
     }
 
     public static boolean isClashing(DomainExpansionSkill domain){
@@ -65,6 +76,13 @@ public class DomainExpansionManager {
     public static void tickDomains(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
         //System.out.println("Domains: " + domains.size() + "  Domain Clashes: " + domainClashes.size());
+        threads.forEach((domain, thread) -> {
+            if (!thread.isEmpty()){
+                Thread t1 = thread.get(0);
+                t1.start();
+                thread.remove(t1);
+            }
+        });
         domains.removeIf(domain -> {
             domain.tick();
             if (!domain.isActive() || domain.isExpired() || domain.checkBarrierDamage()){

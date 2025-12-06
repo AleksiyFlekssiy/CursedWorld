@@ -5,6 +5,7 @@ import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.TenShadowsTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion.DomainExpansionSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import com.aleksiyflekssiy.tutorialmod.item.custom.WheelOfHarmonyItem;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
@@ -22,6 +23,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -111,6 +113,8 @@ public class ForgeEvents {
             }
         }
     }
+
+
 
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.Clone event) {

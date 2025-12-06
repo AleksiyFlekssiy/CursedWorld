@@ -338,7 +338,6 @@ public class RedEntity extends Projectile {
             // Ручное разрушение блоков в радиусе 50 блоков
             int radiusInt = (int) Math.ceil(radius);
             BlockPos center = new BlockPos((int) x, (int) y, (int) z);
-            DamageSources damageSources = this.level().damageSources();
 
             // Разрушение блоков и урон сущностям
             int blocksPerTick = 1000; // Обрабатываем 1000 блоков за тик
