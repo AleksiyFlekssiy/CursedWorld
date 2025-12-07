@@ -1,8 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.List;
 

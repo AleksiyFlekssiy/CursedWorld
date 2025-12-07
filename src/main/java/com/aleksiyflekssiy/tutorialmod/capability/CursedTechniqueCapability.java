@@ -1,14 +1,14 @@
 package com.aleksiyflekssiy.tutorialmod.capability;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.CursedTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.LimitlessCursedTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.TenShadowsTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.*;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.*;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.DivineDogs;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.GreatSerpent;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Nue;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Toad;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.CursedTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.LimitlessCursedTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.GreatSerpent;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import net.minecraft.core.Direction;
@@ -21,7 +21,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -217,23 +216,23 @@ public class CursedTechniqueCapability {
 
         public static CursedTechnique createTechniqueByName(String name) {
             return switch (name) {
-                case "Limitless" -> new LimitlessCursedTechnique();
-                case "TenShadows" -> new TenShadowsTechnique();
+                case "limitless" -> new LimitlessCursedTechnique();
+                case "ten_shadows" -> new TenShadowsTechnique();
                 default -> new LimitlessCursedTechnique();
             };
         }
 
         public static Skill createSkillByName(String name) {
             return switch (name) {
-                case "Infinity" -> new Infinity();
-                case "Blue" -> new Blue();
-                case "Red" -> new Red();
-                case "Hollow Purple" -> new HollowPurple();
-                case "Unlimited Void" -> new UnlimitedVoid();
-                case "Divine Dogs" -> new DivineDogs();
-                case "Nue" -> new Nue();
-                case "Toad" -> new Toad();
-                case "GreatSerpent" -> new GreatSerpent();
+                case "infinity" -> new Infinity();
+                case "blue" -> new Blue();
+                case "red" -> new Red();
+                case "hollow_purple" -> new HollowPurple();
+                case "unlimited_void" -> new UnlimitedVoid();
+                case "divine_dogs" -> new DivineDogs();
+                case "nue" -> new Nue();
+                case "toad" -> new Toad();
+                case "great_serpent" -> new GreatSerpent();
                 default -> null; // Оставляем null, так как проверка происходит позже
             };
         }

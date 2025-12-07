@@ -1,4 +1,4 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.domain_expansion;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import net.minecraft.world.phys.AABB;
@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DomainExpansionManager {

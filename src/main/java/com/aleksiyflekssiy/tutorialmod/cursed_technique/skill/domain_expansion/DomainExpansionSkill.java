@@ -1,9 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.domain_expansion;
 
-import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;

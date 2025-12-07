@@ -1,16 +1,15 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
 import com.aleksiyflekssiy.tutorialmod.client.particle.LaunchRingParticleData;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.HollowPurple;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.Red;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.HollowPurple;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.Red;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import com.aleksiyflekssiy.tutorialmod.util.CustomExplosion;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -20,7 +19,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;

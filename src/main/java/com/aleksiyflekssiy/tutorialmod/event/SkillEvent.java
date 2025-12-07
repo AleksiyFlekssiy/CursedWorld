@@ -1,6 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.event;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.eventbus.api.Event;
 

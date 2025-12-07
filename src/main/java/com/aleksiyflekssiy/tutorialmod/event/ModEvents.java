@@ -2,9 +2,8 @@ package com.aleksiyflekssiy.tutorialmod.event;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion.DomainExpansionSkill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.domain_expansion.DomainExpansionSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.*;
-import com.electronwill.nightconfig.core.ConfigSpec;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

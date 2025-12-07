@@ -1,7 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.config;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
-import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

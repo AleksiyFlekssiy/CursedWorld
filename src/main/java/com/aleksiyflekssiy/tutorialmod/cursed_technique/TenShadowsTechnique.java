@@ -1,10 +1,10 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.DivineDogs;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.GreatSerpent;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Nue;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Toad;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.GreatSerpent;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
 
 import java.util.List;
 
@@ -32,6 +32,6 @@ public class TenShadowsTechnique extends CursedTechnique{
 
     @Override
     public String getName() {
-        return "TenShadows";
+        return "ten_shadows";
     }
 }

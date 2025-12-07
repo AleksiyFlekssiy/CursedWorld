@@ -1,8 +1,8 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
-import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.BlueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
@@ -75,7 +75,7 @@ public class Blue extends Skill {
 
         @Override
         public String getName() {
-            return "Pull";
+            return "pull";
         }
 
         @Override
@@ -106,7 +106,7 @@ public class Blue extends Skill {
 
         @Override
         public String getName() {
-            return "Teleport";
+            return "teleport";
         }
 
         @Override
@@ -189,7 +189,7 @@ public class Blue extends Skill {
 
         @Override
         public String getName() {
-            return "BlueSummon";
+            return "blue_summon";
         }
 
         @Override
@@ -200,11 +200,11 @@ public class Blue extends Skill {
 
 
     public String getName(){
-        return "Blue";
+        return "blue";
     }
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/blue.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/blue.png");
     }
 }

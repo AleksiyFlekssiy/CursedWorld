@@ -1,8 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
-import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.Blue;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.Blue;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.item.custom.BlueItem;

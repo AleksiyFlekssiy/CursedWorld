@@ -1,6 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.util;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 

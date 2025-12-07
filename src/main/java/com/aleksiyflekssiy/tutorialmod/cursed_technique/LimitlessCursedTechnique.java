@@ -1,7 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.*;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
 
 import java.util.List;
 
@@ -29,6 +29,6 @@ public class LimitlessCursedTechnique extends CursedTechnique{
 
     @Override
     public String getName() {
-        return "Limitless";
+        return "limitless";
     }
 }

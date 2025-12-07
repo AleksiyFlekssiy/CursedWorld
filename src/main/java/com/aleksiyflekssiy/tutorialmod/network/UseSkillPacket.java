@@ -1,12 +1,8 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.*;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.*;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.DivineDogs;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.GreatSerpent;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Nue;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows.Toad;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.*;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -39,44 +35,7 @@ public class UseSkillPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 Skill activeSkill = CursedTechniqueCapability.getCurrentSkill(player);
-                switch (msg.skillName) {
-                    case "Infinity":
-                        Infinity infinity = (Infinity) activeSkill;
-                        infinity.use(player, msg.useType, msg.charge);
-                        break;
-                    case "Blue":
-                        Blue blue = (Blue) activeSkill;
-                        blue.use(player, msg.useType, msg.charge);
-                        break;
-                    case "Red":
-                        Red red = (Red) activeSkill;
-                        red.use(player, msg.useType, msg.charge);
-                        break;
-                    case "Hollow Purple":
-                        HollowPurple hollow = (HollowPurple) activeSkill;
-                        hollow.use(player, msg.useType, msg.charge);
-                        break;
-                    case "Unlimited Void":
-                        UnlimitedVoid unlimitedVoid = (UnlimitedVoid) activeSkill;
-                        unlimitedVoid.use(player, msg.useType, msg.charge);
-                        break;
-                    case "Divine Dogs":
-                        DivineDogs divineDogs = (DivineDogs) activeSkill;
-                        divineDogs.use(player, msg.useType, msg.charge);
-                        break;
-                    case "Nue":
-                        Nue nue = (Nue) activeSkill;
-                        nue.use(player, msg.useType, msg.charge);
-                        break;
-                    case "Toad":
-                        Toad toad = (Toad) activeSkill;
-                        toad.use(player, msg.useType, msg.charge);
-                        break;
-                    case "GreatSerpent":
-                        GreatSerpent greatSerpent = (GreatSerpent) activeSkill;
-                        greatSerpent.use(player, msg.useType, msg.charge);
-                        break;
-                }
+                activeSkill.use(player, msg.useType, msg.charge);
             }
         });
         ctx.get().setPacketHandled(true);

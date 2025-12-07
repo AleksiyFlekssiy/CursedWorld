@@ -1,7 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion.DomainExpansionSkill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.domain_expansion.DomainExpansionSkill;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import com.aleksiyflekssiy.tutorialmod.network.InputLockPacket;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
@@ -125,7 +125,7 @@ public class UnlimitedVoid extends DomainExpansionSkill {
         }
     }
 
-    @Mod.EventBusSubscriber(modid = "tutorialmod", bus = Mod.EventBusSubscriber.Bus.FORGE)
+    @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class PlayerDisabler {
 
         public static boolean isScreenBanned(Screen screen) {
@@ -202,11 +202,11 @@ public class UnlimitedVoid extends DomainExpansionSkill {
 
     @Override
     public String getName() {
-        return "Unlimited Void";
+        return "unlimited_void";
     }
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/unlimited_void.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/unlimited_void.png");
     }
 }

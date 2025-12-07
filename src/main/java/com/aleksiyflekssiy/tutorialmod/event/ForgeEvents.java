@@ -2,29 +2,26 @@ package com.aleksiyflekssiy.tutorialmod.event;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.TenShadowsTechnique;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion.DomainExpansionSkill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
-import com.aleksiyflekssiy.tutorialmod.item.custom.WheelOfHarmonyItem;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import com.aleksiyflekssiy.tutorialmod.util.AdaptationUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegistryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,8 +110,6 @@ public class ForgeEvents {
             }
         }
     }
-
-
 
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.Clone event) {

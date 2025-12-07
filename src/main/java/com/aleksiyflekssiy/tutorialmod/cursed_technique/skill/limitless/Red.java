@@ -1,7 +1,8 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
+import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
@@ -46,7 +47,7 @@ public class Red extends Skill {
 
         @Override
         public String getName() {
-            return "Push";
+            return "push";
         }
 
         @Override
@@ -93,7 +94,7 @@ public class Red extends Skill {
 
         @Override
         public String getName() {
-            return "RedSummon";
+            return "red_summon";
         }
 
         @Override
@@ -118,11 +119,11 @@ public class Red extends Skill {
 
     @Override
     public String getName() {
-        return "Red";
+        return "red";
     }
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/red.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/red.png");
     }
 }

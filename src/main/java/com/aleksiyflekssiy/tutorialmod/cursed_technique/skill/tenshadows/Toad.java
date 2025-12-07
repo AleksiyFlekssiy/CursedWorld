@@ -1,8 +1,8 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
-import com.aleksiyflekssiy.tutorialmod.entity.NueEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import net.minecraft.core.BlockPos;
@@ -143,11 +143,11 @@ public class Toad extends ShikigamiSkill {
 
     @Override
     public String getName() {
-        return "Toad";
+        return "toad";
     }
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/toad.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/toad.png");
     }
 }

@@ -19,6 +19,7 @@ import com.aleksiyflekssiy.tutorialmod.item.ModItems;
 import com.aleksiyflekssiy.tutorialmod.loot.ModLootModifiers;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.particle.ModParticles;
+import com.aleksiyflekssiy.tutorialmod.registry.Skills;
 import com.aleksiyflekssiy.tutorialmod.sound.ModSoundEvents;
 import com.mojang.logging.LogUtils;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
@@ -67,6 +68,7 @@ public class TutorialMod
         ModEffects.register(modEventBus);
         CustomMemoryModuleTypes.register(modEventBus);
         CustomSensorTypes.register(modEventBus);
+        Skills.register(modEventBus);
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);

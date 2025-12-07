@@ -1,4 +1,4 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.domainexpansion;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.domain_expansion;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;

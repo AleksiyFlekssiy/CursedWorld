@@ -1,8 +1,8 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
-import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.entity.HollowPurpleEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.animation.AnimationBlueEntity;
@@ -113,7 +113,7 @@ public class HollowPurple extends Skill {
 
         @Override
         public String getName() {
-            return "HollowPurpleSummon";
+            return "hollow_purple_summon";
         }
 
         @Override
@@ -154,11 +154,11 @@ public class HollowPurple extends Skill {
 
     @Override
     public String getName() {
-        return "Hollow Purple";
+        return "hollow_purple";
     }
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/hollow_purple.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/hollow_purple.png");
     }
 }

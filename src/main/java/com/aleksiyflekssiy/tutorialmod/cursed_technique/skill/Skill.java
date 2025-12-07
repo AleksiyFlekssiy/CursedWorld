@@ -1,5 +1,6 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
 
+import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.config.ModConfig;
 import com.aleksiyflekssiy.tutorialmod.util.AdaptationUtil;

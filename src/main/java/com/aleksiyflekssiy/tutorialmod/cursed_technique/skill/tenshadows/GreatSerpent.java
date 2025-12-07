@@ -1,6 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -15,7 +16,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.List;
@@ -152,11 +152,11 @@ public class GreatSerpent extends ShikigamiSkill {
 
     @Override
     public String getName() {
-        return "GreatSerpent";
+        return "great_serpent";
     }
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/great_serpent.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/great_serpent.png");
     }
 }

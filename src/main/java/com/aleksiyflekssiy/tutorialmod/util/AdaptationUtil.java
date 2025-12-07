@@ -1,7 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.util;
 
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.item.custom.WheelOfHarmonyItem;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;

@@ -1,8 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
-import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.effect.ModEffects;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
@@ -219,7 +218,7 @@ public class Infinity extends Skill {
 
         @Override
         public String getName() {
-            return "InfinitySwitchSubSkill";
+            return "infinity_switch";
         }
 
         @Override
@@ -243,7 +242,7 @@ public class Infinity extends Skill {
 
         @Override
         public String getName() {
-            return "IncreaseInfinityOutputSubSkill";
+            return "increase_infinity_output";
         }
 
         @Override
@@ -254,7 +253,7 @@ public class Infinity extends Skill {
 
     @Override
     public String getName() {
-        return "Infinity";
+        return "infinity";
     }
 
     @SubscribeEvent
@@ -269,7 +268,7 @@ public class Infinity extends Skill {
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/infinity.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/infinity.png");
     }
 
 }

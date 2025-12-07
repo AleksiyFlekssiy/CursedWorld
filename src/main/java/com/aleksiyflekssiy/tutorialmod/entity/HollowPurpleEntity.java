@@ -1,7 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.entity;
 
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.Skill;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.limitless.HollowPurple;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.HollowPurple;
 import com.aleksiyflekssiy.tutorialmod.damage.ModDamageSources;
 import com.aleksiyflekssiy.tutorialmod.event.SkillEvent;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;

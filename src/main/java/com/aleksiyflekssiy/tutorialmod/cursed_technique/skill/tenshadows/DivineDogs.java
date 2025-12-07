@@ -1,7 +1,7 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.tenshadows;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
-import com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.DivineDogEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.ModEntities;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
@@ -23,7 +23,6 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DivineDogs extends ShikigamiSkill {
@@ -213,11 +212,11 @@ public class DivineDogs extends ShikigamiSkill {
 
     @Override
     public String getName() {
-        return "Divine Dogs";
+        return "divine_dogs";
     }
 
     @Override
     public ResourceLocation getSkillIcon() {
-        return ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/gui/divine_dogs.png");
+        return ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/gui/divine_dogs.png");
     }
 }

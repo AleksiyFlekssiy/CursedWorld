@@ -1,6 +1,5 @@
-package com.aleksiyflekssiy.tutorialmod.cursedtechnique.skill;
+package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
 
-import com.aleksiyflekssiy.tutorialmod.entity.GreatSerpentEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
