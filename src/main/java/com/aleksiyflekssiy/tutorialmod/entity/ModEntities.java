@@ -68,6 +68,7 @@ public class ModEntities {
                     .sized(2, 2)
                     .setUpdateInterval(1)
                     .setShouldReceiveVelocityUpdates(true)
+                    .clientTrackingRange(20)
                     .build("tutorialmod:great_serpent"));
 
     public static final RegistryObject<EntityType<GreatSerpentSegment>> GREAT_SERPENT_SEGMENT = ENTITIES.register("great_serpent_segment",
@@ -75,6 +76,7 @@ public class ModEntities {
                     .sized(2, 2)
                     .setUpdateInterval(1)
                     .setShouldReceiveVelocityUpdates(true)
+                    .clientTrackingRange(20)
                     .build("tutorialmod:great_serpent_segment"));
 
 

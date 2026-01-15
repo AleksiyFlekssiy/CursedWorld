@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.command;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
@@ -12,6 +13,7 @@ import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -91,8 +93,8 @@ public class ModCommands {
                 .then(argument("player", EntityArgument.player())
                 .then(argument("technique", StringArgumentType.string())
                         .suggests((context, builder) -> {
-                            builder.suggest("TenShadows");
-                            builder.suggest("Limitless");
+                            builder.suggest("ten_shadows");
+                            builder.suggest("limitless");
                             return builder.buildFuture();
                         })
                         .executes(context -> {
@@ -141,5 +143,53 @@ public class ModCommands {
                     context.getSource().sendSuccess(() -> Component.literal("Your shikigami have been regained"), true);
                     return 1;
                 }));
+        dispatcher.register(Commands.literal("cursedworld")
+                .then(Commands.argument("var", StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            builder.suggest("ce");
+                            builder.suggest("maxce");
+                            builder.suggest("regenspeed");
+                            builder.suggest("regenamount");
+                            return builder.buildFuture();
+                        })
+                        .then(Commands.literal("get")
+                                .executes(ctx -> {
+                                    Player player = ctx.getSource().getPlayerOrException();
+                                    String var = StringArgumentType.getString(ctx, "var");
+
+                                    switch (var) {
+                                        case "ce" -> player.sendSystemMessage(
+                                                Component.literal("CE: " + CursedEnergyCapability.getCursedEnergy(player)));
+                                        case "maxce" -> player.sendSystemMessage(
+                                                Component.literal("Max CE: " + CursedEnergyCapability.getMaxCursedEnergy(player)));
+                                        case "regenspeed" -> player.sendSystemMessage(
+                                                Component.literal("Regen Speed: " + CursedEnergyCapability.getRegenerationSpeed(player)));
+                                        case "regenamount" -> player.sendSystemMessage(
+                                                Component.literal("Regen Amount: " + CursedEnergyCapability.getRegenerationAmount(player)));
+                                    }
+                                    return 1;
+                                })
+                        )
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("value", IntegerArgumentType.integer())
+                                        .executes(ctx -> {
+                                            Player player = ctx.getSource().getPlayerOrException();
+                                            String var = StringArgumentType.getString(ctx, "var");
+                                            int value = IntegerArgumentType.getInteger(ctx, "value");
+
+                                            switch (var) {
+                                                case "ce" -> CursedEnergyCapability.setCursedEnergy(player, value);
+                                                case "maxce" -> CursedEnergyCapability.setMaxCursedEnergy(player, value);
+                                                case "regenspeed" -> CursedEnergyCapability.setRegenerationSpeed(player, value);
+                                                case "regenamount" -> CursedEnergyCapability.setRegenerationAmount(player, value);
+                                            }
+
+                                            player.sendSystemMessage(Component.literal("§aУстановлено " + var + " = " + value));
+                                            return 1;
+                                        })
+                                )
+                        )
+                )
+        );
     }
 }

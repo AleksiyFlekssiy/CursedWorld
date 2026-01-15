@@ -2,30 +2,22 @@ package com.aleksiyflekssiy.tutorialmod.entity;
 
 import com.aleksiyflekssiy.tutorialmod.entity.ai.GreatSerpentAI;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
-import com.aleksiyflekssiy.tutorialmod.entity.control.CustomFlyingMoveControl;
-import com.aleksiyflekssiy.tutorialmod.entity.control.NueMoveControl;
+import com.aleksiyflekssiy.tutorialmod.entity.control.GreatSerpentMoveControl;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.pathfinder.Node;
-import net.minecraft.world.level.pathfinder.Path;
-import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class GreatSerpentSegment extends PathfinderMob {
@@ -42,7 +34,7 @@ public class GreatSerpentSegment extends PathfinderMob {
         parent = null;
         parentUUID = null;
         this.navigation = new FlyingPathNavigation(this, pLevel);
-        this.moveControl = new CustomFlyingMoveControl(this);
+        this.moveControl = new GreatSerpentMoveControl(this);
     }
 
     public GreatSerpentSegment(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, GreatSerpentEntity parent, int index) {
@@ -51,8 +43,9 @@ public class GreatSerpentSegment extends PathfinderMob {
         this.index = index;
         this.parent = parent;
         this.parentUUID = parent.getUUID();
+        this.noPhysics = true;
         this.navigation = new FlyingPathNavigation(this, pLevel);
-        this.moveControl = new CustomFlyingMoveControl(this);
+        this.moveControl = new GreatSerpentMoveControl(this);
     }
 
     public GreatSerpentEntity getParent() {
@@ -103,11 +96,14 @@ public class GreatSerpentSegment extends PathfinderMob {
         return 0;
     }
 
-    public boolean isPushable() {
-        return true;
+    @Override
+    public boolean canBeCollidedWith() {
+        if (this.parent != null) return parent.canBeCollidedWith();
+        return false;
     }
 
-    public boolean canBeCollidedWith() {
+    public boolean isPushable() {
+        if (this.parent != null) return parent.isPushable();
         return false;
     }
 
@@ -119,14 +115,14 @@ public class GreatSerpentSegment extends PathfinderMob {
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 60)
-                .add(Attributes.MOVEMENT_SPEED, 0.2)
+                .add(Attributes.MOVEMENT_SPEED, 0.5)
                 .add(Attributes.ATTACK_DAMAGE, 5f)
                 .add(Attributes.FOLLOW_RANGE, 100)
                 .add(Attributes.ATTACK_SPEED, 1)
                 .add(Attributes.ATTACK_KNOCKBACK, 1)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.5)
                 .add(Attributes.JUMP_STRENGTH, 1)
-                .add(Attributes.FLYING_SPEED, 0.5);
+                .add(Attributes.FLYING_SPEED, 5);
     }
 
     @Override

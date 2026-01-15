@@ -4,7 +4,6 @@ import com.aleksiyflekssiy.tutorialmod.network.CursedEnergySyncPacket;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -25,7 +24,44 @@ public class CursedEnergyCapability {
     public static void setCursedEnergy(Entity entity, int energy) {
         entity.getCapability(CURSED_ENERGY).ifPresent(e -> {
             e.setCursedEnergy(energy);
-            CursedEnergySyncPacket.updateToClient(e, entity);
+            CursedEnergySyncPacket.updateToClient(e.serializeNBT(), entity);
+        });
+    }
+
+    public static int getMaxCursedEnergy(Entity entity) {
+        return entity.getCapability(CURSED_ENERGY)
+                .map(ICursedEnergy::getMaxCursedEnergy)
+                .orElse(0);
+    }
+
+    public static void setMaxCursedEnergy(Entity entity, int energy) {
+        entity.getCapability(CURSED_ENERGY).ifPresent(e -> {
+            e.setMaxCursedEnergy(energy);
+            CursedEnergySyncPacket.updateToClient(e.serializeNBT(), entity);
+        });
+    }
+
+    public static int getRegenerationAmount(Entity entity) {
+        return entity.getCapability(CURSED_ENERGY)
+                .map(ICursedEnergy::getRegenerationAmount)
+                .orElse(0);
+    }
+
+    public static void setRegenerationAmount(Entity entity, int energy) {
+        entity.getCapability(CURSED_ENERGY).ifPresent(e -> {
+            e.setRegenerationAmount(energy);
+            CursedEnergySyncPacket.updateToClient(e.serializeNBT(), entity);
+        });
+    }public static int getRegenerationSpeed(Entity entity) {
+        return entity.getCapability(CURSED_ENERGY)
+                .map(ICursedEnergy::getRegenerationSpeed)
+                .orElse(0);
+    }
+
+    public static void setRegenerationSpeed(Entity entity, int energy) {
+        entity.getCapability(CURSED_ENERGY).ifPresent(e -> {
+            e.setRegenerationSpeed(energy);
+            CursedEnergySyncPacket.updateToClient(e.serializeNBT(), entity);
         });
     }
 
@@ -34,7 +70,7 @@ public class CursedEnergyCapability {
     }
 
     public static class Provider implements ICapabilitySerializable<CompoundTag>{
-        private final ICursedEnergy cursedEnergy = new CursedEnergy(100);
+        private final ICursedEnergy cursedEnergy = new CursedEnergy(0,100);
         private final LazyOptional<ICursedEnergy> holder = LazyOptional.of(() -> cursedEnergy);
 
         @NotNull
@@ -45,16 +81,12 @@ public class CursedEnergyCapability {
 
         @Override
         public CompoundTag serializeNBT() {
-            CompoundTag nbt = new CompoundTag();
-            nbt.putInt("cursed_energy", cursedEnergy.getCursedEnergy());
-            nbt.putInt("tick_counter", ((CursedEnergy) cursedEnergy).getTickCounter()); // Сохраняем счётчик
-            return nbt;
+            return cursedEnergy.serializeNBT();
         }
 
         @Override
         public void deserializeNBT(CompoundTag nbt) {
-            cursedEnergy.setCursedEnergy(nbt.getInt("cursed_energy"));
-            ((CursedEnergy) cursedEnergy).setTickCounter(nbt.getInt("tick_counter")); // Загружаем счётчик
+            cursedEnergy.deserializeNBT(nbt);
         }
     }
 }

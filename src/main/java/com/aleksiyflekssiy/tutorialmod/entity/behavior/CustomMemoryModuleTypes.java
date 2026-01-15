@@ -32,6 +32,8 @@ public class CustomMemoryModuleTypes {
             () -> new MemoryModuleType<>(Optional.empty()) {});
     public static final RegistryObject<MemoryModuleType<Integer>> GRAB_COOLDOWN = MEMORY_MODULE_TYPES.register("grab_cooldown",
             () -> new MemoryModuleType<>(Optional.empty()) {});
+    public static final RegistryObject<MemoryModuleType<IOrder>> ORDER = MEMORY_MODULE_TYPES.register("order",
+            () -> new MemoryModuleType<>(Optional.empty()) {});
 
     public static void register(IEventBus eventBus) {
         MEMORY_MODULE_TYPES.register(eventBus);

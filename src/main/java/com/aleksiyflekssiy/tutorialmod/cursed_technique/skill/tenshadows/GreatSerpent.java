@@ -7,8 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.BlockHitResult;
@@ -19,6 +17,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class GreatSerpent extends ShikigamiSkill {
     private GreatSerpentEntity greatSerpent = null;
@@ -32,6 +31,7 @@ public class GreatSerpent extends ShikigamiSkill {
     public void use(LivingEntity entity, UseType type, int charge) {
         switch (type){
             case ACTIVATION -> this.activate(entity);
+            case CHARGING -> this.charge(entity, charge);
         }
     }
 
@@ -56,56 +56,97 @@ public class GreatSerpent extends ShikigamiSkill {
         if (!entity.isCrouching()) {
             if (!isActive) {
                 if (shikigamiUUIDList.isEmpty()) greatSerpent = new GreatSerpentEntity(ModEntities.GREAT_SERPENT.get(), entity.level(), (Player) entity);
-                BlockPos initialPos = entity.blockPosition().below(3);
-                greatSerpent.setPos(initialPos.getCenter());
-                greatSerpent.setSpawnPos(initialPos);
                 shikigamiUUIDList.add(greatSerpent.getUUID());
-                if (isTamed) greatSerpent.tame((Player) entity);
-
-                HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(greatSerpent), 100);
-                if (result.getType() == HitResult.Type.ENTITY) {
-                    EntityHitResult hitResult = (EntityHitResult) result;
-                    if (hitResult.getEntity() instanceof LivingEntity target) {
-                        greatSerpent.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(target, 2, 4));
-                        greatSerpent.calculateAndSetSegmentCount(target.blockPosition());
+                if (isTamed) {
+                    greatSerpent.tame((Player) entity);
+                    if (orderIndex != 0){
+                        setTarget(entity,
+                                blockPos -> {
+                                    greatSerpent.followOrder(null, blockPos, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                                },
+                                livingEntity -> {
+                                    greatSerpent.followOrder(livingEntity, null, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                                });
+                        if (greatSerpent.isAddedToWorld()){
+                            isActive = true;
+                        }
+                        return;
                     }
-                } else if (result.getType().equals(HitResult.Type.BLOCK)) {
-                    BlockHitResult hitResult = (BlockHitResult) result;
-                    greatSerpent.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(hitResult.getBlockPos(), 2, 4));
-                    greatSerpent.calculateAndSetSegmentCount(hitResult.getBlockPos());
-                    System.out.println(hitResult.getBlockPos());
-                } else System.out.println("SOSAL");
-
-                entity.level().addFreshEntity(greatSerpent);
-                isActive = true;
+                }
+                if (greatSerpent.positionSet) {
+                    setTarget(entity,
+                            blockPos -> {
+                                //greatSerpent.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
+                        greatSerpent.calculateAndSetSegmentCount(blockPos);
+                    },
+                            livingEntity -> {
+                        //greatSerpent.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(livingEntity, 1, 1));
+                        greatSerpent.calculateAndSetSegmentCount(livingEntity.blockPosition());
+                            });
+                    entity.level().addFreshEntity(greatSerpent);
+                    isActive = true;
+                }
+                else {
+                    setTarget(entity,
+                            blockPos -> greatSerpent.setSpawnPos(blockPos),
+                            livingEntity -> greatSerpent.setSpawnPos(livingEntity.blockPosition()));
+                    greatSerpent.positionSet = true;
+                    greatSerpent.getOwner().sendSystemMessage(Component.literal("Position set"));
+                }
             }
-            else if (isActive && isTamed){
-                HitResult result = ProjectileUtil.getHitResultOnViewVector(entity, target -> !target.equals(entity), 100);
-                if (result.getType() == HitResult.Type.ENTITY) {
-                    EntityHitResult hitResult = (EntityHitResult) result;
-                    if (hitResult.getEntity() instanceof LivingEntity target) {
-                        System.out.println(target.getClass().getSimpleName());
-                        if (greatSerpent.isAlive()) greatSerpent.followOrder(target, null, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
-                    }
-                } else if (result.getType() == HitResult.Type.BLOCK) {
-                    BlockHitResult hitResult = (BlockHitResult) result;
-                    System.out.println(hitResult.getBlockPos());
-                    if (greatSerpent.isAlive()) greatSerpent.followOrder(null, hitResult.getBlockPos(), GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
-                } else {
-                    System.out.println("MISS");
+            else if (isTamed){
+                if (isActive) {
+                    setTarget(entity,
+                            blockPos -> {
+                                greatSerpent.followOrder(null, blockPos, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                            },
+                            livingEntity -> {
+                                greatSerpent.followOrder(livingEntity, null, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                            });
                 }
             }
         }
         else {
-            if (isActive && isTamed) {
-                if (greatSerpent != null && greatSerpent.isAlive()) {
-                    greatSerpent.discard();
-                    greatSerpent = null;
-                    shikigamiUUIDList.clear();
-                    isActive = false;
-                }
-            }
+            deactivate(entity);
         }
+    }
+
+    @Override
+    public void charge(LivingEntity entity, int charge) {
+        if (isTamed && isActive && greatSerpent.getOrder() == GreatSerpentEntity.GreatSerpentOrder.SMASH) {
+            setTarget(entity,
+                    blockPos -> greatSerpent.followOrder(null, blockPos, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]),
+                    livingEntity -> {});
+        }
+    }
+
+    @Override
+    public void deactivate(LivingEntity entity) {
+        if (isActive && isTamed) {
+            if (greatSerpent != null && greatSerpent.isAlive()) {
+                greatSerpent.discard();
+            }
+            greatSerpent = null;
+            shikigamiUUIDList.clear();
+            isActive = false;
+        }
+    }
+
+    private void setTarget(LivingEntity owner, Consumer<BlockPos> blockAction, Consumer<LivingEntity> entityAction) {
+        HitResult result = ProjectileUtil.getHitResultOnViewVector(owner, target -> !target.equals(owner), 100);
+        if (result.getType() == HitResult.Type.ENTITY && entityAction != null) {
+            EntityHitResult hitResult = (EntityHitResult) result;
+            if (hitResult.getEntity() instanceof LivingEntity target) {
+                entityAction.accept(target);
+            }
+        } else if (result.getType() == HitResult.Type.BLOCK && blockAction != null) {
+            BlockHitResult hitResult = (BlockHitResult) result;
+            System.out.println(hitResult.getBlockPos());
+            blockAction.accept(hitResult.getBlockPos());
+        }
+        else if (result.getType() == HitResult.Type.MISS && blockAction != null) {
+            blockAction.accept(BlockPos.containing(result.getLocation()));
+        };
     }
 
     @SubscribeEvent
@@ -137,15 +178,18 @@ public class GreatSerpent extends ShikigamiSkill {
         if (isTamed) {
             switch (direction){
                 case -1 -> {
-                    if (--orderIndex <= -1) orderIndex = 1;
+                    if (--orderIndex <= -1) orderIndex = 4;
                 }
                 case 1 -> {
-                    if (++orderIndex >= 2) orderIndex = 0;
+                    if (++orderIndex >= 5) orderIndex = 0;
                 }
             }
             switch (orderIndex) {
                 case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
                 case 1 -> owner.sendSystemMessage(Component.literal("MOVE"));
+                case 2 -> owner.sendSystemMessage(Component.literal("CATCH"));
+                case 3 -> owner.sendSystemMessage(Component.literal("SMASH"));
+                case 4 -> owner.sendSystemMessage(Component.literal("THROW"));
             }
         }
     }

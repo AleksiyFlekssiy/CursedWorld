@@ -167,7 +167,8 @@ public class TutorialMod
             event.registerLayerDefinition(ModModelLayers.DIVINE_DOG_LAYER, DivineDogModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.NUE_LAYER, NueModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.TOAD_LAYER, ToadModel::createBodyLayer);
-            event.registerLayerDefinition(ModModelLayers.GREAT_SERPENT_LAYER, GreatSerpentHeadModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.GREAT_SERPENT_HEAD_LAYER, GreatSerpentHeadModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.GREAT_SERPENT_SEGMENT_LAYER, GreatSerpentSegmentModel::createBodyLayer);
         }
 
         @SubscribeEvent

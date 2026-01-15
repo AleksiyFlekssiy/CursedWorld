@@ -5,7 +5,7 @@
   "refmap": "tutorialmod.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-
+    "MoveTargetMixin"
   ],
   "client": [
   ],

@@ -1,46 +1,47 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 
-import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
-import com.aleksiyflekssiy.tutorialmod.capability.ICursedEnergy;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
 public class CursedEnergySyncPacket {
-    private final int cursedEnergy;
+    private final CompoundTag cursedEnergy;
 
-    public CursedEnergySyncPacket(int cursedEnergy) {
+    public CursedEnergySyncPacket(CompoundTag cursedEnergy) {
         this.cursedEnergy = cursedEnergy;
     }
 
     public static void encode(CursedEnergySyncPacket packet, FriendlyByteBuf buffer) {
-        buffer.writeInt(packet.cursedEnergy);
+        buffer.writeNbt(packet.cursedEnergy);
     }
 
     public static CursedEnergySyncPacket decode(FriendlyByteBuf buffer) {
-        return new CursedEnergySyncPacket(buffer.readInt());
+        CompoundTag tag = buffer.readNbt();
+        return new CursedEnergySyncPacket(tag);
     }
 
     public static void handle(CursedEnergySyncPacket packet, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             if (Minecraft.getInstance().player != null) {
                 Minecraft.getInstance().player.getCapability(CursedEnergyCapability.CURSED_ENERGY).ifPresent(energy -> {
-                    energy.setCursedEnergy(packet.cursedEnergy);
+                    energy.setCursedEnergy(packet.cursedEnergy.getInt("cursed_energy"));
+                    energy.setMaxCursedEnergy(packet.cursedEnergy.getInt("max_cursed_energy"));
+                    energy.setRegenerationAmount(packet.cursedEnergy.getInt("regeneration_amount"));
+                    energy.setRegenerationSpeed(packet.cursedEnergy.getInt("regeneration_speed"));
                 });
             }
         });
         ctx.get().setPacketHandled(true);
     }
 
-    public static void updateToClient(ICursedEnergy energy, Entity player) {
-        ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new CursedEnergySyncPacket(energy.getCursedEnergy()));
+    public static void updateToClient(CompoundTag tag, Entity player) {
+        ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new CursedEnergySyncPacket(tag));
     }
 }
