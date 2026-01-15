@@ -12,6 +12,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
 
+import java.util.Map;
+
 public class DivineDogAI {
     public static Brain<?> makeBrain(Brain<DivineDogEntity> brain) {
         initializeCoreActivity(brain);
@@ -27,7 +29,9 @@ public class DivineDogAI {
     }
 
     protected static void initializeCoreActivity(Brain<DivineDogEntity> brain){
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new CustomMoveToTarget()));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F),
+                new CustomMoveToTarget(
+                        Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT))));
     }
 
     protected static void initializeIdleActivity(Brain<DivineDogEntity> brain){

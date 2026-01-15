@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.tutorialmod.registry;
 
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.RCTSkill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
@@ -31,6 +32,8 @@ public class Skills {
     public static final RegistryObject<Skill> NUE = registerSkill(new Nue());
     public static final RegistryObject<Skill> TOAD = registerSkill(new Toad());
     public static final RegistryObject<Skill> GREAT_SERPENT = registerSkill(new GreatSerpent());
+
+    public static final RegistryObject<Skill> RCT = registerSkill(new RCTSkill());
 
     public static RegistryObject<Skill> registerSkill(Skill skill) {
         System.out.println("Registering skill " + skill.getName());

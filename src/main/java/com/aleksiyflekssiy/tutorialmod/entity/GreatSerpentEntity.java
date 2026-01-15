@@ -143,8 +143,6 @@ public class GreatSerpentEntity extends Shikigami {
             }
         }
         if (segments.size() == supposedSegmentCount) this.isSpawning = false;
-        //if (getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) System.out.println("There is target");
-        //System.out.println(getBrain().getRunningBehaviors());
         if (this.getNavigation().getPath() == null && !segments.isEmpty() && this.position().distanceToSqr(segments.get(0).position()) <= 4) return;
         moveSegments();
     }
@@ -350,7 +348,7 @@ public class GreatSerpentEntity extends Shikigami {
                     if (target != null){
                         Vec3 targetPos = target.position();
                         Vec3 vec = position().subtract(targetPos).reverse();
-                        this.setDeltaMovement(vec.normalize().scale(0.5));
+                        this.setDeltaMovement(vec.normalize().scale(2.5));
                         this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), target);
                         this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(targetPos, 1, 1));
                         System.out.println("Catch Alive");

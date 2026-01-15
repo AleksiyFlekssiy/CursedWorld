@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.cursed_technique;
 
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.RCTSkill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.GreatSerpent;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
@@ -9,7 +10,7 @@ import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
 import java.util.List;
 
 public class TenShadowsTechnique extends CursedTechnique{
-    private final List<Skill> skills = List.of(new DivineDogs(), new Nue(), new Toad(), new GreatSerpent());
+    private final List<Skill> skills = List.of(new DivineDogs(), new Nue(), new Toad(), new GreatSerpent(), new RCTSkill());
 
     public TenShadowsTechnique() {
         super(true);
