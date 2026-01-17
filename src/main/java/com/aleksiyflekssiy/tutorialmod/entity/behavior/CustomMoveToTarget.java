@@ -68,7 +68,7 @@ public class CustomMoveToTarget extends Behavior<Mob> {
             boolean flag = optional.map(CustomMoveToTarget::isWalkTargetSpectator).orElse(false);
             if (pEntity.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRAB_TARGET.get())) return false;
             PathNavigation pathnavigation = pEntity.getNavigation();
-            return optional.isPresent() && !pathnavigation.isDone() && !this.reachedTarget(pEntity, optional.get()) && !flag;
+            return optional.isPresent();
         } else {
             return false;
         }

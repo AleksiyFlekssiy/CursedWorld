@@ -114,6 +114,7 @@ public class ModCommands {
         dispatcher.register(literal("tameshikigami")
                 .executes(context -> {
                     Player owner = context.getSource().getPlayer();
+                    if (owner == null) System.out.println("NOOOOO");
                     if (CursedTechniqueCapability.getCursedTechnique(owner) instanceof TenShadowsTechnique technique){
                         List<Skill> skills = technique.getSkillSet();
                         skills.forEach(skill -> {

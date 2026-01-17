@@ -17,7 +17,7 @@ public class AscendToPoint extends Behavior<NueEntity> {
     Vec3 pos = null;
 
     public AscendToPoint(Map<MemoryModuleType<?>, MemoryStatus> pEntryCondition) {
-        super(Map.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED, CustomMemoryModuleTypes.GRAB_TARGET.get(), MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED), 0, 72000);
+        super(Map.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED, CustomMemoryModuleTypes.GRAB_TARGET.get(), MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT), 0, 72000);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.entity.ai;
 
 import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
+import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMoveToTarget;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.toad.TongueCatch;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.toad.TongueImmobilize;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.toad.TonguePull;
@@ -21,6 +22,8 @@ import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.monster.warden.WardenAi;
 import net.minecraft.world.entity.schedule.Activity;
 
+import java.util.Map;
+
 public class ToadAI {
     public static Brain<?> makeBrain(Brain<ToadEntity> brain) {
         initializeCoreActivity(brain);
@@ -36,7 +39,7 @@ public class ToadAI {
     }
 
     protected static void initializeCoreActivity(Brain<ToadEntity> brain){
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new MoveToTargetSink()));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new CustomMoveToTarget(Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT))));
     }
 
     protected static void initializeIdleActivity(Brain<ToadEntity> brain){

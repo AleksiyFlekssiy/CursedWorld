@@ -19,6 +19,7 @@ public class NueMoveControl extends MoveControl {
 
     public void tick() {
         if (this.operation == Operation.MOVE_TO) {
+            this.operation = Operation.WAIT;
             if (entity.horizontalCollision) {
                 entity.setYRot(entity.getYRot() + 180.0F);
                 this.speed = 0.1F;
@@ -54,6 +55,9 @@ public class NueMoveControl extends MoveControl {
                 Vec3 vec3 = entity.getDeltaMovement();
                 entity.setDeltaMovement(vec3.add((new Vec3(d6, d8, d7)).subtract(vec3).scale(0.2D)));
             }
+        }
+        else {
+            entity.setDeltaMovement(Vec3.ZERO);
         }
     }
 

@@ -11,15 +11,15 @@ import net.minecraft.client.animation.KeyframeAnimations;
  * @author Author
  */
 public class ToadAnimations {
-	public static final AnimationDefinition mouth_open = AnimationDefinition.Builder.withLength(0.0F)
-		.addAnimation("body", new AnimationChannel(AnimationChannel.Targets.POSITION, 
-			new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-		))
-		.addAnimation("jaw", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
-			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-		))
-		.addAnimation("upperHead", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
-			new Keyframe(0.0F, KeyframeAnimations.degreeVec(35.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-		))
-		.build();
+//	public static final AnimationDefinition mouth_open = AnimationDefinition.Builder.withLength(0.0F)
+//		.addAnimation("body", new AnimationChannel(AnimationChannel.Targets.POSITION,
+//			new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+//		))
+//		.addAnimation("jaw", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+//			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+//		))
+//		.addAnimation("upperHead", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+//			new Keyframe(0.0F, KeyframeAnimations.degreeVec(35.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+//		))
+//		.build();
 }

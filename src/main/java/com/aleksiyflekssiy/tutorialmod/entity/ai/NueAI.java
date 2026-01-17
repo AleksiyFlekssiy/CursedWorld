@@ -17,6 +17,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
 
+import java.util.Map;
+
 
 public class NueAI {
     public static Brain<?> makeBrain(Brain<NueEntity> brain) {
@@ -42,7 +44,11 @@ public class NueAI {
     }
 
     protected static void initializeCoreActivity(Brain<NueEntity> brain){
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new CustomMoveToTarget(), new CountDownCooldownTicks(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get()), new CountDownCooldownTicks(CustomMemoryModuleTypes.GRAB_COOLDOWN.get())));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(
+//                new CustomMoveToTarget(
+//                        Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT)
+
+                 new CountDownCooldownTicks(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get()), new CountDownCooldownTicks(CustomMemoryModuleTypes.GRAB_COOLDOWN.get())));
     }
 
     protected static void initializeIdleActivity(Brain<NueEntity> brain){
@@ -58,13 +64,14 @@ public class NueAI {
     protected static void initializeFightActivity(Brain<NueEntity> brain){
         brain.addActivityWithConditions(Activity.FIGHT,
                 ImmutableList.of(
-                Pair.of(0, new AscendToPoint(null)),
-                Pair.of(1, new SweepAttack(null))),
+//                Pair.of(0, new AscendToPoint(null)),
+//                Pair.of(1, new SweepAttack(null))
+                ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED),
                         Pair.of(CustomMemoryModuleTypes.GRAB_TARGET.get(), MemoryStatus.REGISTERED),
-                        Pair.of(CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryStatus.REGISTERED),
-                        Pair.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED)
+                        Pair.of(CustomMemoryModuleTypes.ATTACK_TYPE.get(), MemoryStatus.VALUE_PRESENT),
+                        Pair.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT)
                 ));
     }
 
