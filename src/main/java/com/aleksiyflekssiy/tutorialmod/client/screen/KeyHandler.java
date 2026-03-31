@@ -35,6 +35,11 @@ public class KeyHandler {
             "key.tutorialmod.next_skill", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT, "key.categories.tutorialmod");
 
+    public static final KeyMapping SWITCH_JUJUTSU_HUD = new KeyMapping(
+            "key.tutorialmod.switch_jujutsu_hud", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, "key.categories.tutorialmod"
+    );
+
     private int chargeTicks = 0;
     private boolean isCharging = false;
     private boolean wasPressedLastTick = false;
@@ -53,6 +58,10 @@ public class KeyHandler {
                 ModMessages.INSTANCE.sendToServer(new UseSkillPacket(selectedSkill.getName(), Skill.UseType.ACTIVATION, 0));
                 //mc.player.sendSystemMessage(Component.literal("Quick activation!"));
             }
+        }
+
+        if (SWITCH_JUJUTSU_HUD.consumeClick()){
+            JujutsuHUD.shouldRender = !JujutsuHUD.shouldRender;
         }
 
         boolean isPressed = SECONDARY_SKILL_ACTIVATION.isDown();

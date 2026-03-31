@@ -30,7 +30,7 @@ public class AbilityScreen extends Screen {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
 
         // Центрируем слот 34x34
-        int x = (this.width - 36) / 2;
+        int x = (this.width - 360) / 2;
         int y = (this.height - 36) / 2;
 
         // Рисуем фон слота
@@ -41,7 +41,7 @@ public class AbilityScreen extends Screen {
         RenderSystem.setShaderTexture(0, ABILITY_ICON);
         int iconX = x + 2; // Смещение на 2 пикселя для рамки
         int iconY = y + 2;
-        guiGraphics.blit(ABILITY_ICON, iconX, iconY, 0, 0, 32, 32, 32, 32); // Иконка 32x32
+        guiGraphics.blit(ABILITY_ICON, iconX, iconY, 0, 0, 16, 16, 16, 16); // Иконка 32x32
 
         // Рисуем заголовок
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 0xFFFFFF);
