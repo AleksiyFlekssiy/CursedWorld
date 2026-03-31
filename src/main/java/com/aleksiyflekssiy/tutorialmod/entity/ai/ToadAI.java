@@ -39,7 +39,9 @@ public class ToadAI {
     }
 
     protected static void initializeCoreActivity(Brain<ToadEntity> brain){
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new CustomMoveToTarget(Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT))));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(
+                new CustomMoveToTarget(Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT))
+        ));
     }
 
     protected static void initializeIdleActivity(Brain<ToadEntity> brain){

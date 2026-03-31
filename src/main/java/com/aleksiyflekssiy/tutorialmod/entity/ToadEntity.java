@@ -5,6 +5,7 @@ import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.tutorialmod.entity.behavior.CustomSensorTypes;
 import com.aleksiyflekssiy.tutorialmod.entity.control.CustomBodyRotation;
 import com.aleksiyflekssiy.tutorialmod.entity.control.CustomLookControl;
+import com.aleksiyflekssiy.tutorialmod.entity.control.JumpingMoveControl;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
@@ -20,8 +21,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
@@ -40,7 +43,7 @@ public class ToadEntity extends Shikigami {
 
     public ToadEntity(EntityType<? extends Shikigami> entityType, Level level) {
         super(entityType, level);
-        //this.moveControl = new JumpingMoveControl(this);
+        this.moveControl = new JumpingMoveControl(this);
         this.lookControl = new CustomLookControl(this, true);
         setDistance(0);
         this.currentOrder = ToadOrder.NONE;
@@ -48,7 +51,7 @@ public class ToadEntity extends Shikigami {
 
     public ToadEntity(EntityType<? extends Shikigami> entityType, Level level, Player owner) {
         super(entityType, level, owner);
-        //this.moveControl = new JumpingMoveControl(this);
+        this.moveControl = new JumpingMoveControl(this);
         this.lookControl = new CustomLookControl(this, true);
         setDistance(0);
         this.currentOrder = ToadOrder.NONE;
@@ -83,7 +86,7 @@ public class ToadEntity extends Shikigami {
                 .add(Attributes.ATTACK_SPEED, 1)
                 .add(Attributes.ATTACK_KNOCKBACK, 2.5)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.5)
-                .add(Attributes.JUMP_STRENGTH, 1);
+                .add(Attributes.JUMP_STRENGTH, 2);
     }
 
     @Override
@@ -121,6 +124,7 @@ public class ToadEntity extends Shikigami {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
             if (order == ToadOrder.NONE) {}
             else if (order == ToadOrder.PULL || order == ToadOrder.SWING || order == ToadOrder.IMMOBILIZE) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            else if (order == ToadOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
             return true;
         }
         return false;
@@ -158,11 +162,11 @@ public class ToadEntity extends Shikigami {
     public void tick() {
         super.tick();
         if (!this.level().isClientSide()) {
-            if (this.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
-                this.getBrain().setActiveActivityIfPossible(Activity.FIGHT);
-            } else {
-                this.getBrain().setActiveActivityIfPossible(Activity.IDLE);
-            }
+//            if (this.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
+//                this.getBrain().setActiveActivityIfPossible(Activity.FIGHT);
+//            } else {
+//                this.getBrain().setActiveActivityIfPossible(Activity.IDLE);
+//            }
         }
     }
 

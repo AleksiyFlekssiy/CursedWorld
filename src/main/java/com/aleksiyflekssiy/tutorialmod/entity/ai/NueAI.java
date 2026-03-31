@@ -45,10 +45,10 @@ public class NueAI {
 
     protected static void initializeCoreActivity(Brain<NueEntity> brain){
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
-//                new CustomMoveToTarget(
-//                        Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT)
-
-                 new CountDownCooldownTicks(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get()), new CountDownCooldownTicks(CustomMemoryModuleTypes.GRAB_COOLDOWN.get())));
+                new CustomMoveToTarget(
+                        Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT)),
+                new CountDownCooldownTicks(CustomMemoryModuleTypes.ATTACK_COOLDOWN.get()),
+                new CountDownCooldownTicks(CustomMemoryModuleTypes.GRAB_COOLDOWN.get())));
     }
 
     protected static void initializeIdleActivity(Brain<NueEntity> brain){
@@ -64,8 +64,8 @@ public class NueAI {
     protected static void initializeFightActivity(Brain<NueEntity> brain){
         brain.addActivityWithConditions(Activity.FIGHT,
                 ImmutableList.of(
-//                Pair.of(0, new AscendToPoint(null)),
-//                Pair.of(1, new SweepAttack(null))
+                    Pair.of(0, new AscendToPoint(null)),
+                    Pair.of(1, new SweepAttack(null))
                 ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED),

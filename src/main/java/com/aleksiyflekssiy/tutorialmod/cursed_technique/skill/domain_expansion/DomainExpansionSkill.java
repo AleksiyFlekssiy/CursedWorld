@@ -386,12 +386,11 @@ public abstract class DomainExpansionSkill extends Skill {
         if (isOpen || DomainExpansionManager.isClashing(this)) return false;
         int blocks = barrierBlocks.size();
         int brokenBlocks = 0;
-//        for (BlockPos barrierBlock : barrierBlocks) {
-//            if (domainOwner.level().getBlockState(barrierBlock).getBlock() != Blocks.BLACK_CONCRETE
-//            && domainOwner.level().getBlockState(barrierBlock).getBlock() != Blocks.WHITE_CONCRETE) brokenBlocks++;
-//        }
-        boolean bool = ((float) brokenBlocks / blocks) >= 0.35f;
-        if (bool) {
+        for (BlockPos barrierBlock : barrierBlocks) {
+            if (!domainOwner.level().getBlockState(barrierBlock).equals(DEFAULT_BARRIER_BLOCK)
+            && !domainOwner.level().getBlockState(barrierBlock).equals(CLASHING_BARRIER_BLOCK)) brokenBlocks++;
+        }
+        if ((float) brokenBlocks / blocks >= 0.2f) {
             System.out.println(domainOwner.getScoreboardName() + " is broken");
             return true;
         }
