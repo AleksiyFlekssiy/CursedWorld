@@ -16,6 +16,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class KeyHandler {
 
@@ -40,6 +42,44 @@ public class KeyHandler {
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, "key.categories.tutorialmod"
     );
 
+    public static final KeyMapping SKILL_1 = new KeyMapping(
+            "key.tutorialmod.skill_1", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_1, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_2 = new KeyMapping(
+            "key.tutorialmod.skill_2", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_2, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_3 = new KeyMapping(
+            "key.tutorialmod.skill_3", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_3, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_4 = new KeyMapping(
+            "key.tutorialmod.skill_4", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_4, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_5 = new KeyMapping(
+            "key.tutorialmod.skill_5", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_5, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_6 = new KeyMapping(
+            "key.tutorialmod.skill_6", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_6, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_7 = new KeyMapping(
+            "key.tutorialmod.skill_7", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_7, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_8 = new KeyMapping(
+            "key.tutorialmod.skill_8", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_8, "key.categories.tutorialmod"
+    );
+    public static final KeyMapping SKILL_9 = new KeyMapping(
+            "key.tutorialmod.skill_9", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_9, "key.categories.tutorialmod"
+    );
+
+
     private int chargeTicks = 0;
     private boolean isCharging = false;
     private boolean wasPressedLastTick = false;
@@ -57,6 +97,56 @@ public class KeyHandler {
             if (selectedSkill != null) {
                 ModMessages.INSTANCE.sendToServer(new UseSkillPacket(selectedSkill.getName(), Skill.UseType.ACTIVATION, 0));
                 //mc.player.sendSystemMessage(Component.literal("Quick activation!"));
+            }
+        }
+
+        if (JujutsuHUD.shouldRender){
+            List<Skill> skills = CursedTechniqueCapability.getCursedTechnique(mc.player).getSkillSet();
+            if (SKILL_1.consumeClick()){
+                if (!skills.isEmpty()) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(0));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(0).getName()));
+                }
+            }if (SKILL_2.consumeClick()){
+                if (skills.size() >= 2) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(1));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(1).getName()));
+                }
+            }if (SKILL_3.consumeClick()){
+                if (skills.size() >= 3) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(2));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(2).getName()));
+                }
+            }if (SKILL_4.consumeClick()){
+                if (skills.size() >= 4) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(3));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(3).getName()));
+                }
+            }if (SKILL_5.consumeClick()){
+                if (skills.size() >= 5) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(4));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(4).getName()));
+                }
+            }if (SKILL_6.consumeClick()){
+                if (skills.size() >= 6) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(5));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(5).getName()));
+                }
+            }if (SKILL_7.consumeClick()){
+                if (skills.size() >= 7) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(6));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(6).getName()));
+                }
+            }if (SKILL_8.consumeClick()){
+                if (skills.size() >= 8) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(7));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(7).getName()));
+                }
+            }if (SKILL_9.consumeClick()){
+                if (skills.size() == 9) {
+                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(8));
+                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(8).getName()));
+                }
             }
         }
 

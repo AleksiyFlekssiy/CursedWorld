@@ -19,6 +19,7 @@ public class ModEvents {
         event.put(ModEntities.TOAD.get(), ToadEntity.createAttributes().build());
         event.put(ModEntities.GREAT_SERPENT.get(), GreatSerpentEntity.createAttributes().build());
         event.put(ModEntities.GREAT_SERPENT_SEGMENT.get(),  GreatSerpentSegment.createAttributes().build());
+        event.put(ModEntities.RABBIT_ESCAPE.get(),  RabbitEscapeEntity.createAttributes().build());
     }
 
     @SubscribeEvent

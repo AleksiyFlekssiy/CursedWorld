@@ -157,6 +157,7 @@ public class TutorialMod
             event.registerEntityRenderer(ModEntities.TOAD.get(), ToadRenderer::new);
             event.registerEntityRenderer(ModEntities.GREAT_SERPENT.get(), GreatSerpentRenderer::new);
             event.registerEntityRenderer(ModEntities.GREAT_SERPENT_SEGMENT.get(), GreatSerpentSegmentRenderer::new);
+            event.registerEntityRenderer(ModEntities.RABBIT_ESCAPE.get(), RabbitEscapeRenderer::new);
         }
 
         @SubscribeEvent
@@ -169,6 +170,7 @@ public class TutorialMod
             event.registerLayerDefinition(ModModelLayers.TOAD_LAYER, ToadModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.GREAT_SERPENT_HEAD_LAYER, GreatSerpentHeadModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.GREAT_SERPENT_SEGMENT_LAYER, GreatSerpentSegmentModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.RABBIT_ESCAPE_LAYER, RabbitEscapeEntityModel::createBodyLayer);
         }
 
         @SubscribeEvent

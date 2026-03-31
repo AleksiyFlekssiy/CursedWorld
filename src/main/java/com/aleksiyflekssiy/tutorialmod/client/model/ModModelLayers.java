@@ -13,4 +13,5 @@ public class ModModelLayers {
     public static final ModelLayerLocation TOAD_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "toad"), "main");
     public static final ModelLayerLocation GREAT_SERPENT_HEAD_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "great_serpent_head"), "main");
     public static final ModelLayerLocation GREAT_SERPENT_SEGMENT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "great_serpent_segment"), "main");
+    public static final ModelLayerLocation RABBIT_ESCAPE_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "rabbit_escape"), "main");
 }

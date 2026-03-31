@@ -54,13 +54,9 @@ public class JujutsuHUD {
         guiGraphics.fill(x, y, x + width, y + height, 0xFF555555); // Фон (серый)
         guiGraphics.fill(x, y, x + filledWidth, y + height, 0xFFFF0000); // Заполненная часть (красный)
 
-        // Новый слот для способности
-        int xSlot = 10; // Позиция слота (можно настроить)
-        int ySlot = 40; // Под полоской энергии
         int slotSize = 28;
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0,0,200);
-        guiGraphics.fill(xSlot, ySlot, xSlot + slotSize + 100, ySlot + slotSize, 0xFF555555);
 
         // Рисуем иконку
         //RenderSystem.setShaderTexture(0, ABILITY_ICON);
@@ -70,7 +66,10 @@ public class JujutsuHUD {
         for (int i = 0; i < 9; i++){
             if (i < skills.size()) {
                 ABILITY_ICON = skills.get(i).getSkillIcon();
-                guiGraphics.blit(ABILITY_ICON, f + 26 * i + 2 * (1 + i), guiGraphics.guiHeight() - 28, 0, 0, 24, 24, 24, 24);
+                if (skills.get(i).equals(CursedTechniqueCapability.getCurrentSkill(mc.player))) {
+                    guiGraphics.blit(ABILITY_ICON, f + 26 * i + 2 * (1 + i), guiGraphics.guiHeight() - 30, 0, 0, 24, 24, 24, 24);
+                }
+                else guiGraphics.blit(ABILITY_ICON, f + 26 * i + 2 * (1 + i), guiGraphics.guiHeight() - 26, 0, 0, 24, 24, 24, 24);
             }
             guiGraphics.blit(SLOT_TEXTURE, f + 28 * i, guiGraphics.guiHeight() - 28, 0, 0, slotSize, slotSize, slotSize, slotSize);
         }

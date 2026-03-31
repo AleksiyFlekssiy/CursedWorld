@@ -79,6 +79,11 @@ public class ModEntities {
                     .clientTrackingRange(20)
                     .build("tutorialmod:great_serpent_segment"));
 
+    public static final RegistryObject<EntityType<RabbitEscapeEntity>> RABBIT_ESCAPE = ENTITIES.register("rabbit_escape",
+            () -> EntityType.Builder.<RabbitEscapeEntity>of(RabbitEscapeEntity::new, MobCategory.CREATURE)
+                    .sized(0.5f, 0.5f)
+                    .build("tutorialmod:rabbit_escape"));
+
 
     public static void register(IEventBus bus) {
         ENTITIES.register(bus);

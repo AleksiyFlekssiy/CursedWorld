@@ -10,6 +10,7 @@ import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.GreatSe
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
+import com.aleksiyflekssiy.tutorialmod.network.SyncSkillPacket;
 import com.aleksiyflekssiy.tutorialmod.network.TechniqueSyncPacket;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -269,6 +270,12 @@ public class CursedTechniqueCapability {
                 .orElseGet(() -> player.getCapability(CURSED_TECHNIQUE)
                         .map(ICursedTechnique::getFirstSkill)
                         .orElse(null));
+    }
+
+    public static void setCurrentSkill(Player player, Skill skill) {
+        player.getCapability(CURSED_TECHNIQUE).ifPresent(cursedTechnique -> {
+            cursedTechnique.setCurrentSkill(skill);
+        });
     }
 
     public static void nextSkill(Player player) {

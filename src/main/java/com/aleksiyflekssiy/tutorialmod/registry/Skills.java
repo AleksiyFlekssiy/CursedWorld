@@ -4,10 +4,7 @@ import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.RCTSkill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.limitless.*;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.DivineDogs;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.GreatSerpent;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Nue;
-import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.Toad;
+import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -32,6 +29,7 @@ public class Skills {
     public static final RegistryObject<Skill> NUE = registerSkill(new Nue());
     public static final RegistryObject<Skill> TOAD = registerSkill(new Toad());
     public static final RegistryObject<Skill> GREAT_SERPENT = registerSkill(new GreatSerpent());
+    public static final RegistryObject<Skill> RABBIT_ESCAPE = registerSkill(new RabbitEscape());
 
     public static final RegistryObject<Skill> RCT = registerSkill(new RCTSkill());
 
