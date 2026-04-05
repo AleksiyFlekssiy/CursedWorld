@@ -13,9 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 
 public class RabbitEscapeRenderer extends MobRenderer<RabbitEscapeEntity, RabbitEscapeEntityModel<RabbitEscapeEntity>> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("tutorialmod", "textures/entity/rabbit_escape.png");
+    public static RabbitEscapeEntityModel<RabbitEscapeEntity> MODEL;
 
     public RabbitEscapeRenderer(EntityRendererProvider.Context context) {
         super(context, new RabbitEscapeEntityModel<>(context.bakeLayer(ModModelLayers.RABBIT_ESCAPE_LAYER)), 0.5f);
+        MODEL = new RabbitEscapeEntityModel<>(context.bakeLayer(ModModelLayers.RABBIT_ESCAPE_LAYER));
+        VortexRenderer.RABBIT_MODEL = MODEL;
     }
 
     @Override

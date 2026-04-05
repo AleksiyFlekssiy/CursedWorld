@@ -92,6 +92,12 @@ public class KeyHandler {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
+        if (SWITCH_JUJUTSU_HUD.consumeClick()){
+            JujutsuHUD.shouldRender = !JujutsuHUD.shouldRender;
+        }
+
+        if (!JujutsuHUD.shouldRender) return;
+
         if (PRIMARY_SKILL_ACTIVATION.consumeClick()){
             Skill selectedSkill = CursedTechniqueCapability.getCurrentSkill(mc.player);
             if (selectedSkill != null) {
@@ -100,58 +106,52 @@ public class KeyHandler {
             }
         }
 
-        if (JujutsuHUD.shouldRender){
-            List<Skill> skills = CursedTechniqueCapability.getCursedTechnique(mc.player).getSkillSet();
-            if (SKILL_1.consumeClick()){
-                if (!skills.isEmpty()) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(0));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(0).getName()));
-                }
-            }if (SKILL_2.consumeClick()){
-                if (skills.size() >= 2) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(1));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(1).getName()));
-                }
-            }if (SKILL_3.consumeClick()){
-                if (skills.size() >= 3) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(2));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(2).getName()));
-                }
-            }if (SKILL_4.consumeClick()){
-                if (skills.size() >= 4) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(3));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(3).getName()));
-                }
-            }if (SKILL_5.consumeClick()){
-                if (skills.size() >= 5) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(4));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(4).getName()));
-                }
-            }if (SKILL_6.consumeClick()){
-                if (skills.size() >= 6) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(5));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(5).getName()));
-                }
-            }if (SKILL_7.consumeClick()){
-                if (skills.size() >= 7) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(6));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(6).getName()));
-                }
-            }if (SKILL_8.consumeClick()){
-                if (skills.size() >= 8) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(7));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(7).getName()));
-                }
-            }if (SKILL_9.consumeClick()){
-                if (skills.size() == 9) {
-                    CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(8));
-                    ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(8).getName()));
-                }
+        List<Skill> skills = CursedTechniqueCapability.getCursedTechnique(mc.player).getSkillSet();
+        if (SKILL_1.consumeClick()){
+            if (!skills.isEmpty()) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(0));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(0).getName()));
             }
-        }
-
-        if (SWITCH_JUJUTSU_HUD.consumeClick()){
-            JujutsuHUD.shouldRender = !JujutsuHUD.shouldRender;
+        }if (SKILL_2.consumeClick()){
+            if (skills.size() >= 2) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(1));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(1).getName()));
+            }
+        }if (SKILL_3.consumeClick()){
+            if (skills.size() >= 3) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(2));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(2).getName()));
+            }
+        }if (SKILL_4.consumeClick()){
+            if (skills.size() >= 4) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(3));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(3).getName()));
+            }
+        }if (SKILL_5.consumeClick()){
+            if (skills.size() >= 5) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(4));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(4).getName()));
+            }
+        }if (SKILL_6.consumeClick()){
+            if (skills.size() >= 6) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(5));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(5).getName()));
+            }
+        }if (SKILL_7.consumeClick()){
+            if (skills.size() >= 7) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(6));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(6).getName()));
+            }
+        }if (SKILL_8.consumeClick()){
+            if (skills.size() >= 8) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(7));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(7).getName()));
+            }
+        }if (SKILL_9.consumeClick()){
+            if (skills.size() == 9) {
+                CursedTechniqueCapability.setCurrentSkill(mc.player, skills.get(8));
+                ModMessages.INSTANCE.sendToServer(new SyncSkillPacket(skills.get(8).getName()));
+            }
         }
 
         boolean isPressed = SECONDARY_SKILL_ACTIVATION.isDown();

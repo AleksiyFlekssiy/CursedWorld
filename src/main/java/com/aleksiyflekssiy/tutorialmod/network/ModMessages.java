@@ -45,5 +45,10 @@ public class ModMessages {
                 InputLockPacket::encode,
                 InputLockPacket::decode,
                 InputLockPacket::handle);
+
+        INSTANCE.registerMessage(id++, SkillRenderPacket.class,
+                SkillRenderPacket::encode,
+                SkillRenderPacket::decode,
+                SkillRenderPacket::handle);
     }
 }
