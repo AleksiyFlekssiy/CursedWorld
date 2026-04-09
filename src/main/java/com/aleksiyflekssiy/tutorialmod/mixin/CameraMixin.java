@@ -1,6 +1,6 @@
 package com.aleksiyflekssiy.tutorialmod.mixin;
 
-import com.aleksiyflekssiy.tutorialmod.client.renderer.VortexRenderer;
+import com.aleksiyflekssiy.tutorialmod.client.renderer.RabbitSwarmRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
@@ -12,21 +12,33 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Camera.class)
-public class CameraMixin {
+public abstract class CameraMixin {
     @Shadow
     private Vec3 position;
 
+    @Shadow
+    public abstract boolean isDetached();
 
+    @Shadow
+    protected abstract double getMaxZoom(double pStartingDistance);
+
+    @Shadow
+    protected abstract void move(double pDistanceOffset, double pVerticalOffset, double pHorizontalOffset);
 
     @Inject(method = "setup",
             at = @At(value = "TAIL"))
     public void onSetup(BlockGetter pLevel, Entity entity, boolean pDetached, boolean pThirdPersonReverse, float pPartialTick, CallbackInfo ci) {
-        if (VortexRenderer.USERS.contains(entity.getUUID())) {
+        if (RabbitSwarmRenderer.USERS.contains(entity.getUUID())) {
             // Прямое управление камерой
-
             Vec3 view = entity.getViewVector(1.0F);
-
-            this.position = view.scale(-2 * 2.5).add(entity.position());
+            byte multiplier = (byte) (pThirdPersonReverse ? 2 : -2);
+            double x = view.x * multiplier * 5;
+            double y = view.y * multiplier * 5;
+            double z = view.z * multiplier * 5;
+            Vec3 pos = new Vec3(x, y, z).add(entity.position());
+            if (!isDetached()) pos.add(0, 1.6, 0);
+            this.position = pos;
+            //this.move(-getMaxZoom(x), 0, 0);
         }
     }
 }

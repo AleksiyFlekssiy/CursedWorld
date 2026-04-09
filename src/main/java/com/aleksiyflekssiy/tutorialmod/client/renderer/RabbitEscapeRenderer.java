@@ -2,9 +2,7 @@ package com.aleksiyflekssiy.tutorialmod.client.renderer;
 
 import com.aleksiyflekssiy.tutorialmod.client.model.ModModelLayers;
 import com.aleksiyflekssiy.tutorialmod.client.model.RabbitEscapeEntityModel;
-import com.aleksiyflekssiy.tutorialmod.client.model.ToadModel;
 import com.aleksiyflekssiy.tutorialmod.entity.RabbitEscapeEntity;
-import com.aleksiyflekssiy.tutorialmod.entity.ToadEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -18,7 +16,7 @@ public class RabbitEscapeRenderer extends MobRenderer<RabbitEscapeEntity, Rabbit
     public RabbitEscapeRenderer(EntityRendererProvider.Context context) {
         super(context, new RabbitEscapeEntityModel<>(context.bakeLayer(ModModelLayers.RABBIT_ESCAPE_LAYER)), 0.5f);
         MODEL = new RabbitEscapeEntityModel<>(context.bakeLayer(ModModelLayers.RABBIT_ESCAPE_LAYER));
-        VortexRenderer.RABBIT_MODEL = MODEL;
+        RabbitSwarmRenderer.RABBIT_MODEL = MODEL;
     }
 
     @Override

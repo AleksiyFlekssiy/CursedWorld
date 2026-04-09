@@ -6,10 +6,7 @@ import com.aleksiyflekssiy.tutorialmod.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.TenShadowsTechnique;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.Skill;
-import com.aleksiyflekssiy.tutorialmod.entity.RedEntity;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
@@ -23,7 +20,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
-import java.util.Objects;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
@@ -73,7 +69,7 @@ public class ModCommands {
                 }));
         dispatcher.register(literal("regainshikigami")
                 .executes(context -> {
-                    Player owner = context.getSource().getPlayer();
+                    Player owner = context.getSource().getPlayerOrException();
                     if (CursedTechniqueCapability.getCursedTechnique(owner) instanceof TenShadowsTechnique technique){
                         List<Skill> skills = technique.getSkillSet().stream().filter(ModCommands::isShikigamiSkill).toList();
                         skills.forEach(skill -> {

@@ -8,17 +8,11 @@ import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
 import com.aleksiyflekssiy.tutorialmod.network.ModMessages;
 import com.aleksiyflekssiy.tutorialmod.network.SkillRenderPacket;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
@@ -29,10 +23,10 @@ import java.util.*;
 public class RabbitEscape extends ShikigamiSkill {
     private List<Shikigami> rabbits = new ArrayList<>(100);
     private boolean isMoving = false;
-    public static final EntityDataAccessor<Boolean> IS_IN_VORTEX = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
 
     @Override
     public void use(LivingEntity entity, UseType type, int charge) {
+        if (entity.level().isClientSide) return;
         switch (type) {
             case ACTIVATION -> this.activate(entity);
             case CHARGING -> this.charge(entity, charge);
@@ -130,17 +124,12 @@ public class RabbitEscape extends ShikigamiSkill {
         }
         else {
             if (isTamed) {
-                Vec3 lookAngle = entity.getViewVector(20).scale(0.5);
+                Vec3 lookAngle = entity.getViewVector(1).scale(0.5);
                 entity.setDeltaMovement(lookAngle.x, lookAngle.y, lookAngle.z);
                 entity.hurtMarked = true;
-                if (!isMoving) ModMessages.INSTANCE.send(PacketDistributor.NEAR.with(
-                        () -> new PacketDistributor.TargetPoint(
-                                entity.getX(),
-                                entity.getY(),
-                                entity.getZ(),
-                                32,
-                                entity.level().dimension())
-                ), new SkillRenderPacket(entity.getUUID(), true));
+                if (!isMoving) {
+                    ModMessages.INSTANCE.send(PacketDistributor.ALL.noArg(), new SkillRenderPacket(entity.getUUID(), true));
+                }
                 isMoving = true;
             }
         }
@@ -149,14 +138,7 @@ public class RabbitEscape extends ShikigamiSkill {
     @Override
     public void release(LivingEntity entity) {
         if (isTamed && isMoving) {
-            ModMessages.INSTANCE.send(PacketDistributor.NEAR.with(
-                    () -> new PacketDistributor.TargetPoint(
-                            entity.getX(),
-                            entity.getY(),
-                            entity.getZ(),
-                            32,
-                            entity.level().dimension())
-            ), new SkillRenderPacket(entity.getUUID(), false));
+            ModMessages.INSTANCE.send(PacketDistributor.ALL.noArg(), new SkillRenderPacket(entity.getUUID(), false));
             isMoving = false;
         }
     }

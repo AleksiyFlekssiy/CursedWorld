@@ -1,19 +1,18 @@
 package com.aleksiyflekssiy.tutorialmod.network;
 
-import com.aleksiyflekssiy.tutorialmod.capability.CursedEnergyCapability;
-import com.aleksiyflekssiy.tutorialmod.client.renderer.VortexRenderer;
+import com.aleksiyflekssiy.tutorialmod.client.renderer.RabbitSwarmRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 public class SkillRenderPacket {
-    private UUID uuid;
-    private boolean isActive;
+    private final UUID uuid;
+    private final boolean isActive;
 
     public SkillRenderPacket(UUID uuid, boolean isActive) {
         this.uuid = uuid;
@@ -34,9 +33,13 @@ public class SkillRenderPacket {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null){
                 if (packet.isActive){
-                    VortexRenderer.addUser(packet.uuid);
+                    System.out.println(Objects.requireNonNull(player.level().getPlayerByUUID(packet.uuid)).getDisplayName() + " is charging");
+                    RabbitSwarmRenderer.addUser(packet.uuid);
                 }
-                else VortexRenderer.removeUser(packet.uuid);
+                else {
+                    System.out.println(Objects.requireNonNull(player.level().getPlayerByUUID(packet.uuid)).getDisplayName() + " is releasing");
+                    RabbitSwarmRenderer.removeUser(packet.uuid);
+                }
             }
         });
         ctx.get().setPacketHandled(true);

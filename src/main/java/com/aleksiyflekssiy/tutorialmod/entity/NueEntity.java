@@ -114,8 +114,7 @@ public class NueEntity extends Shikigami {
     public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            if (order == NueOrder.NONE) {
-            } else if (order == NueOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            if (order == NueOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
             else if (order == NueOrder.GRAB)
                 this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), target);
             else if (order == NueOrder.MOVE)
