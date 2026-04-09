@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -111,7 +112,7 @@ public class RabbitSwarmRenderer {
                 RABBIT_MODEL.renderToBuffer(
                         poseStack,
                         buffer.getBuffer(RenderType.entityCutoutNoCull(ResourceLocation.fromNamespaceAndPath(TutorialMod.MOD_ID, "textures/entity/rabbit_escape.png"))),
-                        player.level().getMaxLightLevel(),
+                        15728880,
                         OverlayTexture.NO_OVERLAY,
                         1.0f, 1.0f, 1.0f, 1.0f
                 );
