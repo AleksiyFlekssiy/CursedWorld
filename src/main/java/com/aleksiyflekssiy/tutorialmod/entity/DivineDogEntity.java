@@ -33,8 +33,19 @@ public class DivineDogEntity extends Shikigami{
     }
 
     public float targetYaw = 0.0F;
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(), CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), MemoryModuleType.LOOK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-    protected static final ImmutableList<SensorType<? extends Sensor<? super DivineDogEntity>>> SENSOR_TYPES = ImmutableList.of(CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(), CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get(), SensorType.NEAREST_LIVING_ENTITIES);
+
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
+            MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH,
+            MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET,
+            CustomMemoryModuleTypes.OWNER.get(), CustomMemoryModuleTypes.OWNER_HURT.get(),
+            CustomMemoryModuleTypes.OWNER_HURT_BY_ENTITY.get(), MemoryModuleType.LOOK_TARGET,
+            MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+
+    protected static final ImmutableList<SensorType<? extends Sensor<? super DivineDogEntity>>> SENSOR_TYPES = ImmutableList.of(
+            CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(),
+            CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get(),
+            SensorType.NEAREST_LIVING_ENTITIES);
+
     private static final EntityDataAccessor<Float> REAL_SPEED = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(DivineDogEntity.class, EntityDataSerializers.INT);
 

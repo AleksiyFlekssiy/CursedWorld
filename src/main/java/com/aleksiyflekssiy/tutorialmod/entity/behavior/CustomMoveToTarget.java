@@ -75,7 +75,6 @@ public class CustomMoveToTarget extends Behavior<Mob> {
     }
 
     protected void stop(ServerLevel pLevel, Mob pEntity, long pGameTime) {
-        System.out.println("Stop Move");
         if (pEntity.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET) && !this.reachedTarget(pEntity, pEntity.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get()) && pEntity.getNavigation().isStuck()) {
             this.remainingCooldown = pLevel.getRandom().nextInt(40);
         }
@@ -89,11 +88,9 @@ public class CustomMoveToTarget extends Behavior<Mob> {
     protected void start(ServerLevel pLevel, Mob pEntity, long pGameTime) {
         pEntity.getBrain().setMemory(MemoryModuleType.PATH, this.path);
         pEntity.getNavigation().moveTo(this.path, this.speedModifier);
-        System.out.println("Start Move");
     }
 
     protected void tick(ServerLevel pLevel, Mob mob, long pGameTime) {
-        System.out.println("Tick Move");
         Path path = mob.getNavigation().getPath();
         Brain<?> brain = mob.getBrain();
         if (this.path != path) {

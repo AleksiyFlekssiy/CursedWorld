@@ -28,17 +28,19 @@ public abstract class CameraMixin {
     @Inject(method = "setup",
             at = @At(value = "TAIL"))
     public void onSetup(BlockGetter pLevel, Entity entity, boolean pDetached, boolean pThirdPersonReverse, float pPartialTick, CallbackInfo ci) {
-        if (RabbitSwarmRenderer.USERS.contains(entity.getUUID())) {
+        if (RabbitSwarmRenderer.ID_RENDER_TARGETS.containsKey(entity.getId())) {
             // Прямое управление камерой
-            Vec3 view = entity.getViewVector(1.0F);
-            byte multiplier = (byte) (pThirdPersonReverse ? 2 : -2);
-            double x = view.x * multiplier * 5;
-            double y = view.y * multiplier * 5;
-            double z = view.z * multiplier * 5;
-            Vec3 pos = new Vec3(x, y, z).add(entity.position());
-            if (!isDetached()) pos.add(0, 1.6, 0);
-            this.position = pos;
-            //this.move(-getMaxZoom(x), 0, 0);
+            if (RabbitSwarmRenderer.ID_RENDER_TARGETS.get(entity.getId())) {
+                Vec3 view = entity.getViewVector(1.0F);
+                byte multiplier = (byte) (pThirdPersonReverse ? 2 : -2);
+                double x = view.x * multiplier * 5;
+                double y = view.y * multiplier * 5;
+                double z = view.z * multiplier * 5;
+                Vec3 pos = new Vec3(x, y, z).add(entity.position());
+                if (!isDetached()) pos.add(0, 1.6, 0);
+                this.position = pos;
+                //this.move(-getMaxZoom(x), 0, 0);
+            }
         }
     }
 }

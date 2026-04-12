@@ -3,21 +3,15 @@ package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.tenshadows;
 import com.aleksiyflekssiy.tutorialmod.TutorialMod;
 import com.aleksiyflekssiy.tutorialmod.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.tutorialmod.entity.*;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public class GreatSerpent extends ShikigamiSkill {
     private GreatSerpentEntity greatSerpent = null;
@@ -130,23 +124,6 @@ public class GreatSerpent extends ShikigamiSkill {
             shikigamiUUIDList.clear();
             isActive = false;
         }
-    }
-
-    private void setTarget(LivingEntity owner, Consumer<BlockPos> blockAction, Consumer<LivingEntity> entityAction) {
-        HitResult result = ProjectileUtil.getHitResultOnViewVector(owner, target -> !target.equals(owner), 100);
-        if (result.getType() == HitResult.Type.ENTITY && entityAction != null) {
-            EntityHitResult hitResult = (EntityHitResult) result;
-            if (hitResult.getEntity() instanceof LivingEntity target) {
-                entityAction.accept(target);
-            }
-        } else if (result.getType() == HitResult.Type.BLOCK && blockAction != null) {
-            BlockHitResult hitResult = (BlockHitResult) result;
-            System.out.println(hitResult.getBlockPos());
-            blockAction.accept(hitResult.getBlockPos());
-        }
-        else if (result.getType() == HitResult.Type.MISS && blockAction != null) {
-            blockAction.accept(BlockPos.containing(result.getLocation()));
-        };
     }
 
     @SubscribeEvent

@@ -1,15 +1,21 @@
 package com.aleksiyflekssiy.tutorialmod.cursed_technique.skill;
 
 import com.aleksiyflekssiy.tutorialmod.entity.Shikigami;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public abstract class ShikigamiSkill extends Skill{
     protected List<UUID> shikigamiUUIDList = new ArrayList<>();
@@ -50,6 +56,23 @@ public abstract class ShikigamiSkill extends Skill{
     }
 
     public abstract List<Shikigami> getShikigami();
+
+    protected void setTarget(LivingEntity owner, Consumer<BlockPos> blockAction, Consumer<LivingEntity> entityAction) {
+        HitResult result = ProjectileUtil.getHitResultOnViewVector(owner, target -> !target.equals(owner), 100);
+        if (result.getType() == HitResult.Type.ENTITY && entityAction != null) {
+            EntityHitResult hitResult = (EntityHitResult) result;
+            if (hitResult.getEntity() instanceof LivingEntity target) {
+                entityAction.accept(target);
+            }
+        } else if (result.getType() == HitResult.Type.BLOCK && blockAction != null) {
+            BlockHitResult hitResult = (BlockHitResult) result;
+            System.out.println(hitResult.getBlockPos());
+            blockAction.accept(hitResult.getBlockPos());
+        }
+        else if (result.getType() == HitResult.Type.MISS && blockAction != null) {
+            blockAction.accept(BlockPos.containing(result.getLocation()));
+        };
+    }
 
     public abstract void setShikigami(List<Shikigami> shikigamiList);
 

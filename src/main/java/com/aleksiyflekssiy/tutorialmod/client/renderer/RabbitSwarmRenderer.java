@@ -11,14 +11,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -30,19 +28,19 @@ import java.util.*;
 
 @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class RabbitSwarmRenderer {
-    public static final List<UUID> USERS = new ArrayList<>();
+    public static final Map<Integer, Boolean> ID_RENDER_TARGETS = new HashMap<>();
 
     public static RabbitEscapeEntityModel<RabbitEscapeEntity> RABBIT_MODEL;
 
     private static final int MODEL_COUNT = 300;        // сколько моделей в куполе
     private static final double RADIUS = 2.5;          // радиус купола
 
-    public static void addUser(UUID uuid) {
-        USERS.add(uuid);
+    public static void addUser(int id, boolean selfUse) {
+        ID_RENDER_TARGETS.put(id, selfUse);
     }
 
-    public static void removeUser(UUID uuid) {
-        USERS.remove(uuid);
+    public static void removeUser(int id) {
+        ID_RENDER_TARGETS.remove(id);
     }
 
     @SubscribeEvent
@@ -52,7 +50,7 @@ public class RabbitSwarmRenderer {
             if (technique instanceof TenShadowsTechnique tenShadows) {
                 for (Skill skill : tenShadows.getSkillSet()) {
                     if (skill instanceof RabbitEscape rabbitEscape && rabbitEscape.isActive())
-                        addUser(entity.getUUID());
+                        addUser(entity.getId(), true);
                 }
             }
         });
@@ -60,8 +58,8 @@ public class RabbitSwarmRenderer {
 
     @SubscribeEvent
     public static void onStopTracking(PlayerEvent.StopTracking event){
-        if (USERS.contains(event.getTarget().getUUID())){
-            removeUser(event.getTarget().getUUID());
+        if (ID_RENDER_TARGETS.containsKey(event.getTarget().getId())){
+            removeUser(event.getTarget().getId());
         }
     }
 
@@ -79,14 +77,13 @@ public class RabbitSwarmRenderer {
 
         poseStack.pushPose();
 
-        for (UUID uuid : USERS) {
-            Player player = mc.level.getPlayerByUUID(uuid);
-            if (player == null) continue;
-
+        for (int id : ID_RENDER_TARGETS.keySet()) {
+            LivingEntity entity = (LivingEntity) mc.level.getEntity(id);
+            if (entity == null) continue;
             // Центр — игрок
-            double centerX = player.getX();
-            double centerY = player.getY() + 1.0;
-            double centerZ = player.getZ();
+            double centerX = entity.getX();
+            double centerY = entity.getY() + 1.0;
+            double centerZ = entity.getZ();
 
             for (int i = 0; i < MODEL_COUNT; i++) {
                 // Равномерное распределение по полусфере
@@ -100,13 +97,12 @@ public class RabbitSwarmRenderer {
                 poseStack.pushPose();
 
                 poseStack.translate(x - centerX, y - centerY, z - centerZ);
-                if (player.getUUID().equals(mc.player.getUUID())) poseStack.translate(cameraLookVector.x * 10, player.getY() - camera.getPosition().y + 1.6, cameraLookVector.z * 10);
-                else poseStack.translate(centerX -mc.player.getX(), centerY -mc.player.getY(), centerZ -mc.player.getZ());
+                if (ID_RENDER_TARGETS.get(id) && mc.player.getId() == id) poseStack.translate(cameraLookVector.x * 10, entity.getY() - camera.getPosition().y + 1.6, cameraLookVector.z * 10);
+                else poseStack.translate(centerX - mc.player.getX(), centerY - mc.player.getY(), centerZ - mc.player.getZ());
 
                 poseStack.mulPose(Axis.XP.rotationDegrees(180));
-                poseStack.mulPose(Axis.YP.rotationDegrees(player.getViewYRot(0.5F)));
+                poseStack.mulPose(Axis.YP.rotationDegrees(entity.getViewYRot(0.5F)));
 
-                //KeyframeAnimations.animate(RABBIT_MODEL, RabbitEscapeAnimations.animation, (long) lastTime, 0.4f, new Vector3f());
                 RABBIT_MODEL.setupAnim(null, 1, 1, mc.level.getGameTime(), 0, 0);
 
                 RABBIT_MODEL.renderToBuffer(
@@ -117,10 +113,10 @@ public class RabbitSwarmRenderer {
                         1.0f, 1.0f, 1.0f, 1.0f
                 );
                 poseStack.popPose();
-
             }
 
         }
+
         poseStack.popPose();
         buffer.endBatch();
     }

@@ -46,9 +46,9 @@ public class ModMessages {
                 InputLockPacket::decode,
                 InputLockPacket::handle);
 
-        INSTANCE.registerMessage(id++, SkillRenderPacket.class,
-                SkillRenderPacket::encode,
-                SkillRenderPacket::decode,
-                SkillRenderPacket::handle);
+        INSTANCE.registerMessage(id++, SwarmRenderPacket.class,
+                SwarmRenderPacket::encode,
+                SwarmRenderPacket::decode,
+                SwarmRenderPacket::handle);
     }
 }

@@ -82,6 +82,9 @@ public class ModEntities {
     public static final RegistryObject<EntityType<RabbitEscapeEntity>> RABBIT_ESCAPE = ENTITIES.register("rabbit_escape",
             () -> EntityType.Builder.<RabbitEscapeEntity>of(RabbitEscapeEntity::new, MobCategory.CREATURE)
                     .sized(0.5f, 0.5f)
+                    .setUpdateInterval(1)
+                    .setShouldReceiveVelocityUpdates(true)
+                    .clientTrackingRange(20)
                     .build("tutorialmod:rabbit_escape"));
 
 
