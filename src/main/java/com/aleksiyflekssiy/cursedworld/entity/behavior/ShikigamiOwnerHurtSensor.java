@@ -1,4 +1,4 @@
-package com.aleksiyflekssiy.tutorialmod.entity.behavior;
+package com.aleksiyflekssiy.cursedworld.entity.behavior;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,17 +18,21 @@ public class ShikigamiOwnerHurtSensor extends Sensor<LivingEntity> {
             if (lastHurtMob != null && !lastHurtMob.equals(entity) && !lastHurtMob.equals(owner) && lastHurtMob.isAlive()) {
                 brain.setMemory(MemoryModuleType.ATTACK_TARGET, lastHurtMob);
                 brain.setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), lastHurtMob);
+                brain.setMemory(CustomMemoryModuleTypes.OWNER_HURT.get(), lastHurtMob);
             }
         });
         brain.getMemory(CustomMemoryModuleTypes.OWNER_HURT.get()).ifPresent(enemy ->{
-            boolean inDistance = enemy.getAttribute(Attributes.FOLLOW_RANGE) != null && enemy.distanceToSqr(enemy) <= enemy.getAttributeValue(Attributes.FOLLOW_RANGE);
+            boolean inDistance = entity.distanceToSqr(enemy) <= entity.getAttributeValue(Attributes.FOLLOW_RANGE);
             if (!enemy.isAlive() || !inDistance) {
                 brain.eraseMemory(CustomMemoryModuleTypes.OWNER_HURT.get());
                 brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
+                brain.eraseMemory(MemoryModuleType.WALK_TARGET);
                 brain.eraseMemory(CustomMemoryModuleTypes.GRAB_TARGET.get());
             }
         });
     }
+
+
 
     @Override
     public Set<MemoryModuleType<?>> requires() {
