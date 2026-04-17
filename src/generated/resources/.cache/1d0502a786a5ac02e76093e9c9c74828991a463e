@@ -1,0 +1,4 @@
+// 1.20.1	2026-04-12T16:11:29.6844222	Global Loot Modifiers : cursedworld
+c19ad11c1a7d87d924bad69d4c007624d8b9401a data/cursedworld/loot_modifiers/metal_detector_from_suspicious_sand.json
+6621e5910e59193835ad0beb383208525f1805a6 data/cursedworld/loot_modifiers/tomato_from_grass.json
+8c45b847300ce9b1af52bb621774f921de3a0bea data/forge/loot_modifiers/global_loot_modifiers.json

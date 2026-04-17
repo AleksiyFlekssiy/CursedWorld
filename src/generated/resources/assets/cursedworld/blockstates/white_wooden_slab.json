@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "cursedworld:block/white_wooden_slab"
+    },
+    "type=double": {
+      "model": "cursedworld:block/white_wooden_planks"
+    },
+    "type=top": {
+      "model": "cursedworld:block/white_wooden_slab_top"
+    }
+  }
+}

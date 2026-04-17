@@ -1,0 +1,67 @@
+package com.aleksiyflekssiy.cursedworld.entity.ai;
+
+import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
+import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
+import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMoveToTarget;
+import com.aleksiyflekssiy.cursedworld.entity.behavior.toad.TongueCatch;
+import com.aleksiyflekssiy.cursedworld.entity.behavior.toad.TongueImmobilize;
+import com.aleksiyflekssiy.cursedworld.entity.behavior.toad.TonguePull;
+import com.aleksiyflekssiy.cursedworld.entity.behavior.toad.TongueSwing;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.client.particle.SonicBoomParticle;
+import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.*;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.animal.goat.GoatAi;
+import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.monster.warden.WardenAi;
+import net.minecraft.world.entity.schedule.Activity;
+
+import java.util.Map;
+
+public class ToadAI {
+    public static Brain<?> makeBrain(Brain<ToadEntity> brain) {
+        initializeCoreActivity(brain);
+        initializeIdleActivity(brain);
+        initializeFightActivity(brain);
+
+        // Устанавливаем начальную активность
+        brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
+        brain.setDefaultActivity(Activity.IDLE);
+        brain.useDefaultActivity();
+
+        return brain;
+    }
+
+    protected static void initializeCoreActivity(Brain<ToadEntity> brain){
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(
+                new CustomMoveToTarget(Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT))
+        ));
+    }
+
+    protected static void initializeIdleActivity(Brain<ToadEntity> brain){
+
+    }
+
+    protected static void initializeFightActivity(Brain<ToadEntity> brain){
+        brain.addActivityWithConditions(Activity.FIGHT,
+                ImmutableList.of(
+                        Pair.of(0, new TongueCatch(ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT))),
+                        Pair.of(1, new TonguePull(ImmutableMap.of(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), MemoryStatus.VALUE_PRESENT))),
+                        Pair.of(2, new TongueImmobilize(ImmutableMap.of(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), MemoryStatus.VALUE_PRESENT))),
+                        Pair.of(3, new TongueSwing(ImmutableMap.of(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), MemoryStatus.VALUE_PRESENT)))),
+                ImmutableSet.of(
+                        Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT),
+                        Pair.of(CustomMemoryModuleTypes.GRABBED_ENTITY.get(), MemoryStatus.REGISTERED)
+                ));
+    }
+
+    public static void updateActivity(Brain<ToadEntity> brain){
+        brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
+    }
+}

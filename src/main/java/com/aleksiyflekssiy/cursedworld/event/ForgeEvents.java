@@ -1,0 +1,122 @@
+package com.aleksiyflekssiy.cursedworld.event;
+
+import com.aleksiyflekssiy.cursedworld.CursedWorld;
+import com.aleksiyflekssiy.cursedworld.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.cursedworld.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.TenShadowsTechnique;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
+import com.aleksiyflekssiy.cursedworld.network.CursedEnergySyncPacket;
+import com.aleksiyflekssiy.cursedworld.network.ModMessages;
+import com.aleksiyflekssiy.cursedworld.network.TechniqueSyncPacket;
+import com.aleksiyflekssiy.cursedworld.util.AdaptationUtil;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Mod.EventBusSubscriber(modid = CursedWorld.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class ForgeEvents {
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        ServerPlayer player = (ServerPlayer) event.getEntity();
+        player.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(technique -> {
+            CompoundTag nbt = technique.serializeNbtToNetwork();
+            System.out.println("Server NBT: " + nbt);
+            ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new TechniqueSyncPacket(nbt));
+            if (technique.getTechnique() instanceof TenShadowsTechnique tenShadowsTechnique) {
+                for (Skill skill : tenShadowsTechnique.getSkillSet()){
+                    if (skill instanceof ShikigamiSkill shikigamiSkill) {
+                        List<UUID> shikigamiUUIDList = shikigamiSkill.getShikigamiUUID();
+                        if (shikigamiUUIDList.isEmpty()) continue;
+                        List<Shikigami> shikigamiList = shikigamiUUIDList
+                                .stream()
+                                .map(shikigamiUUID -> ShikigamiSkill.getShikigamiFromUUID(shikigamiUUID, (ServerLevel) player.level()))
+                                .toList();
+                        List<Shikigami> mutableShikigamiList = new ArrayList<>(shikigamiList);
+                        shikigamiList.forEach(shikigami -> {
+                            if (shikigami != null){
+                                if (shikigamiSkill.isTamed()) {
+                                    shikigami.tame(player);
+                                    System.out.println(skill.getName() + " has tamed");
+                                }
+                                else {
+                                    shikigami.setOwner(player);
+                                    System.out.println(skill.getName() + " has gained the owner");
+                                }
+                            }
+                            else System.out.println(skill.getName() + " is null");
+                        });
+                        shikigamiSkill.setShikigami(mutableShikigamiList);
+                    }
+                    else System.out.println(skill.getName() + " isn't shikigami");
+                }
+            } else System.out.println("Wrong technique");
+        });
+        player.getCapability(CursedEnergyCapability.CURSED_ENERGY).ifPresent(energy -> {
+            CursedEnergySyncPacket.updateToClient(energy.serializeNBT(), player);
+        });
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        ServerPlayer player = (ServerPlayer) event.getEntity();
+        player.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(technique -> {
+            CompoundTag nbt = technique.serializeNbtToNetwork();
+            System.out.println("Server NBT: " + nbt);
+            ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new TechniqueSyncPacket(nbt));
+        });
+    }
+
+    @SubscribeEvent
+    public static void onPlayerHitSkill(SkillEvent.Hit event) {
+        if (event.getTarget() instanceof Player player) {
+            if (!AdaptationUtil.checkAdaptation(event.getSkill(), player)) {
+                AdaptationUtil.addOrSpeedUpAdaptationToSkill(event.getSkill(), player);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void playerAboutToTakeDamage(LivingHurtEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && !player.level().isClientSide) {
+            if (!AdaptationUtil.checkAdaptation(event.getSource().type(), player)) {
+                AdaptationUtil.addOrSpeedUpAdaptationToDamage(event.getSource().type(), event.getAmount(), player);
+            }
+            else {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void beforeEffectApplication(MobEffectEvent.Applicable event) {
+        if (event.getEntity() instanceof ServerPlayer player && !player.level().isClientSide) {
+            if (!event.getEffectInstance().getEffect().isBeneficial()){
+                if (!AdaptationUtil.checkAdaptation(event.getEffectInstance().getEffect(), player)) {
+                    AdaptationUtil.addOrSpeedUpAdaptationToEffect(event.getEffectInstance(), player);
+                }
+                else event.setResult(Event.Result.DENY);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.Clone event) {
+        Player oldPlayer = event.getOriginal();
+        CursedTechniqueCapability.setCursedTechnique(event.getEntity(), CursedTechniqueCapability.getCursedTechnique(oldPlayer).getName());
+    }
+}

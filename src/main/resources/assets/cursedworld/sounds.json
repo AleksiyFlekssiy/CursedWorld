@@ -1,0 +1,83 @@
+{
+  "entity.red_entity.launch": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:entity/red_entity/launch",
+        "stream": false
+      }
+    ]
+  },
+  "chant_1": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:chant_1",
+        "stream": false
+      }
+    ]
+  },
+  "chant_2": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:chant_2",
+        "stream": false
+      }
+    ]
+  },
+  "chant_3": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:chant_3",
+        "stream": false
+      }
+    ]
+  },
+  "entity.blue_entity.pull": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:entity/blue_entity/pull",
+        "stream": false
+      }
+    ]
+  },
+  "purple_explosion": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:purple_explosion",
+        "stream": false
+      }
+    ]
+  },
+  "entity.hollow_purple.launch": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:entity/hollow_purple/launch",
+        "stream": false
+      }
+    ]
+  },
+  "entity.hollow_purple.merge": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:entity/hollow_purple/merge",
+        "stream": false
+      }
+    ]
+  },
+  "wheel_rotation": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "cursedworld:wheel_rotation",
+        "stream": false
+      }
+    ]
+  }
+}

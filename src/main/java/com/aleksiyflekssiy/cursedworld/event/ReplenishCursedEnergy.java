@@ -1,0 +1,23 @@
+package com.aleksiyflekssiy.cursedworld.event;
+
+import com.aleksiyflekssiy.cursedworld.CursedWorld;
+import com.aleksiyflekssiy.cursedworld.capability.CursedEnergy;
+import com.aleksiyflekssiy.cursedworld.capability.CursedEnergyCapability;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+@Mod.EventBusSubscriber(modid = CursedWorld.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class ReplenishCursedEnergy {
+    @SubscribeEvent
+    public static void giveEnergy(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) return;
+        Player player = event.player;
+        player.getCapability(CursedEnergyCapability.CURSED_ENERGY).ifPresent(energy -> {
+            CursedEnergy cursedEnergy = (CursedEnergy) energy;
+            cursedEnergy.setFastTick(player.isCrouching());
+            cursedEnergy.tick();
+        });
+    }
+}

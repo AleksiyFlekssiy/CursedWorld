@@ -3,11 +3,11 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "tutorialmod:ruby_block"
+      "item": "cursedworld:ruby_block"
     }
   ],
   "result": {
     "count": 9,
-    "item": "tutorialmod:ruby"
+    "item": "cursedworld:ruby"
   }
 }

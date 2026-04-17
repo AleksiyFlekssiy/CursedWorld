@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "#": {
-      "item": "tutorialmod:ruby"
+      "item": "cursedworld:ruby"
     }
   },
   "pattern": [
@@ -12,7 +12,7 @@
     "###"
   ],
   "result": {
-    "item": "tutorialmod:ruby_block"
+    "item": "cursedworld:ruby_block"
   },
   "show_notification": true
 }

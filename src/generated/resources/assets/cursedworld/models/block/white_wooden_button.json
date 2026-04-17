@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/button",
+  "textures": {
+    "texture": "cursedworld:block/white_wooden_planks"
+  }
+}

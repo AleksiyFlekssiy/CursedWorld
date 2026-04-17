@@ -1,0 +1,8 @@
+// 1.20.1	2026-04-12T16:11:29.7193301	Tags for minecraft:block mod id cursedworld
+193c978823a5a07b697456a973d7e769b7d9e3c5 data/cursedworld/tags/blocks/metal_detector_valuables.json
+329b804fca5370b29132009e652b493dcb933018 data/minecraft/tags/blocks/fences.json
+615a57f632bd03765c3343291767739192cee466 data/minecraft/tags/blocks/fence_gates.json
+926f1104baaedee88117845a4c7c9c5c0757d89b data/minecraft/tags/blocks/mineable/axe.json
+b9c3e9290cf319777fa9a2660cc58046003aefac data/minecraft/tags/blocks/mineable/pickaxe.json
+c5769e57973d5eefea60061d0df06ad2b6769b15 data/minecraft/tags/blocks/needs_iron_tool.json
+6b6e34f5cc969c0c8bc7cdaaa35386169faa52e7 data/minecraft/tags/blocks/walls.json
