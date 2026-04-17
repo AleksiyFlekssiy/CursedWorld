@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 public class RabbitEscapeEntity extends Shikigami{
     protected static final ImmutableList<SensorType<? extends Sensor<? super RabbitEscapeEntity>>> SENSOR_TYPES = ImmutableList.of(
-            SensorType.NEAREST_PLAYERS,
+            SensorType.NEAREST_LIVING_ENTITIES,
             CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(),
             CustomSensorTypes.SHIKIGAMI_OWNER_HURT_BY.get());
 
@@ -81,11 +81,6 @@ public class RabbitEscapeEntity extends Shikigami{
     @Override
     public void tick() {
         super.tick();
-        if (!this.level().isClientSide) {
-            this.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).ifPresent(target -> {
-                if (target.position().distanceToSqr(this.position()) <= 1) target.hurt(this.damageSources().mobAttack(this), 1);
-            });
-        }
     }
 
     @Override
