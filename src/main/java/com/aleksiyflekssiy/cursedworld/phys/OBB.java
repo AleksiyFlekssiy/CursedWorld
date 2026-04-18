@@ -1,9 +1,13 @@
 package com.aleksiyflekssiy.cursedworld.phys;
 
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OBB {
@@ -118,32 +122,57 @@ public class OBB {
         );
     }
 
-    public Vec3[] getVertices() {
-        Vec3[] vertices = new Vec3[8];
+    public List<Vec3> getVertices() {
+        List<Vec3> result = new ArrayList<>();
 
-        double cos = Math.cos(Math.toRadians(yaw));
-        double sin = Math.sin(Math.toRadians(yaw));
+        Vec3 center = getCenter();
+        Vec3 half = getHalfSize();
 
-        int i = 0;
+        double pitch = Math.toRadians(this.pitch);
+        double yaw   = Math.toRadians(this.yaw);
+        double roll  = Math.toRadians(this.roll);
 
-        for (int x = -1; x <= 1; x += 2) {
-            for (int y = -1; y <= 1; y += 2) {
-                for (int z = -1; z <= 1; z += 2) {
+        // 8 вершин AABB (локально)
+        double[] xs = {-half.x, half.x};
+        double[] ys = {-half.y, half.y};
+        double[] zs = {-half.z, half.z};
 
-                    double localX = getWidth() * x / 2;
-                    double localY = getHeight() * y / 2;
-                    double localZ = getDepth() * z / 2;
+        for (double x : xs) {
+            for (double y : ys) {
+                for (double z : zs) {
 
-                    // вращение по Y
-                    double rotX = localX * cos - localZ * sin;
-                    double rotZ = localX * sin + localZ * cos;
+                    // --- вращение Y ---
+                    double cosY = Math.cos(yaw);
+                    double sinY = Math.sin(yaw);
+                    double x1 = x * cosY + z * sinY;
+                    double y1 = y;
+                    double z1 = -x * sinY + z * cosY;
 
-                    vertices[i++] = getCenter().add(rotX, localY, rotZ);
+                    // --- вращение X ---
+                    double cosX = Math.cos(pitch);
+                    double sinX = Math.sin(pitch);
+                    double x2 = x1;
+                    double y2 = y1 * cosX - z1 * sinX;
+                    double z2 = y1 * sinX + z1 * cosX;
+
+                    // --- вращение Z ---
+                    double cosZ = Math.cos(roll);
+                    double sinZ = Math.sin(roll);
+                    double x3 = x2 * cosZ - y2 * sinZ;
+                    double y3 = x2 * sinZ + y2 * cosZ;
+                    double z3 = z2;
+
+                    // в мир
+                    result.add(new Vec3(
+                            x3 + center.x,
+                            y3 + center.y,
+                            z3 + center.z
+                    ));
                 }
             }
         }
 
-        return vertices;
+        return result;
     }
 
     public OBB rotateX(double pitch){
@@ -203,37 +232,46 @@ public class OBB {
     }
 
     public boolean contains(Vec3 point) {
-        // центр
         Vec3 center = getCenter();
+        Vec3 half = getHalfSize();
 
-        // переводим точку в локальные координаты бокса
-        Vec3 local = point.subtract(center);
+        double x = point.x - center.x;
+        double y = point.y - center.y;
+        double z = point.z - center.z;
 
-        // 🔥 вращаем точку ОБРАТНО повороту бокса
-        float yawRad = (float) Math.toRadians(-yaw);
+        double pitch = Math.toRadians(this.pitch);
+        double yaw   = Math.toRadians(this.yaw);
+        double roll  = Math.toRadians(this.roll);
 
-        double cos = Math.cos(yawRad);
-        double sin = Math.sin(yawRad);
+        pitch = -pitch;
+        yaw   = -yaw;
+        roll  = -roll;
 
-        double x = local.x * cos - local.z * sin;
-        double z = local.x * sin + local.z * cos;
+        double cosZ = Math.cos(roll);
+        double sinZ = Math.sin(roll);
+        double x1 = x * cosZ - y * sinZ;
+        double y1 = x * sinZ + y * cosZ;
+        double z1 = z;
 
-        double y = local.y;
+        double cosX = Math.cos(pitch);
+        double sinX = Math.sin(pitch);
+        double x2 = x1;
+        double y2 = y1 * cosX - z1 * sinX;
+        double z2 = y1 * sinX + z1 * cosX;
 
-        // halfSize
-        Vec3 half = new Vec3(
-                (maxX - minX) / 2,
-                (maxY - minY) / 2,
-                (maxZ - minZ) / 2
-        );
+        double cosY = Math.cos(yaw);
+        double sinY = Math.sin(yaw);
+        double x3 = x2 * cosY + z2 * sinY;
+        double y3 = y2;
+        double z3 = -x2 * sinY + z2 * cosY;
 
-        return Math.abs(x) <= half.x &&
-                Math.abs(y) <= half.y &&
-                Math.abs(z) <= half.z;
+        return Math.abs(x3) <= half.x &&
+                Math.abs(y3) <= half.y &&
+                Math.abs(z3) <= half.z;
     }
 
     public AABB toAABB() {
-        Vec3[] vertices = getVertices();
+        List<Vec3> vertices = getVertices();
 
         double minX = Double.MAX_VALUE;
         double minY = Double.MAX_VALUE;
@@ -253,6 +291,45 @@ public class OBB {
         }
 
         return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    public boolean intersects(Entity entity){
+        float width = entity.getBbWidth();
+        float height = entity.getBbHeight();
+        boolean result = false;
+        AABB aabb = new AABB(
+                new Vec3(entity.position().x - width / 2,
+                        entity.position().y,
+                        entity.position().z - width / 2),
+
+                new Vec3(entity.position().x + width / 2,
+                        entity.position().y + height,
+                        entity.position().z + width / 2)
+        );
+        List<Vec3> vertices = List.of(
+                new Vec3(aabb.minX, aabb.minY, aabb.minZ),
+                new Vec3(aabb.minX, aabb.maxY, aabb.minZ),
+                new Vec3(aabb.maxX, aabb.maxY, aabb.minZ),
+                new Vec3(aabb.maxX, aabb.minY, aabb.minZ),
+                new Vec3(aabb.minX, aabb.minY, aabb.maxZ),
+                new Vec3(aabb.minX, aabb.maxY, aabb.maxZ),
+                new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ),
+                new Vec3(aabb.maxX, aabb.minY, aabb.maxZ)
+        );
+        for (Vec3 vertex : vertices){
+            if (this.contains(vertex)) result = true;
+            if (entity.level() instanceof ServerLevel level) {
+                level.sendParticles(
+                        ParticleTypes.CRIT,
+                        vertex.x,
+                        vertex.y,
+                        vertex.z,
+                        1,
+                        0, 0, 0, 0
+                );
+            }
+        }
+        return true;
     }
 
     public static AABB createAAABFrom(OBB obb){
