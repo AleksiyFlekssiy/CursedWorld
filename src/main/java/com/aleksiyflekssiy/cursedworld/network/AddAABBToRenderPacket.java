@@ -45,7 +45,10 @@ public class AddAABBToRenderPacket {
         ctx.get().enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;
-            if (packet.renderState) CustomDebugRenderer.addAABB(packet.aabb);
+            if (packet.renderState) {
+                CustomDebugRenderer.AABB_LIST.keySet().forEach(CustomDebugRenderer::removeAABB);
+                CustomDebugRenderer.addAABB(packet.aabb);
+            }
             else CustomDebugRenderer.removeAABB(packet.aabb);
         });
         ctx.get().setPacketHandled(true);

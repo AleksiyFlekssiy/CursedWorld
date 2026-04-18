@@ -51,8 +51,8 @@ public class AddOBBToRenderPacket {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;
             if (packet.renderState) {
-                CustomDebugRenderer.OBB_LIST.forEach((obb, aBoolean) -> CustomDebugRenderer.addOBB(obb, false));
-                CustomDebugRenderer.addOBB(packet.obb, true);
+                CustomDebugRenderer.OBB_LIST.keySet().forEach(CustomDebugRenderer::removeOBB);
+                CustomDebugRenderer.addOBB(packet.obb);
             }
 
             else {
