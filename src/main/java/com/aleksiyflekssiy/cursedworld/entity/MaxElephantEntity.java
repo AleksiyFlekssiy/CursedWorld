@@ -129,7 +129,7 @@ public class MaxElephantEntity extends Shikigami{
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 300)
-                .add(Attributes.MOVEMENT_SPEED, 0.2)
+                .add(Attributes.MOVEMENT_SPEED, 0.4)
                 .add(Attributes.ATTACK_DAMAGE, 10)
                 .add(Attributes.FOLLOW_RANGE, 100)
                 .add(Attributes.ATTACK_SPEED, 0.2)
