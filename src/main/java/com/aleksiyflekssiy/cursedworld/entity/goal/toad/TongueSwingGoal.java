@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.cursedworld.entity.goal.toad;
 
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,7 +38,7 @@ public class TongueSwingGoal extends Goal {
         if (toad.getTarget() != null && !toad.getTarget().isSpectator()) {
             if (!toad.isTamed()) {
                 if (toad.isCooldownOff()) return toad.position().subtract(toad.getTarget().position()).length() > 4;
-            } else return toad.getOrder() == ToadEntity.ToadOrder.NONE || toad.getOrder() == ToadEntity.ToadOrder.SWING;
+            } else return toad.getOrder() == ShikigamiOrder.NONE || toad.getOrder() == ShikigamiOrder.SWING;
         }
         return false;
     }

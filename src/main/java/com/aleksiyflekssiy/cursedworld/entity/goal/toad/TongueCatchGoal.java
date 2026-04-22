@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.cursedworld.entity.goal.toad;
 
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,7 +34,7 @@ public class TongueCatchGoal extends Goal {
     public boolean canUse() {
         if (toad.getTarget() != null && !toad.getTarget().isSpectator()) {
             if (!toad.isTamed()) return toad.isCooldownOff(); // 30 блоков в квадрате
-            else return toad.getOrder() == ToadEntity.ToadOrder.NONE || toad.getOrder() == ToadEntity.ToadOrder.IMMOBILIZE;
+            else return toad.getOrder() == ShikigamiOrder.NONE || toad.getOrder() == ShikigamiOrder.IMMOBILIZE;
         }
         return false;
     }

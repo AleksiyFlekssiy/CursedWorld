@@ -2,6 +2,7 @@ package com.aleksiyflekssiy.cursedworld.entity.behavior.nue;
 
 import com.aleksiyflekssiy.cursedworld.entity.NueEntity;
 
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ai.NueAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -24,12 +25,12 @@ public class SweepAttack extends Behavior<NueEntity> {
     protected boolean checkExtraStartConditions(ServerLevel level, NueEntity nue) {
         LivingEntity target = getRequiredTarget(nue);
         boolean bool = target != null && target.isAlive() && nue.getAttackPhase() == NueEntity.AttackPhase.SWOOP;
-        boolean order = nue.getOrder() != NueEntity.NueOrder.MOVE;
+        boolean order = nue.getOrder() != ShikigamiOrder.MOVE;
         return bool && order;
     }
 
     private LivingEntity getRequiredTarget(NueEntity nue) {
-        if (nue.getOrder() == NueEntity.NueOrder.NONE){
+        if (nue.getOrder() == ShikigamiOrder.NONE){
             if (nue.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).isPresent()) {
                 switch (nue.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).get()) {
                     case "ATTACK" -> {
@@ -41,10 +42,10 @@ public class SweepAttack extends Behavior<NueEntity> {
                 }
             }
         }
-        else if (nue.getOrder() == NueEntity.NueOrder.ATTACK) {
+        else if (nue.getOrder() == ShikigamiOrder.ATTACK) {
             return nue.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
         }
-        else if (nue.getOrder() == NueEntity.NueOrder.GRAB) {
+        else if (nue.getOrder() == ShikigamiOrder.GRAB) {
             return nue.getBrain().getMemory(CustomMemoryModuleTypes.GRAB_TARGET.get()).orElse(null);
         }
         //System.out.println("WTF WITH THIS SHIT");
@@ -78,8 +79,8 @@ public class SweepAttack extends Behavior<NueEntity> {
         LivingEntity livingentity = getRequiredTarget(nue);
         if (livingentity != null) {
             nue.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(livingentity.blockPosition(), 1, 5));
-            if (nue.getOrder() == NueEntity.NueOrder.GRAB ||
-                    (nue.getOrder() == NueEntity.NueOrder.NONE && NueAI.checkAttackType(nue, "GRAB"))) {
+            if (nue.getOrder() == ShikigamiOrder.GRAB ||
+                    (nue.getOrder() == ShikigamiOrder.NONE && NueAI.checkAttackType(nue, "GRAB"))) {
                 if (nue.getBoundingBox().inflate(0.5F).intersects(livingentity.getBoundingBox()) && nue.checkGrabCooldown()) {
                     System.out.println("SOMEONE IS THERE");
                     nue.tryGrabEntityBelow(livingentity);
@@ -87,8 +88,8 @@ public class SweepAttack extends Behavior<NueEntity> {
                     this.stop(level, nue, time);
                 }
             }
-            else if (nue.getOrder() == NueEntity.NueOrder.ATTACK ||
-                    (nue.getOrder() == NueEntity.NueOrder.NONE && NueAI.checkAttackType(nue, "ATTACK"))){
+            else if (nue.getOrder() == ShikigamiOrder.ATTACK ||
+                    (nue.getOrder() == ShikigamiOrder.NONE && NueAI.checkAttackType(nue, "ATTACK"))){
                 if (nue.getBoundingBox().inflate(0.5F).intersects(livingentity.getBoundingBox()) && nue.checkAttackCooldown()) {
                     nue.doHurtTarget(livingentity);
                     setNextAttackType(nue);
@@ -101,7 +102,7 @@ public class SweepAttack extends Behavior<NueEntity> {
     }
 
     private void setNextAttackType(NueEntity nue) {
-        if (nue.getOrder() == NueEntity.NueOrder.NONE) {
+        if (nue.getOrder() == ShikigamiOrder.NONE) {
             switch (nue.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).get()){
                 case "ATTACK" -> {
                     nue.setAttackCooldown();

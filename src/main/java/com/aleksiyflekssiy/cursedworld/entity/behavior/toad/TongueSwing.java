@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.cursedworld.entity.behavior.toad;
 
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -35,7 +36,7 @@ public class TongueSwing extends Behavior<ToadEntity> {
         boolean bool = false;
         if (toad.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get())) {
             LivingEntity target = toad.getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).get();
-            if (toad.getOrder() == ToadEntity.ToadOrder.SWING) bool = true;
+            if (toad.getOrder() == ShikigamiOrder.SWING) bool = true;
             else bool = toad.isCooldownOff() && toad.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).get().equals("SWING");
         }
         System.out.println("CHECK SWING: " + bool);
@@ -45,7 +46,7 @@ public class TongueSwing extends Behavior<ToadEntity> {
     @Override
     protected boolean canStillUse(ServerLevel level, ToadEntity toad, long pGameTime) {
         if (caughtEntity != null && caughtEntity.isAlive() && releaseTick < 60) {
-            return toad.getOrder() == ToadEntity.ToadOrder.NONE || toad.getOrder() == ToadEntity.ToadOrder.SWING;
+            return toad.getOrder() == ShikigamiOrder.NONE || toad.getOrder() == ShikigamiOrder.SWING;
         }
         return false;
     }

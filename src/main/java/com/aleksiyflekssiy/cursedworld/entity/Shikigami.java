@@ -18,7 +18,7 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     protected Player owner;
     protected UUID ownerUUID;
     protected boolean isTamed = false;
-    protected IOrder currentOrder = null;
+    protected ShikigamiOrder currentOrder = ShikigamiOrder.NONE;
 
     public Shikigami(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -53,15 +53,15 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
         this.owner = owner;
     }
 
-    public IOrder getOrder(){
+    public ShikigamiOrder getOrder(){
         return this.currentOrder;
     }
 
-    public void setOrder(IOrder order){
+    public void setOrder(ShikigamiOrder order){
         this.currentOrder = order;
     }
 
-    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order){
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order){
         if (this.isTamed() && this.owner != null) {
             setOrder(order);
             return true;

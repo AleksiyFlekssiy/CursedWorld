@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.cursedworld.entity.behavior.toad;
 
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.cursedworld.util.MovementUtils;
@@ -34,7 +35,7 @@ public class TongueImmobilize extends Behavior<ToadEntity> {
     protected boolean checkExtraStartConditions(ServerLevel level, ToadEntity toad) {
         boolean bool = false;
         if (toad.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get())) {
-            if (toad.getOrder() == ToadEntity.ToadOrder.IMMOBILIZE) bool = true;
+            if (toad.getOrder() == ShikigamiOrder.IMMOBILIZE) bool = true;
             else bool = toad.isCooldownOff() && toad.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).get().equals("IMMOBILIZE");
         }
         System.out.println("CHECK IMMOBILIZE: " + bool);
@@ -44,7 +45,7 @@ public class TongueImmobilize extends Behavior<ToadEntity> {
     @Override
     protected boolean canStillUse(ServerLevel pLevel, ToadEntity toad, long pGameTime) {
         if (caughtEntity != null && !caughtEntity.isSpectator() && catchTick <= IMMOBILIZATION_TICKS){
-            return toad.getOrder() == ToadEntity.ToadOrder.NONE || toad.getOrder() == ToadEntity.ToadOrder.IMMOBILIZE;
+            return toad.getOrder() == ShikigamiOrder.NONE || toad.getOrder() == ShikigamiOrder.IMMOBILIZE;
         }
         return false;
     }

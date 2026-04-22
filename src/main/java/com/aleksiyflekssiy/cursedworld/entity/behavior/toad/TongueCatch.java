@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.cursedworld.entity.behavior.toad;
 
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -28,7 +29,7 @@ public class TongueCatch extends Behavior<ToadEntity> {
         if (!toad.isCooldownOff()) return false;
         if (toad.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
             if (!toad.isTamed()) return true;
-            else return toad.getOrder() != ToadEntity.ToadOrder.MOVE;
+            else return toad.getOrder() != ShikigamiOrder.MOVE;
         }
         return false;
     }

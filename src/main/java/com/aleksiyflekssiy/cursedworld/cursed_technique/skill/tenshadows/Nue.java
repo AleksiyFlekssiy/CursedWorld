@@ -5,6 +5,7 @@ import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.cursedworld.entity.ModEntities;
 import com.aleksiyflekssiy.cursedworld.entity.NueEntity;
 import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -12,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -25,7 +25,6 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = CursedWorld.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Nue extends ShikigamiSkill {
     private NueEntity nue = null;
-    private byte orderIndex = 0;
 
     public Nue(){
         MinecraftForge.EVENT_BUS.register(this);
@@ -52,6 +51,7 @@ public class Nue extends ShikigamiSkill {
                     nue = new NueEntity(ModEntities.NUE.get(), entity.level(), (Player) entity);
                     nue.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                     shikigamiUUIDList.add(nue.getUUID());
+                    shikigamiList.add(nue);
                     entity.level().addFreshEntity(nue);
                 }
                 if (isTamed) {
@@ -64,8 +64,8 @@ public class Nue extends ShikigamiSkill {
                 if (nue.getControllingPassenger() == null) {
                     setTarget(
                             entity,
-                            blockPos -> nue.followOrder(null, blockPos, NueEntity.NueOrder.values()[orderIndex]),
-                            target -> nue.followOrder(target, null, NueEntity.NueOrder.values()[orderIndex])
+                            blockPos -> nue.followOrder(null, blockPos, this.getOrders().get(orderIndex)),
+                            target -> nue.followOrder(target, null, this.getOrders().get(orderIndex))
                     );
                 }
                 else if (entity.equals(nue.getControllingPassenger())){
@@ -83,10 +83,21 @@ public class Nue extends ShikigamiSkill {
                     nue.discard();
                     nue = null;
                     shikigamiUUIDList.clear();
+                    shikigamiList.clear();
                     isActive = !isActive;
                 }
             }
         }
+    }
+
+    @Override
+    public List<ShikigamiOrder> getOrders() {
+        return List.of(
+                ShikigamiOrder.NONE,
+                ShikigamiOrder.ATTACK,
+                ShikigamiOrder.GRAB,
+                ShikigamiOrder.MOVE
+        );
     }
 
     public void setShikigami(List<Shikigami> shikigamiList) {
@@ -117,26 +128,6 @@ public class Nue extends ShikigamiSkill {
         List<Shikigami> shikigamiList = new ArrayList<>();
         shikigamiList.add(nue);
         return shikigamiList;
-    }
-
-    @Override
-    public void switchOrder(LivingEntity owner, int direction) {
-        if (isTamed) {
-            switch (direction){
-                case -1 -> {
-                    if (--orderIndex <= -1) orderIndex = 3;
-                }
-                case 1 -> {
-                    if (++orderIndex >= 4) orderIndex = 0;
-                }
-            }
-            switch (orderIndex) {
-                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
-                case 1 -> owner.sendSystemMessage(Component.literal("ATTACK"));
-                case 2 -> owner.sendSystemMessage(Component.literal("GRAB"));
-                case 3 -> owner.sendSystemMessage(Component.literal("MOVE"));
-            }
-        }
     }
 
     @Override

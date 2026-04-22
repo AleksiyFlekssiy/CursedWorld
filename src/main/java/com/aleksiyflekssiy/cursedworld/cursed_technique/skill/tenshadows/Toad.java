@@ -4,6 +4,7 @@ import com.aleksiyflekssiy.cursedworld.CursedWorld;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.cursedworld.entity.ModEntities;
 import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -24,7 +25,6 @@ import java.util.List;
 
 public class Toad extends ShikigamiSkill {
     private ToadEntity toad;
-    private byte orderIndex = 0;
 
     public Toad() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -51,6 +51,7 @@ public class Toad extends ShikigamiSkill {
                     toad = new ToadEntity(ModEntities.TOAD.get(), entity.level(), (Player) entity);
                     toad.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                     shikigamiUUIDList.add(toad.getUUID());
+                    shikigamiList.add(toad);
                     entity.level().addFreshEntity(toad);
                 }
                 if (isTamed) {
@@ -64,12 +65,12 @@ public class Toad extends ShikigamiSkill {
                     EntityHitResult hitResult = (EntityHitResult) result;
                     if (hitResult.getEntity() instanceof LivingEntity target) {
                         System.out.println(target.getClass().getSimpleName());
-                        toad.followOrder(target, null, ToadEntity.ToadOrder.values()[orderIndex]);
+                        toad.followOrder(target, null, this.getOrders().get(orderIndex));
                     }
                 } else if (result.getType() == HitResult.Type.BLOCK) {
                     BlockHitResult hitResult = (BlockHitResult) result;
                     System.out.println(hitResult.getBlockPos());
-                    toad.followOrder(null, hitResult.getBlockPos(), ToadEntity.ToadOrder.values()[orderIndex]);
+                    toad.followOrder(null, hitResult.getBlockPos(), this.getOrders().get(orderIndex));
                 } else {
                     System.out.println("MISS");
                 }
@@ -81,35 +82,27 @@ public class Toad extends ShikigamiSkill {
                 toad.discard();
                 toad = null;
                 shikigamiUUIDList.clear();
+                shikigamiList.clear();
                 isActive = !isActive;
             }
         }
     }
 
     @Override
-    public void setShikigami(List<Shikigami> shikigamiList) {
-        if (this.toad == null && shikigamiList.get(0) instanceof ToadEntity toadEntity) this.toad = toadEntity;
+    public List<ShikigamiOrder> getOrders() {
+        return List.of(
+                ShikigamiOrder.NONE,
+                ShikigamiOrder.ATTACK,
+                ShikigamiOrder.PULL,
+                ShikigamiOrder.SWING,
+                ShikigamiOrder.IMMOBILIZE,
+                ShikigamiOrder.MOVE
+        );
     }
 
     @Override
-    public void switchOrder(LivingEntity owner, int direction) {
-        if (isTamed) {
-            switch (direction){
-                case -1 -> {
-                    if (--orderIndex <= -1) orderIndex = 4;
-                }
-                case 1 -> {
-                    if (++orderIndex >= 5) orderIndex = 0;
-                }
-            }
-            switch (orderIndex) {
-                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
-                case 1 -> owner.sendSystemMessage(Component.literal("PULL"));
-                case 2 -> owner.sendSystemMessage(Component.literal("SWING"));
-                case 3 -> owner.sendSystemMessage(Component.literal("IMMOBILIZE"));
-                case 4 -> owner.sendSystemMessage(Component.literal("MOVE"));
-            }
-        }
+    public void setShikigami(List<Shikigami> shikigamiList) {
+        if (this.toad == null && shikigamiList.get(0) instanceof ToadEntity toadEntity) this.toad = toadEntity;
     }
 
     @SubscribeEvent

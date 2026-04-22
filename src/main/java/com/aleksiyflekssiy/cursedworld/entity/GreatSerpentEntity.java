@@ -48,8 +48,8 @@ public class GreatSerpentEntity extends Shikigami {
     public boolean positionSet = false;
 
     private final Deque<Vec3> positionHistory = new ArrayDeque<>();
-    private static final int HISTORY_SIZE = 400; // Подбери под длину змеи (больше = длиннее тело без разрывов)
-    private static final double SEGMENT_SPACING = 2D; // <<< КЛЮЧ! Для хитбокса 0.8×0.8 — 0.79-0.80 идеально (границы касаются)
+    private static final int HISTORY_SIZE = 400;
+    private static final double SEGMENT_SPACING = 2D;
 
 
     public GreatSerpentEntity(EntityType<? extends Shikigami> pEntityType, Level pLevel) {
@@ -321,14 +321,12 @@ public class GreatSerpentEntity extends Shikigami {
     }
 
     @Override
-    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            segments.forEach(segment -> {
-                segment.getBrain().stopAll((ServerLevel) level(), segment);
-            });
-            if (order == GreatSerpentOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
-            else if (order == GreatSerpentOrder.CATCH) {
+            segments.forEach(segment -> segment.getBrain().stopAll((ServerLevel) level(), segment));
+            if (order == ShikigamiOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
+            else if (order == ShikigamiOrder.CATCH) {
                 if (!this.isAddedToWorld()) {
                     if (spawnPos == null && blockPos != null) {
                         System.out.println("Position set");
@@ -355,7 +353,7 @@ public class GreatSerpentEntity extends Shikigami {
                     }
                 }
             }
-            else if (order == GreatSerpentOrder.SMASH){
+            else if (order == ShikigamiOrder.SMASH){
                 Optional<LivingEntity> grabTarget = getBrain().getMemory(CustomMemoryModuleTypes.GRAB_TARGET.get());
                 if (!this.isAddedToWorld()) {
                     if (grabTarget.isEmpty() && spawnPos == null && target != null) {
@@ -391,7 +389,7 @@ public class GreatSerpentEntity extends Shikigami {
                     }
                 }
             }
-            else if (order == GreatSerpentOrder.THROW){
+            else if (order == ShikigamiOrder.THROW){
                 if (getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get()) && blockPos != null){
                     LivingEntity grabbedEntity = getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).get();
                     grabbedEntity.stopRiding();
@@ -408,7 +406,7 @@ public class GreatSerpentEntity extends Shikigami {
 
     @Override
     public void clearOrder() {
-        this.setOrder(GreatSerpentOrder.NONE);
+        this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
         getBrain().eraseMemory(CustomMemoryModuleTypes.ORDER.get());
         segments.forEach(segment -> {
@@ -416,11 +414,4 @@ public class GreatSerpentEntity extends Shikigami {
         });
     }
 
-    public enum GreatSerpentOrder implements IOrder{
-        NONE,
-        MOVE,
-        CATCH,
-        SMASH,
-        THROW
-    }
 }

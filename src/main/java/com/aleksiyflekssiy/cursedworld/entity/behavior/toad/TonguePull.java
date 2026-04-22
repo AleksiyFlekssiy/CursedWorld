@@ -1,5 +1,6 @@
 package com.aleksiyflekssiy.cursedworld.entity.behavior.toad;
 
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ToadEntity;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -30,7 +31,7 @@ public class TonguePull extends Behavior<ToadEntity> {
         boolean bool = false;
         if (toad.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get())) {
             LivingEntity target = toad.getBrain().getMemory(CustomMemoryModuleTypes.GRABBED_ENTITY.get()).get();
-            if (toad.getOrder() == ToadEntity.ToadOrder.PULL) bool = true;
+            if (toad.getOrder() == ShikigamiOrder.PULL) bool = true;
             else bool = toad.isCooldownOff() && toad.getBrain().getMemory(CustomMemoryModuleTypes.ATTACK_TYPE.get()).get().equals("PULL");
         }
         System.out.println("CHECK PULL: " + bool);
@@ -42,10 +43,10 @@ public class TonguePull extends Behavior<ToadEntity> {
         if (caughtEntity != null && !caughtEntity.isSpectator()) {
             if (!toad.isTamed()) return toad.distanceTo(caughtEntity) > 1.0 && durationTicks <= 60; // Продолжаем, пока цель дальше 1 блока
             else {
-                if (toad.getOrder() == ToadEntity.ToadOrder.NONE){
+                if (toad.getOrder() == ShikigamiOrder.NONE){
                     return toad.distanceTo(caughtEntity) > 1.0 && durationTicks <= 60;
                 }
-                else return toad.getOrder() == ToadEntity.ToadOrder.PULL;
+                else return toad.getOrder() == ShikigamiOrder.PULL;
             }
         }
         return false;

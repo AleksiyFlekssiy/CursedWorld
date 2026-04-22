@@ -1,7 +1,7 @@
 package com.aleksiyflekssiy.cursedworld.entity.behavior;
 
 import com.aleksiyflekssiy.cursedworld.CursedWorld;
-import com.aleksiyflekssiy.cursedworld.entity.IOrder;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
@@ -31,7 +31,7 @@ public class CustomMemoryModuleTypes {
             () -> new MemoryModuleType<>(Optional.empty()) {});
     public static final RegistryObject<MemoryModuleType<Integer>> GRAB_COOLDOWN = MEMORY_MODULE_TYPES.register("grab_cooldown",
             () -> new MemoryModuleType<>(Optional.empty()) {});
-    public static final RegistryObject<MemoryModuleType<IOrder>> ORDER = MEMORY_MODULE_TYPES.register("order",
+    public static final RegistryObject<MemoryModuleType<ShikigamiOrder>> ORDER = MEMORY_MODULE_TYPES.register("order",
             () -> new MemoryModuleType<>(Optional.empty()) {});
 
     public static void register(IEventBus eventBus) {

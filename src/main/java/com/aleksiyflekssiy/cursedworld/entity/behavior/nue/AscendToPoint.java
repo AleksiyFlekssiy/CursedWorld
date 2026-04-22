@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.cursedworld.entity.behavior.nue;
 
 import com.aleksiyflekssiy.cursedworld.entity.NueEntity;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.ai.NueAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.core.BlockPos;
@@ -23,7 +24,7 @@ public class AscendToPoint extends Behavior<NueEntity> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, NueEntity nue) {
         boolean bool = nue.getAttackPhase() == NueEntity.AttackPhase.ASCEND;
-        boolean order = nue.getOrder() != NueEntity.NueOrder.MOVE;
+        boolean order = nue.getOrder() != ShikigamiOrder.MOVE;
         return bool && order;
     }
 
@@ -58,7 +59,7 @@ public class AscendToPoint extends Behavior<NueEntity> {
     @Override
     protected void stop(ServerLevel level, NueEntity nue, long time) {
         //ЧТО-ТО ОСТАНАВЛИВАЕТ ЭТО ПОСЛЕ ТИКА
-        if (nue.getOrder() == NueEntity.NueOrder.GRAB || (nue.getOrder() == NueEntity.NueOrder.NONE && NueAI.checkAttackType(nue, "ATTACK"))) {
+        if (nue.getOrder() == ShikigamiOrder.GRAB || (nue.getOrder() == ShikigamiOrder.NONE && NueAI.checkAttackType(nue, "ATTACK"))) {
             //ИСПОЛЬЗУЕТСЯ СЛЕДУЮЩИЙ ТИП АТАКИ
             nue.dropGrabbedEntity();
         }

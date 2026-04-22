@@ -32,6 +32,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class ToadEntity extends Shikigami {
     private static final EntityDataAccessor<Float> DISTANCE = SynchedEntityData.defineId(ToadEntity.class, EntityDataSerializers.FLOAT);
@@ -46,7 +47,6 @@ public class ToadEntity extends Shikigami {
         this.moveControl = new JumpingMoveControl(this);
         this.lookControl = new CustomLookControl(this, true);
         setDistance(0);
-        this.currentOrder = ToadOrder.NONE;
     }
 
     public ToadEntity(EntityType<? extends Shikigami> entityType, Level level, Player owner) {
@@ -54,7 +54,6 @@ public class ToadEntity extends Shikigami {
         this.moveControl = new JumpingMoveControl(this);
         this.lookControl = new CustomLookControl(this, true);
         setDistance(0);
-        this.currentOrder = ToadOrder.NONE;
     }
 
     @Override
@@ -119,12 +118,12 @@ public class ToadEntity extends Shikigami {
     }
 
     @Override
-    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            if (order == ToadOrder.NONE) {}
-            else if (order == ToadOrder.PULL || order == ToadOrder.SWING || order == ToadOrder.IMMOBILIZE) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
-            else if (order == ToadOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
+            if (order == ShikigamiOrder.NONE) {}
+            else if (order == ShikigamiOrder.PULL || order == ShikigamiOrder.SWING || order == ShikigamiOrder.IMMOBILIZE) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            else if (order == ShikigamiOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
             return true;
         }
         return false;
@@ -132,7 +131,7 @@ public class ToadEntity extends Shikigami {
 
     @Override
     public void clearOrder() {
-        this.setOrder(ToadOrder.NONE);
+        this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
     }
 
@@ -208,11 +207,4 @@ public class ToadEntity extends Shikigami {
         this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
     }
 
-    public enum ToadOrder implements IOrder{
-        NONE,
-        PULL,
-        SWING,
-        IMMOBILIZE,
-        MOVE
-    }
 }

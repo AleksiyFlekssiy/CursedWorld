@@ -4,21 +4,18 @@ import com.aleksiyflekssiy.cursedworld.CursedWorld;
 import com.aleksiyflekssiy.cursedworld.client.renderer.CustomDebugRenderer;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.cursedworld.entity.MaxElephantEntity;
-import com.aleksiyflekssiy.cursedworld.entity.RabbitEscapeEntity;
 import com.aleksiyflekssiy.cursedworld.entity.ModEntities;
 import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
-import java.util.Random;
 
 public class MaxElephant extends ShikigamiSkill {
     private Shikigami maxElephant;
-    private int orderIndex = 0;
 
     @Override
     public void use(LivingEntity entity, UseType type, int charge) {
@@ -38,6 +35,7 @@ public class MaxElephant extends ShikigamiSkill {
                 maxElephant.setPos(spawnPos.getCenter());
 
                 shikigamiUUIDList.add(maxElephant.getUUID());
+                shikigamiList.add(maxElephant);
                 entity.level().addFreshEntity(maxElephant);
 
                 if (isTamed){
@@ -48,8 +46,8 @@ public class MaxElephant extends ShikigamiSkill {
             }
             else if (isActive && isTamed){
                 setTarget(entity,
-                        blockPos -> maxElephant.followOrder(null, blockPos, MaxElephantEntity.MaxElephantOrder.values()[orderIndex]),
-                        target -> maxElephant.followOrder(target, null, MaxElephantEntity.MaxElephantOrder.values()[orderIndex]));
+                        blockPos -> maxElephant.followOrder(null, blockPos, this.getOrders().get(orderIndex)),
+                        target -> maxElephant.followOrder(target, null, this.getOrders().get(orderIndex)));
             }
         }
         else {
@@ -59,6 +57,8 @@ public class MaxElephant extends ShikigamiSkill {
                 CustomDebugRenderer.AABB_LIST.keySet().forEach(CustomDebugRenderer::removeAABB);
                 CustomDebugRenderer.OBB_LIST.keySet().forEach(CustomDebugRenderer::removeOBB);
                 isActive = !isActive;
+                shikigamiUUIDList.clear();
+                shikigamiList.clear();
             }
         }
     }
@@ -74,22 +74,13 @@ public class MaxElephant extends ShikigamiSkill {
     }
 
     @Override
-    public void switchOrder(LivingEntity owner, int direction) {
-        if (isTamed) {
-            switch (direction){
-                case -1 -> {
-                    if (--orderIndex <= -1) orderIndex = 2;
-                }
-                case 1 -> {
-                    if (++orderIndex >= 3) orderIndex = 0;
-                }
-            }
-            switch (orderIndex) {
-                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
-                case 1 -> owner.sendSystemMessage(Component.literal("PUSH"));
-                case 2 -> owner.sendSystemMessage(Component.literal("MOVE"));
-            }
-        }
+    public List<ShikigamiOrder> getOrders() {
+        return List.of(
+                ShikigamiOrder.NONE,
+                ShikigamiOrder.ATTACK,
+                ShikigamiOrder.PUSH,
+                ShikigamiOrder.MOVE
+        );
     }
 
     @Override

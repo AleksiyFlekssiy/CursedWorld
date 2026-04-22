@@ -17,7 +17,6 @@ import java.util.List;
 
 public class GreatSerpent extends ShikigamiSkill {
     private GreatSerpentEntity greatSerpent = null;
-    private int orderIndex = 0;
 
     public GreatSerpent(){
         MinecraftForge.EVENT_BUS.register(this);
@@ -53,15 +52,16 @@ public class GreatSerpent extends ShikigamiSkill {
             if (!isActive) {
                 if (shikigamiUUIDList.isEmpty()) greatSerpent = new GreatSerpentEntity(ModEntities.GREAT_SERPENT.get(), entity.level(), (Player) entity);
                 shikigamiUUIDList.add(greatSerpent.getUUID());
+                shikigamiList.add(greatSerpent);
                 if (isTamed) {
                     greatSerpent.tame((Player) entity);
                     if (orderIndex != 0){
                         setTarget(entity,
                                 blockPos -> {
-                                    greatSerpent.followOrder(null, blockPos, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                                    greatSerpent.followOrder(null, blockPos, this.getOrders().get(orderIndex));
                                 },
                                 livingEntity -> {
-                                    greatSerpent.followOrder(livingEntity, null, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                                    greatSerpent.followOrder(livingEntity, null, this.getOrders().get(orderIndex));
                                 });
                         if (greatSerpent.isAddedToWorld()){
                             isActive = true;
@@ -94,10 +94,10 @@ public class GreatSerpent extends ShikigamiSkill {
                 if (isActive) {
                     setTarget(entity,
                             blockPos -> {
-                                greatSerpent.followOrder(null, blockPos, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                                greatSerpent.followOrder(null, blockPos, this.getOrders().get(orderIndex));
                             },
                             livingEntity -> {
-                                greatSerpent.followOrder(livingEntity, null, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]);
+                                greatSerpent.followOrder(livingEntity, null, this.getOrders().get(orderIndex));
                             });
                 }
             }
@@ -109,9 +109,9 @@ public class GreatSerpent extends ShikigamiSkill {
 
     @Override
     public void charge(LivingEntity entity, int charge) {
-        if (isTamed && isActive && greatSerpent.getOrder() == GreatSerpentEntity.GreatSerpentOrder.SMASH) {
+        if (isTamed && isActive && greatSerpent.getOrder() == ShikigamiOrder.SMASH) {
             setTarget(entity,
-                    blockPos -> greatSerpent.followOrder(null, blockPos, GreatSerpentEntity.GreatSerpentOrder.values()[orderIndex]),
+                    blockPos -> greatSerpent.followOrder(null, blockPos, this.getOrders().get(orderIndex)),
                     livingEntity -> {});
         }
     }
@@ -124,6 +124,7 @@ public class GreatSerpent extends ShikigamiSkill {
             }
             greatSerpent = null;
             shikigamiUUIDList.clear();
+            shikigamiList.clear();
             isActive = false;
         }
     }
@@ -148,30 +149,21 @@ public class GreatSerpent extends ShikigamiSkill {
     }
 
     @Override
+    public List<ShikigamiOrder> getOrders() {
+        return List.of(
+                ShikigamiOrder.NONE,
+                ShikigamiOrder.CATCH,
+                ShikigamiOrder.SMASH,
+                ShikigamiOrder.THROW,
+                ShikigamiOrder.MOVE
+        );
+    }
+
+    @Override
     public void setShikigami(List<Shikigami> shikigamiList) {
         if (this.greatSerpent == null && shikigamiList.get(0) instanceof GreatSerpentEntity greatSerpentEntity) this.greatSerpent = greatSerpentEntity;
     }
 
-    @Override
-    public void switchOrder(LivingEntity owner, int direction) {
-        if (isTamed) {
-            switch (direction){
-                case -1 -> {
-                    if (--orderIndex <= -1) orderIndex = 4;
-                }
-                case 1 -> {
-                    if (++orderIndex >= 5) orderIndex = 0;
-                }
-            }
-            switch (orderIndex) {
-                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
-                case 1 -> owner.sendSystemMessage(Component.literal("MOVE"));
-                case 2 -> owner.sendSystemMessage(Component.literal("CATCH"));
-                case 3 -> owner.sendSystemMessage(Component.literal("SMASH"));
-                case 4 -> owner.sendSystemMessage(Component.literal("THROW"));
-            }
-        }
-    }
 
     @Override
     public String getName() {

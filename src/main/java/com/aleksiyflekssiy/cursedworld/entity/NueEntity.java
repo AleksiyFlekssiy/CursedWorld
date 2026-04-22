@@ -57,7 +57,6 @@ public class NueEntity extends Shikigami {
         this.navigation = new BluntAirNavigation(this, level());
         this.entityData.set(ANIMATION, 0);
         NueAI.initializeMemories(this.getBrain());
-        this.currentOrder = NueOrder.NONE;
     }
 
     public NueEntity(EntityType<? extends Shikigami> entityType, Level level, Player owner) {
@@ -66,7 +65,6 @@ public class NueEntity extends Shikigami {
         this.navigation = new BluntAirNavigation(this, level());
         this.entityData.set(ANIMATION, 0);
         NueAI.initializeMemories(this.getBrain());
-        this.currentOrder = NueOrder.NONE;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -111,13 +109,13 @@ public class NueEntity extends Shikigami {
     }
 
     @Override
-    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            if (order == NueOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
-            else if (order == NueOrder.GRAB)
+            if (order == ShikigamiOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            else if (order == ShikigamiOrder.GRAB)
                 this.getBrain().setMemory(CustomMemoryModuleTypes.GRAB_TARGET.get(), target);
-            else if (order == NueOrder.MOVE)
+            else if (order == ShikigamiOrder.MOVE)
                 this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 5));
             return true;
         }
@@ -126,7 +124,7 @@ public class NueEntity extends Shikigami {
 
     @Override
     public void clearOrder() {
-        this.setOrder(NueOrder.NONE);
+        this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
     }
 
@@ -372,11 +370,5 @@ public class NueEntity extends Shikigami {
         ASCEND
     }
 
-    public enum NueOrder implements IOrder {
-        NONE,
-        ATTACK,
-        GRAB,
-        MOVE
-    }
 }
 

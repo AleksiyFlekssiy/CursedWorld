@@ -25,6 +25,9 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DivineDogEntity extends Shikigami{
 
     public enum Color{
@@ -98,12 +101,14 @@ public class DivineDogEntity extends Shikigami{
     }
 
     @Override
-    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            if (order == DivineDogOrder.NONE) {}
-            else if (order == DivineDogOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
-            else if (order == DivineDogOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
+            if (order == ShikigamiOrder.NONE) {}
+            else if (order == ShikigamiOrder.ATTACK) this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+            else if (order == ShikigamiOrder.MOVE) {
+                this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
+            }
             return true;
         }
         return false;
@@ -111,7 +116,7 @@ public class DivineDogEntity extends Shikigami{
 
     @Override
     public void clearOrder() {
-        this.setOrder(DivineDogOrder.NONE);
+        this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
     }
 
@@ -183,9 +188,4 @@ public class DivineDogEntity extends Shikigami{
                 .add(Attributes.JUMP_STRENGTH, 1);
     }
 
-    public enum DivineDogOrder implements IOrder{
-        NONE,
-        ATTACK,
-        MOVE
-    }
 }

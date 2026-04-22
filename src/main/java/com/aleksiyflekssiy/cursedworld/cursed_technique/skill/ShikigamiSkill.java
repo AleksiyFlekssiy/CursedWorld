@@ -1,10 +1,12 @@
 package com.aleksiyflekssiy.cursedworld.cursed_technique.skill;
 
 import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -18,6 +20,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public abstract class ShikigamiSkill extends Skill{
+    protected int orderIndex = 0;
+    protected List<Shikigami> shikigamiList = new ArrayList<>();
     protected List<UUID> shikigamiUUIDList = new ArrayList<>();
     protected boolean isActive;
     protected boolean isTamed;
@@ -71,13 +75,31 @@ public abstract class ShikigamiSkill extends Skill{
         }
         else if (result.getType() == HitResult.Type.MISS && blockAction != null) {
             blockAction.accept(BlockPos.containing(result.getLocation()));
-        };
+        }
     }
 
     public abstract void setShikigami(List<Shikigami> shikigamiList);
 
     //-1 for the previous order, 1 for the next order
-    public abstract void switchOrder(LivingEntity owner, int direction);
+    public void switchOrder(LivingEntity owner, int direction) {
+        if (isTamed) {
+            int first = 0;
+            int last = this.getOrders().size() - 1;
+            switch (direction){
+                case -1 -> {
+                    if (--this.orderIndex < first) this.orderIndex = last;
+                }
+                case 1 -> {
+                    if (++this.orderIndex > last) this.orderIndex = first;
+                }
+            }
+            owner.sendSystemMessage(Component.literal(this.getOrders().get(orderIndex).getOrder()));
+        }
+    }
+
+    public List<ShikigamiOrder> getOrders(){
+        return List.of(ShikigamiOrder.NONE);
+    }
 
     @Override
     public void saveAdditional(CompoundTag tag) {

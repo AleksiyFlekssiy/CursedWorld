@@ -6,6 +6,7 @@ import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.cursedworld.entity.ModEntities;
 import com.aleksiyflekssiy.cursedworld.entity.RabbitEscapeEntity;
 import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.network.ModMessages;
 import com.aleksiyflekssiy.cursedworld.network.SwarmRenderPacket;
 import net.minecraft.core.BlockPos;
@@ -20,7 +21,6 @@ import oshi.util.tuples.Pair;
 import java.util.*;
 
 public class RabbitEscape extends ShikigamiSkill {
-    private int orderIndex = 0;
     private List<Shikigami> rabbits = new ArrayList<>(10);
     private boolean isMoving = false;
 
@@ -48,6 +48,7 @@ public class RabbitEscape extends ShikigamiSkill {
                     rabbit.setPos(spawnPos.getX() + random.nextDouble(-5, 5), spawnPos.getY(), spawnPos.getZ() + random.nextDouble(-5, 5));
                     if (isTamed) rabbit.tame((Player) entity);
                     entity.level().addFreshEntity(rabbits.get(i));
+                    shikigamiList.addAll(rabbits);
                 }
                 isActive = !isActive;
             }
@@ -57,14 +58,14 @@ public class RabbitEscape extends ShikigamiSkill {
                             Random random = new Random();
                             for (Shikigami rabbit : rabbits) {
                                 BlockPos finalBlockPos = blockPos.offset(random.nextInt(-5, 5), 0, random.nextInt(-5, 5));
-                                rabbit.followOrder(null, finalBlockPos, RabbitEscapeEntity.RabbitEscapeOrder.values()[orderIndex]);
+                                rabbit.followOrder(null, finalBlockPos, this.getOrders().get(orderIndex));
                             }
                 },
                         target -> {
                             if (orderIndex == 2) this.surround(target);
                             else {
                                 for (Shikigami rabbit : rabbits) {
-                                    rabbit.followOrder(target, null, RabbitEscapeEntity.RabbitEscapeOrder.values()[orderIndex]);
+                                    rabbit.followOrder(target, null, this.getOrders().get(orderIndex));
                                 }
                             }
                         });
@@ -78,6 +79,7 @@ public class RabbitEscape extends ShikigamiSkill {
                 }
                 rabbits.clear();
                 shikigamiUUIDList.clear();
+                shikigamiList.clear();
                 isActive = !isActive;
             }
         }
@@ -142,28 +144,18 @@ public class RabbitEscape extends ShikigamiSkill {
     }
 
     @Override
-    public void setShikigami(List<Shikigami> shikigamiList) {
-
+    public List<ShikigamiOrder> getOrders() {
+        return List.of(
+                ShikigamiOrder.NONE,
+                ShikigamiOrder.ATTACK,
+                ShikigamiOrder.SURROUND,
+                ShikigamiOrder.MOVE
+        );
     }
 
     @Override
-    public void switchOrder(LivingEntity owner, int direction) {
-        if (isTamed) {
-            switch (direction){
-                case -1 -> {
-                    if (--orderIndex <= -1) orderIndex = 3;
-                }
-                case 1 -> {
-                    if (++orderIndex >= 4) orderIndex = 0;
-                }
-            }
-            switch (orderIndex) {
-                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
-                case 1 -> owner.sendSystemMessage(Component.literal("ATTACK"));
-                case 2 -> owner.sendSystemMessage(Component.literal("SURROUND"));
-                case 3 -> owner.sendSystemMessage(Component.literal("MOVE"));
-            }
-        }
+    public void setShikigami(List<Shikigami> shikigamiList) {
+
     }
 
     @Override

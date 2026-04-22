@@ -53,7 +53,9 @@ public class MaxElephantAI {
     protected static void initializeFightActivity(Brain<MaxElephantEntity> brain){
         brain.addActivityWithConditions(Activity.FIGHT,
                 ImmutableList.of(
-                        Pair.of(0, new WaterSplash(Map.of(), 0, 72000))
+                        Pair.of(0, new WaterSplash(Map.of(), 0, 72000)),
+                        Pair.of(1, SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1)),
+                        Pair.of(2, MeleeAttack.create(30))
                 ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT))

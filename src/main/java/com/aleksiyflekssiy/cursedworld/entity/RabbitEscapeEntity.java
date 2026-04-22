@@ -18,6 +18,8 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
+
 public class RabbitEscapeEntity extends Shikigami{
     protected static final ImmutableList<SensorType<? extends Sensor<? super RabbitEscapeEntity>>> SENSOR_TYPES = ImmutableList.of(
             SensorType.NEAREST_LIVING_ENTITIES,
@@ -64,13 +66,13 @@ public class RabbitEscapeEntity extends Shikigami{
     }
 
     @Override
-    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order) {
         if (super.followOrder(target, blockPos, order)){
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            if (order == RabbitEscapeOrder.ATTACK){
+            if (order == ShikigamiOrder.ATTACK){
                 this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
             }
-            else if (order == RabbitEscapeOrder.MOVE){
+            else if (order == ShikigamiOrder.MOVE){
                 this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
             }
             return true;
@@ -109,14 +111,8 @@ public class RabbitEscapeEntity extends Shikigami{
 
     @Override
     public void clearOrder() {
-        this.setOrder(RabbitEscapeOrder.NONE);
+        this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
     }
 
-    public enum RabbitEscapeOrder implements IOrder{
-        NONE,
-        ATTACK,
-        SURROUND,
-        MOVE
-    }
 }

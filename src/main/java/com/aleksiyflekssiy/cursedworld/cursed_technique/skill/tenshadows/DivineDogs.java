@@ -2,10 +2,7 @@ package com.aleksiyflekssiy.cursedworld.cursed_technique.skill.tenshadows;
 
 import com.aleksiyflekssiy.cursedworld.CursedWorld;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
-import com.aleksiyflekssiy.cursedworld.entity.DivineDogEntity;
-import com.aleksiyflekssiy.cursedworld.entity.ModEntities;
-import com.aleksiyflekssiy.cursedworld.entity.NueEntity;
-import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
+import com.aleksiyflekssiy.cursedworld.entity.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -30,7 +27,6 @@ public class DivineDogs extends ShikigamiSkill {
     private DivineDogEntity whiteDivineDog = null;
     private DivineDogEntity blackDivineDog = null;
     private boolean whiteDogDead, blackDogDead;
-    private byte orderIndex = 0;
 
     public DivineDogs() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -63,6 +59,7 @@ public class DivineDogs extends ShikigamiSkill {
                     whiteDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                     entity.level().addFreshEntity(whiteDivineDog);
                     shikigamiUUIDList.add(whiteDivineDog.getUUID());
+                    shikigamiList.add(whiteDivineDog);
                 }
                 if (!blackDogDead) {
                     blackDivineDog = new DivineDogEntity(ModEntities.DIVINE_DOG.get(), entity.level(), (Player) entity);
@@ -70,6 +67,7 @@ public class DivineDogs extends ShikigamiSkill {
                     blackDivineDog.setPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                     entity.level().addFreshEntity(blackDivineDog);
                     shikigamiUUIDList.add(blackDivineDog.getUUID());
+                    shikigamiList.add(blackDivineDog);
                 }
                 if (isTamed) {
                     if (!whiteDogDead) whiteDivineDog.tame((Player) entity);
@@ -85,12 +83,12 @@ public class DivineDogs extends ShikigamiSkill {
                 setTarget(
                         entity,
                         blockPos -> {
-                            whiteDivineDog.followOrder(null, blockPos, DivineDogEntity.DivineDogOrder.values()[orderIndex]);
-                            blackDivineDog.followOrder(null, blockPos, DivineDogEntity.DivineDogOrder.values()[orderIndex]);
+                            whiteDivineDog.followOrder(null, blockPos, this.getOrders().get(orderIndex));
+                            blackDivineDog.followOrder(null, blockPos, this.getOrders().get(orderIndex));
                         },
                         target -> {
-                            whiteDivineDog.followOrder(target, null, DivineDogEntity.DivineDogOrder.values()[orderIndex]);
-                            blackDivineDog.followOrder(target, null, DivineDogEntity.DivineDogOrder.values()[orderIndex]);
+                            whiteDivineDog.followOrder(target, null, this.getOrders().get(orderIndex));
+                            blackDivineDog.followOrder(target, null, this.getOrders().get(orderIndex));
                         });
             }
         }
@@ -102,6 +100,7 @@ public class DivineDogs extends ShikigamiSkill {
                 whiteDivineDog = null;
                 blackDivineDog = null;
                 shikigamiUUIDList.clear();
+                shikigamiList.clear();
                 isActive = false;
             }
         }
@@ -179,30 +178,20 @@ public class DivineDogs extends ShikigamiSkill {
     }
 
     @Override
+    public List<ShikigamiOrder> getOrders() {
+        return List.of(
+                ShikigamiOrder.NONE,
+                ShikigamiOrder.ATTACK,
+                ShikigamiOrder.MOVE
+        );
+    }
+
+    @Override
     public List<Shikigami> getShikigami() {
         List<Shikigami> shikigami = new ArrayList<>();
         shikigami.add(whiteDivineDog);
         shikigami.add(blackDivineDog);
         return shikigami;
-    }
-
-    @Override
-    public void switchOrder(LivingEntity owner, int direction) {
-        if (isTamed) {
-            switch (direction){
-                case -1 -> {
-                    if (--orderIndex <= -1) orderIndex = 2;
-                }
-                case 1 -> {
-                    if (++orderIndex >= 3) orderIndex = 0;
-                }
-            }
-            switch (orderIndex) {
-                case 0 -> owner.sendSystemMessage(Component.literal("NONE"));
-                case 1 -> owner.sendSystemMessage(Component.literal("ATTACK"));
-                case 2 -> owner.sendSystemMessage(Component.literal("MOVE"));
-            }
-        }
     }
 
     @Override

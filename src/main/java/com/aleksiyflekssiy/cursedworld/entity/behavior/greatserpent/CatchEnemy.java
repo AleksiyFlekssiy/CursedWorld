@@ -1,6 +1,7 @@
 package com.aleksiyflekssiy.cursedworld.entity.behavior.greatserpent;
 
 import com.aleksiyflekssiy.cursedworld.entity.GreatSerpentEntity;
+import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,8 +23,8 @@ public class CatchEnemy extends Behavior<GreatSerpentEntity> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel pLevel, GreatSerpentEntity serpent) {
         return serpent.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRAB_TARGET.get())
-                && (serpent.getOrder() == GreatSerpentEntity.GreatSerpentOrder.CATCH ||
-                serpent.getOrder() == GreatSerpentEntity.GreatSerpentOrder.SMASH);
+                && (serpent.getOrder() == ShikigamiOrder.CATCH ||
+                serpent.getOrder() == ShikigamiOrder.SMASH);
     }
 
     @Override

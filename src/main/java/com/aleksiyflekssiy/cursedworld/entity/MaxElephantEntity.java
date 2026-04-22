@@ -1,10 +1,8 @@
 package com.aleksiyflekssiy.cursedworld.entity;
 
 import com.aleksiyflekssiy.cursedworld.entity.ai.MaxElephantAI;
-import com.aleksiyflekssiy.cursedworld.entity.ai.RabbitEscapeAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomSensorTypes;
-import com.aleksiyflekssiy.cursedworld.util.RotationUtil;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
@@ -25,7 +23,6 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,14 +103,17 @@ public class MaxElephantEntity extends Shikigami{
     }
 
     @Override
-    public boolean followOrder(LivingEntity target, BlockPos blockPos, IOrder order) {
+    public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order) {
         if (super.followOrder(target, blockPos, order)){
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            if (order == MaxElephantOrder.PUSH){
+            if (order == ShikigamiOrder.PUSH){
                 this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
             }
-            else if (order == MaxElephantOrder.MOVE){
+            else if (order == ShikigamiOrder.MOVE){
                 this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
+            }
+            else if (order == ShikigamiOrder.ATTACK) {
+                this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
             }
             return true;
         }
@@ -122,7 +122,7 @@ public class MaxElephantEntity extends Shikigami{
 
     @Override
     public void clearOrder() {
-        this.setOrder(MaxElephantOrder.NONE);
+        this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
     }
 
@@ -138,9 +138,4 @@ public class MaxElephantEntity extends Shikigami{
                 .add(Attributes.JUMP_STRENGTH, 0.5);
     }
 
-    public enum MaxElephantOrder implements IOrder{
-        NONE,
-        PUSH,
-        MOVE
-    }
 }
