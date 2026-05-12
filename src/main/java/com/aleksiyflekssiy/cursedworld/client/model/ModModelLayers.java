@@ -15,4 +15,5 @@ public class ModModelLayers {
     public static final ModelLayerLocation GREAT_SERPENT_SEGMENT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CursedWorld.MOD_ID, "great_serpent_segment"), "main");
     public static final ModelLayerLocation RABBIT_ESCAPE_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CursedWorld.MOD_ID, "rabbit_escape"), "main");
     public static final ModelLayerLocation MAX_ELEPHANT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CursedWorld.MOD_ID, "max_elephant"), "main");
+    public static final ModelLayerLocation ROUND_DEER_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CursedWorld.MOD_ID, "round_deer"), "main");
 }

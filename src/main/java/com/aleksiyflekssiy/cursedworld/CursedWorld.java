@@ -159,6 +159,7 @@ public class CursedWorld
             event.registerEntityRenderer(ModEntities.GREAT_SERPENT_SEGMENT.get(), GreatSerpentSegmentRenderer::new);
             event.registerEntityRenderer(ModEntities.RABBIT_ESCAPE.get(), RabbitEscapeRenderer::new);
             event.registerEntityRenderer(ModEntities.MAX_ELEPHANT.get(), MaxElephantRenderer::new);
+            event.registerEntityRenderer(ModEntities.ROUND_DEER.get(), RoundDeerRenderer::new);
         }
 
         @SubscribeEvent
@@ -173,6 +174,7 @@ public class CursedWorld
             event.registerLayerDefinition(ModModelLayers.GREAT_SERPENT_SEGMENT_LAYER, GreatSerpentSegmentModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.RABBIT_ESCAPE_LAYER, RabbitEscapeEntityModel::createBodyLayer);
             event.registerLayerDefinition(ModModelLayers.MAX_ELEPHANT_LAYER, MaxElephantModel::createBodyLayer);
+            event.registerLayerDefinition(ModModelLayers.ROUND_DEER_LAYER, RoundDeerModel::createBodyLayer);
         }
 
         @SubscribeEvent

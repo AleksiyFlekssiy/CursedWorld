@@ -96,6 +96,11 @@ public class ModEntities {
                     .clientTrackingRange(20)
                     .build(CursedWorld.MOD_ID + ":max_elephant"));
 
+    public static final RegistryObject<EntityType<RoundDeerEntity>> ROUND_DEER = ENTITIES.register("round_deer",
+            () -> EntityType.Builder.of(RoundDeerEntity::new, MobCategory.CREATURE)
+                    .sized(1.5f, 2.5f)
+                    .build(CursedWorld.MOD_ID + ":round_deer"));
+
 
     public static void register(IEventBus bus) {
         ENTITIES.register(bus);
