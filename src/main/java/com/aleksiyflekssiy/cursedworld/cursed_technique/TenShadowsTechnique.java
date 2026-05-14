@@ -7,7 +7,7 @@ import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
 import java.util.List;
 
 public class TenShadowsTechnique extends CursedTechnique{
-    private final List<Skill> skills = List.of(new DivineDogs(), new Nue(), new Toad(), new GreatSerpent(), new RabbitEscape(), new MaxElephant(), new RoundDeer(), new RCTSkill());
+    private final List<Skill> skills = List.of(new DivineDogs(), new Nue(), new Toad(), new GreatSerpent(), new RabbitEscape(), new MaxElephant(), new RoundDeer(), new PiercingOx(), new RCTSkill());
 
     public TenShadowsTechnique() {
         super(true);

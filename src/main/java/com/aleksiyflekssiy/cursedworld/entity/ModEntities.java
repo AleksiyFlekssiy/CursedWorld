@@ -101,6 +101,11 @@ public class ModEntities {
                     .sized(1.5f, 2.5f)
                     .build(CursedWorld.MOD_ID + ":round_deer"));
 
+    public static final RegistryObject<EntityType<PiercingOxEntity>> PIERCING_OX = ENTITIES.register("piercing_ox",
+            () -> EntityType.Builder.of(PiercingOxEntity::new, MobCategory.CREATURE)
+                    .sized(1.5f, 1.5f)
+                    .build(CursedWorld.MOD_ID + ":piercing_ox"));
+
 
     public static void register(IEventBus bus) {
         ENTITIES.register(bus);
