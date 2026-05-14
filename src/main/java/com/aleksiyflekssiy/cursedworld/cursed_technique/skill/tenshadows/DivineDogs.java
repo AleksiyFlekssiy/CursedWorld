@@ -33,16 +33,6 @@ public class DivineDogs extends ShikigamiSkill {
     }
 
     @Override
-    public void use(LivingEntity entity, UseType type, int charge) {
-        System.out.println("USING");
-        switch (type) {
-            case ACTIVATION -> {
-                this.activate(entity);
-            }
-        }
-    }
-
-    @Override
     public void activate(LivingEntity entity) {
         if (isDead() || entity.level().isClientSide) {
             System.out.println("DEAD");

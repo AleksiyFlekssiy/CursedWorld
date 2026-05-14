@@ -25,16 +25,6 @@ public class RabbitEscape extends ShikigamiSkill {
     private boolean isMoving = false;
 
     @Override
-    public void use(LivingEntity entity, UseType type, int charge) {
-        if (entity.level().isClientSide) return;
-        switch (type) {
-            case ACTIVATION -> this.activate(entity);
-            case CHARGING -> this.charge(entity, charge);
-            case RELEASING -> this.release(entity);
-        }
-    }
-
-    @Override
     public void activate(LivingEntity entity) {
         if (isDead) return;
         if (!entity.isCrouching()){

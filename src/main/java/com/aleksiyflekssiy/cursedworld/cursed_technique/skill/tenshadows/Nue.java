@@ -30,13 +30,6 @@ public class Nue extends ShikigamiSkill {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    @Override
-    public void use(LivingEntity entity, UseType type, int charge) {
-        switch (type){
-            case ACTIVATION -> this.activate(entity);
-        }
-    }
-
     public void activate(LivingEntity entity) {
         if (isDead) {
             System.out.println("DEAD");

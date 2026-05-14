@@ -22,14 +22,6 @@ public class GreatSerpent extends ShikigamiSkill {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    @Override
-    public void use(LivingEntity entity, UseType type, int charge) {
-        switch (type){
-            case ACTIVATION -> this.activate(entity);
-            case CHARGING -> this.charge(entity, charge);
-        }
-    }
-
     public void setShikigami(GreatSerpentEntity greatSerpent){
         if (this.greatSerpent == null) {
             this.greatSerpent = greatSerpent;

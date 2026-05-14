@@ -31,13 +31,6 @@ public class Toad extends ShikigamiSkill {
     }
 
     @Override
-    public void use(LivingEntity entity, UseType type, int charge) {
-        switch (type) {
-            case ACTIVATION -> this.activate(entity);
-        }
-    }
-
-    @Override
     public void activate(LivingEntity entity) {
         if (isDead) {
             System.out.println("DEAD");

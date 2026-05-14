@@ -61,6 +61,16 @@ public abstract class ShikigamiSkill extends Skill{
 
     public abstract List<Shikigami> getShikigami();
 
+    @Override
+    public void use(LivingEntity entity, UseType type, int charge) {
+        if (entity.level().isClientSide) return;
+        switch (type) {
+            case ACTIVATION -> this.activate(entity);
+            case CHARGING -> this.charge(entity, charge);
+            case RELEASING -> this.release(entity);
+        }
+    }
+
     protected void setTarget(LivingEntity owner, Consumer<BlockPos> blockAction, Consumer<LivingEntity> entityAction) {
         HitResult result = ProjectileUtil.getHitResultOnViewVector(owner, target -> !target.equals(owner), 100);
         if (result.getType() == HitResult.Type.ENTITY && entityAction != null) {

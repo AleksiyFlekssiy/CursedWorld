@@ -18,14 +18,6 @@ public class MaxElephant extends ShikigamiSkill {
     private Shikigami maxElephant;
 
     @Override
-    public void use(LivingEntity entity, UseType type, int charge) {
-        if (entity.level().isClientSide) return;
-        if (type == UseType.ACTIVATION) this.activate(entity);
-        else if (type == UseType.CHARGING) this.charge(entity, charge);
-        else if (type == UseType.RELEASING) this.release(entity);
-    }
-
-    @Override
     public void activate(LivingEntity entity) {
         if (isDead) return;
         if (!entity.isCrouching()){
