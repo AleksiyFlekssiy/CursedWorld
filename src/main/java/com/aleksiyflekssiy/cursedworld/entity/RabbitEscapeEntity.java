@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public class RabbitEscapeEntity extends Shikigami{
+
     protected static final ImmutableList<SensorType<? extends Sensor<? super RabbitEscapeEntity>>> SENSOR_TYPES = ImmutableList.of(
             SensorType.NEAREST_LIVING_ENTITIES,
             CustomSensorTypes.SHIKIGAMI_OWNER_HURT.get(),

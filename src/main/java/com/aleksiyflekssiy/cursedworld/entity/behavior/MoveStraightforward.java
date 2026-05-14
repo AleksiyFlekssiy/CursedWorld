@@ -20,9 +20,11 @@ public class MoveStraightforward extends Behavior<Mob> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel pLevel, Mob mob) {
-        return mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET) &&
-                (mob.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRAB_TARGET.get()) ||
-                mob.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get()));
+        return mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)
+//                &&
+//                (mob.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRAB_TARGET.get()) ||
+//                mob.getBrain().hasMemoryValue(CustomMemoryModuleTypes.GRABBED_ENTITY.get()))
+                ;
     }
 
     @Override

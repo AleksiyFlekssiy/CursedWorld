@@ -40,8 +40,12 @@ public class GreatSerpentAI {
     protected static void initializeCoreActivity(Brain<GreatSerpentEntity> brain){
         brain.addActivity(Activity.CORE, 0,
                 ImmutableList.of(
-                        new MoveStraightforward(Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT,
-                                MemoryModuleType.PATH, MemoryStatus.VALUE_ABSENT)),
+                        new MoveStraightforward(Map.of(
+                                MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT,
+                                MemoryModuleType.PATH, MemoryStatus.VALUE_ABSENT,
+                                CustomMemoryModuleTypes.GRAB_TARGET.get(), MemoryStatus.VALUE_PRESENT,
+                                CustomMemoryModuleTypes.GRABBED_ENTITY.get(), MemoryStatus.VALUE_PRESENT
+                        )),
 
                         new CustomMoveToTarget(Map.of(
                                 MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT,

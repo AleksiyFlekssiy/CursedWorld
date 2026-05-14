@@ -22,7 +22,8 @@ public class ShikigamiOwnerHurtSensor extends Sensor<LivingEntity> {
             }
         });
         brain.getMemory(CustomMemoryModuleTypes.OWNER_HURT.get()).ifPresent(enemy ->{
-            boolean inDistance = entity.distanceToSqr(enemy) <= entity.getAttributeValue(Attributes.FOLLOW_RANGE);
+            boolean inDistance = true;
+                    //entity.distanceToSqr(enemy) <= entity.getAttributeValue(Attributes.FOLLOW_RANGE);
             if (!enemy.isAlive() || !inDistance) {
                 brain.eraseMemory(CustomMemoryModuleTypes.OWNER_HURT.get());
                 brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
