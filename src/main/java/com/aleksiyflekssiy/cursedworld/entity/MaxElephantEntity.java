@@ -1,8 +1,10 @@
 package com.aleksiyflekssiy.cursedworld.entity;
 
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.cursedworld.entity.ai.MaxElephantAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomSensorTypes;
+import com.aleksiyflekssiy.cursedworld.registry.Skills;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
@@ -43,6 +45,10 @@ public class MaxElephantEntity extends Shikigami{
 
     public MaxElephantEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    public MaxElephantEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, Player owner) {
+        super(pEntityType, pLevel, owner);
     }
 
     @Override
@@ -138,4 +144,8 @@ public class MaxElephantEntity extends Shikigami{
                 .add(Attributes.JUMP_STRENGTH, 0.5);
     }
 
+    @Override
+    protected Skill getCorrespondingSkill() {
+        return Skills.MAX_ELEPHANT.get();
+    }
 }

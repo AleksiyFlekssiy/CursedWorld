@@ -98,13 +98,21 @@ public class DivineDogs extends ShikigamiSkill {
 
     @Override
     public void setShikigami(List<Shikigami> shikigamiList) {
-        if (shikigamiList.size() == 1 && shikigamiList.get(0) instanceof DivineDogEntity divineDogEntity) {
-            if (whiteDogDead && blackDivineDog == null) this.blackDivineDog = divineDogEntity;
-            else if (blackDogDead && whiteDivineDog == null) this.whiteDivineDog = divineDogEntity;
-        }
-        else if (shikigamiList.size() == 2){
-            this.whiteDivineDog = (DivineDogEntity) shikigamiList.get(0);
-            this.blackDivineDog = (DivineDogEntity) shikigamiList.get(1);
+        if (shikigamiList.get(0) == null) throw new RuntimeException("NO SHIKIGAMI");
+        if (shikigamiList.size() == 1) {
+            DivineDogEntity divineDogEntity = (DivineDogEntity) shikigamiList.get(0);
+            if (divineDogEntity.getColor() == DivineDogEntity.Color.BLACK){
+                if (!blackDogDead) {
+                    blackDivineDog = divineDogEntity;
+                    System.out.println("Black UUID: " + blackDivineDog.getUUID());
+                }
+            }
+            else if (divineDogEntity.getColor() == DivineDogEntity.Color.WHITE) {
+                if (!whiteDogDead) {
+                    whiteDivineDog = divineDogEntity;
+                    System.out.println("White UUID: " + whiteDivineDog.getUUID());
+                }
+            }
         }
     }
 

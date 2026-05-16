@@ -1,11 +1,13 @@
 package com.aleksiyflekssiy.cursedworld.entity;
 
 import com.aleksiyflekssiy.cursedworld.client.model.NueAnimations;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.cursedworld.entity.ai.NueAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomSensorTypes;
 import com.aleksiyflekssiy.cursedworld.entity.control.NueMoveControl;
 import com.aleksiyflekssiy.cursedworld.entity.navigation.BluntAirNavigation;
+import com.aleksiyflekssiy.cursedworld.registry.Skills;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -370,5 +372,9 @@ public class NueEntity extends Shikigami {
         ASCEND
     }
 
+    @Override
+    protected Skill getCorrespondingSkill() {
+        return Skills.NUE.get();
+    }
 }
 

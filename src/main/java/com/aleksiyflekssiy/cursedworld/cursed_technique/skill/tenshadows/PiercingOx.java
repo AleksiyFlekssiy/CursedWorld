@@ -22,7 +22,7 @@ public class PiercingOx extends ShikigamiSkill {
         if (!entity.isCrouching()){
             if (!isActive){
                 BlockPos spawnPos = entity.blockPosition();
-                piercingOx = new PiercingOxEntity(ModEntities.PIERCING_OX.get(), entity.level());
+                piercingOx = new PiercingOxEntity(ModEntities.PIERCING_OX.get(), entity.level(), (Player) entity);
                 piercingOx.setPos(spawnPos.getCenter());
 
                 shikigamiUUIDList.add(piercingOx.getUUID());

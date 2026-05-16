@@ -21,7 +21,7 @@ public class RoundDeer extends ShikigamiSkill {
         if (!entity.isCrouching()){
             if (!isActive){
                 BlockPos spawnPos = entity.blockPosition();
-                roundDeer = new RoundDeerEntity(ModEntities.ROUND_DEER.get(), entity.level());
+                roundDeer = new RoundDeerEntity(ModEntities.ROUND_DEER.get(), entity.level(), (Player) entity);
                 roundDeer.setPos(spawnPos.getCenter());
 
                 shikigamiUUIDList.add(roundDeer.getUUID());
@@ -58,7 +58,7 @@ public class RoundDeer extends ShikigamiSkill {
 
     @Override
     public void setShikigami(List<Shikigami> shikigamiList) {
-
+        roundDeer = shikigamiList.get(0);
     }
 
     @Override

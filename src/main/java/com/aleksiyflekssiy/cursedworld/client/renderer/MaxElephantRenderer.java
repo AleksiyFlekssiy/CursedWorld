@@ -3,6 +3,7 @@ package com.aleksiyflekssiy.cursedworld.client.renderer;
 import com.aleksiyflekssiy.cursedworld.CursedWorld;
 import com.aleksiyflekssiy.cursedworld.client.model.MaxElephantModel;
 import com.aleksiyflekssiy.cursedworld.client.model.ModModelLayers;
+import com.aleksiyflekssiy.cursedworld.entity.MaxElephantEntity;
 import com.aleksiyflekssiy.cursedworld.entity.RabbitEscapeEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -10,7 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
-public class MaxElephantRenderer extends MobRenderer<RabbitEscapeEntity, MaxElephantModel<RabbitEscapeEntity>> {
+public class MaxElephantRenderer extends MobRenderer<MaxElephantEntity, MaxElephantModel<MaxElephantEntity>> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(CursedWorld.MOD_ID, "textures/entity/max_elephant.png");
     private final MaxElephantModel model;
 
@@ -20,14 +21,14 @@ public class MaxElephantRenderer extends MobRenderer<RabbitEscapeEntity, MaxElep
     }
 
     @Override
-    public void render(RabbitEscapeEntity entity, float pEntityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    public void render(MaxElephantEntity entity, float pEntityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
         super.render(entity, pEntityYaw, partialTicks, poseStack, buffer, packedLight);
         poseStack.popPose();
     }
 
     @Override
-    public ResourceLocation getTextureLocation(RabbitEscapeEntity pEntity) {
+    public ResourceLocation getTextureLocation(MaxElephantEntity pEntity) {
         return TEXTURE;
     }
 }

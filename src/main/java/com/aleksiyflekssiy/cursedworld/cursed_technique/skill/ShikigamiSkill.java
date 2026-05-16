@@ -145,6 +145,6 @@ public abstract class ShikigamiSkill extends Skill{
     }
 
     public static Shikigami getShikigamiFromUUID(UUID uuid, ServerLevel server) {
-        return ((Shikigami) server.getEntity(uuid));
+        return (Shikigami) server.getEntity(uuid);
     }
 }

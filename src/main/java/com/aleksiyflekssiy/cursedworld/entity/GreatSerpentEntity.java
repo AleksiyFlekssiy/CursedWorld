@@ -2,12 +2,14 @@ package com.aleksiyflekssiy.cursedworld.entity;
 
 import com.aleksiyflekssiy.cursedworld.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.TenShadowsTechnique;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.tenshadows.GreatSerpent;
 import com.aleksiyflekssiy.cursedworld.entity.ai.GreatSerpentAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomSensorTypes;
 import com.aleksiyflekssiy.cursedworld.entity.control.GreatSerpentMoveControl;
 import com.aleksiyflekssiy.cursedworld.entity.navigation.CustomFlyingPathNavigation;
+import com.aleksiyflekssiy.cursedworld.registry.Skills;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
@@ -414,4 +416,8 @@ public class GreatSerpentEntity extends Shikigami {
         });
     }
 
+    @Override
+    protected Skill getCorrespondingSkill() {
+        return Skills.GREAT_SERPENT.get();
+    }
 }

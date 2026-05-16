@@ -32,6 +32,7 @@ public class Skills {
     public static final RegistryObject<Skill> RABBIT_ESCAPE = registerSkill(new RabbitEscape());
     public static final RegistryObject<Skill> MAX_ELEPHANT = registerSkill(new MaxElephant());
     public static final RegistryObject<Skill> ROUND_DEER = registerSkill(new RoundDeer());
+    public static final RegistryObject<Skill> PIERCING_OX = registerSkill(new PiercingOx());
 
     public static final RegistryObject<Skill> RCT = registerSkill(new RCTSkill());
 

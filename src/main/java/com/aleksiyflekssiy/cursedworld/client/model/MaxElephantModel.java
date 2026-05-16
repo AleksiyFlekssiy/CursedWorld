@@ -4,6 +4,7 @@
 package com.aleksiyflekssiy.cursedworld.client.model;
 
 import com.aleksiyflekssiy.cursedworld.CursedWorld;
+import com.aleksiyflekssiy.cursedworld.entity.MaxElephantEntity;
 import com.aleksiyflekssiy.cursedworld.entity.RabbitEscapeEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -14,7 +15,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 
-public class MaxElephantModel<T extends RabbitEscapeEntity> extends HierarchicalModel<T> {
+public class MaxElephantModel<T extends MaxElephantEntity> extends HierarchicalModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CursedWorld.MOD_ID, "max_elephant"), "main");
 	private final ModelPart body;
@@ -66,7 +67,7 @@ public class MaxElephantModel<T extends RabbitEscapeEntity> extends Hierarchical
 	}
 
 	@Override
-	public void setupAnim(RabbitEscapeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(MaxElephantEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
 	}
 

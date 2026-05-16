@@ -23,7 +23,7 @@ public class MaxElephant extends ShikigamiSkill {
         if (!entity.isCrouching()){
             if (!isActive){
                 BlockPos spawnPos = entity.blockPosition();
-                maxElephant = new MaxElephantEntity(ModEntities.MAX_ELEPHANT.get(), entity.level());
+                maxElephant = new MaxElephantEntity(ModEntities.MAX_ELEPHANT.get(), entity.level(), (Player) entity);
                 maxElephant.setPos(spawnPos.getCenter());
 
                 shikigamiUUIDList.add(maxElephant.getUUID());

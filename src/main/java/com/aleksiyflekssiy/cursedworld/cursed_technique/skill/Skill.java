@@ -116,6 +116,7 @@ public abstract class Skill {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == null) return false;
         if (!(obj instanceof Skill other)) return false;
         return this.getName().equals(other.getName());
     }

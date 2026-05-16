@@ -37,34 +37,34 @@ public class ForgeEvents {
             CompoundTag nbt = technique.serializeNbtToNetwork();
             System.out.println("Server NBT: " + nbt);
             ModMessages.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new TechniqueSyncPacket(nbt));
-            if (technique.getTechnique() instanceof TenShadowsTechnique tenShadowsTechnique) {
-                for (Skill skill : tenShadowsTechnique.getSkillSet()){
-                    if (skill instanceof ShikigamiSkill shikigamiSkill) {
-                        List<UUID> shikigamiUUIDList = shikigamiSkill.getShikigamiUUID();
-                        if (shikigamiUUIDList.isEmpty()) continue;
-                        List<Shikigami> shikigamiList = shikigamiUUIDList
-                                .stream()
-                                .map(shikigamiUUID -> ShikigamiSkill.getShikigamiFromUUID(shikigamiUUID, (ServerLevel) player.level()))
-                                .toList();
-                        List<Shikigami> mutableShikigamiList = new ArrayList<>(shikigamiList);
-                        shikigamiList.forEach(shikigami -> {
-                            if (shikigami != null){
-                                if (shikigamiSkill.isTamed()) {
-                                    shikigami.tame(player);
-                                    System.out.println(skill.getName() + " has tamed");
-                                }
-                                else {
-                                    shikigami.setOwner(player);
-                                    System.out.println(skill.getName() + " has gained the owner");
-                                }
-                            }
-                            else System.out.println(skill.getName() + " is null");
-                        });
-                        shikigamiSkill.setShikigami(mutableShikigamiList);
-                    }
-                    else System.out.println(skill.getName() + " isn't shikigami");
-                }
-            } else System.out.println("Wrong technique");
+//            if (technique.getTechnique() instanceof TenShadowsTechnique tenShadowsTechnique) {
+//                for (Skill skill : tenShadowsTechnique.getSkillSet()){
+//                    if (skill instanceof ShikigamiSkill shikigamiSkill) {
+//                        List<UUID> shikigamiUUIDList = shikigamiSkill.getShikigamiUUID();
+//                        if (shikigamiUUIDList.isEmpty()) continue;
+//                        List<Shikigami> shikigamiList = shikigamiUUIDList
+//                                .stream()
+//                                .map(shikigamiUUID -> ShikigamiSkill.getShikigamiFromUUID(shikigamiUUID, (ServerLevel) player.level()))
+//                                .toList();
+//                        List<Shikigami> mutableShikigamiList = new ArrayList<>(shikigamiList);
+//                        shikigamiList.forEach(shikigami -> {
+//                            if (shikigami != null){
+//                                if (shikigamiSkill.isTamed()) {
+//                                    shikigami.tame(player);
+//                                    System.out.println(skill.getName() + " has tamed");
+//                                }
+//                                else {
+//                                    shikigami.setOwner(player);
+//                                    System.out.println(skill.getName() + " has gained the owner");
+//                                }
+//                            }
+//                            else System.out.println(skill.getName() + " is null");
+//                        });
+//                        shikigamiSkill.setShikigami(mutableShikigamiList);
+//                    }
+//                    else System.out.println(skill.getName() + " isn't shikigami");
+//                }
+//            } else System.out.println("Wrong technique");
         });
         player.getCapability(CursedEnergyCapability.CURSED_ENERGY).ifPresent(energy -> {
             CursedEnergySyncPacket.updateToClient(energy.serializeNBT(), player);

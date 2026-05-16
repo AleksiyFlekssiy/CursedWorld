@@ -1,11 +1,19 @@
 package com.aleksiyflekssiy.cursedworld.entity;
 
+import com.aleksiyflekssiy.cursedworld.capability.CursedEnergyCapability;
+import com.aleksiyflekssiy.cursedworld.capability.CursedTechniqueCapability;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.TenShadowsTechnique;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.tenshadows.PiercingOx;
 import com.aleksiyflekssiy.cursedworld.entity.ai.PiercingOxAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomSensorTypes;
+import com.aleksiyflekssiy.cursedworld.registry.Skills;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +28,8 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 public class PiercingOxEntity extends Shikigami{
 
@@ -37,6 +47,10 @@ public class PiercingOxEntity extends Shikigami{
 
     public PiercingOxEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    public PiercingOxEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, Player owner) {
+        super(pEntityType, pLevel, owner);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -74,6 +88,34 @@ public class PiercingOxEntity extends Shikigami{
     }
 
     @Override
+    public void tick() {
+        super.tick();
+
+        if (!level().isClientSide){
+
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+//        if (isTamed) {
+//            owner.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(technique ->{
+//                if (technique.getTechnique() instanceof TenShadowsTechnique tenShadows){
+//                    for (Skill skill : tenShadows.getSkillSet()){
+//                        if (skill instanceof PiercingOx piercingOx){
+//                            piercingOx.setShikigami(List.of(this));
+//                            System.out.println("WORKED FOR OX");
+//                        }
+//                    }
+//                }
+//                else System.out.println("Not Ten Shadows");
+//            });
+//        }
+//        else System.out.println("Not tamed");
+    }
+
+    @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
         PiercingOxAI.updateActivity(this.getBrain());
@@ -99,5 +141,10 @@ public class PiercingOxEntity extends Shikigami{
     public void clearOrder() {
         this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
+    }
+
+    @Override
+    protected Skill getCorrespondingSkill() {
+        return Skills.PIERCING_OX.get();
     }
 }

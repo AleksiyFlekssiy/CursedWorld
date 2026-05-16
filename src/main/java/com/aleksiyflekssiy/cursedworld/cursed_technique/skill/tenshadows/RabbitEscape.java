@@ -21,7 +21,7 @@ import oshi.util.tuples.Pair;
 import java.util.*;
 
 public class RabbitEscape extends ShikigamiSkill {
-    private List<Shikigami> rabbits = new ArrayList<>(10);
+    private final List<Shikigami> rabbits = new ArrayList<>(10);
     private boolean isMoving = false;
 
     @Override
@@ -33,7 +33,7 @@ public class RabbitEscape extends ShikigamiSkill {
                 BlockPos spawnPos = entity.blockPosition();
                 Random random = new Random();
                 for (int i = 0; i < 10; i++) {
-                    RabbitEscapeEntity rabbit = new RabbitEscapeEntity(ModEntities.RABBIT_ESCAPE.get(), entity.level());
+                    RabbitEscapeEntity rabbit = new RabbitEscapeEntity(ModEntities.RABBIT_ESCAPE.get(), entity.level(), (Player) entity);
                     rabbits.add(rabbit);
                     rabbit.setPos(spawnPos.getX() + random.nextDouble(-5, 5), spawnPos.getY(), spawnPos.getZ() + random.nextDouble(-5, 5));
                     if (isTamed) rabbit.tame((Player) entity);
@@ -145,7 +145,7 @@ public class RabbitEscape extends ShikigamiSkill {
 
     @Override
     public void setShikigami(List<Shikigami> shikigamiList) {
-
+        this.rabbits.add(shikigamiList.get(0));
     }
 
     @Override

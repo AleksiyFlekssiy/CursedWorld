@@ -1,9 +1,11 @@
 package com.aleksiyflekssiy.cursedworld.entity;
 
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
 import com.aleksiyflekssiy.cursedworld.entity.ai.DivineDogAI;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomMemoryModuleTypes;
 import com.aleksiyflekssiy.cursedworld.entity.behavior.CustomSensorTypes;
 import com.aleksiyflekssiy.cursedworld.entity.navigation.CustomGroundNavigation;
+import com.aleksiyflekssiy.cursedworld.registry.Skills;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
@@ -188,4 +190,8 @@ public class DivineDogEntity extends Shikigami{
                 .add(Attributes.JUMP_STRENGTH, 1);
     }
 
+    @Override
+    protected Skill getCorrespondingSkill() {
+        return Skills.DIVINE_DOGS.get();
+    }
 }

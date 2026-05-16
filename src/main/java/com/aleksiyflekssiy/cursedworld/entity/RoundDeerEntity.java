@@ -1,8 +1,11 @@
 package com.aleksiyflekssiy.cursedworld.entity;
 
+import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
+import com.aleksiyflekssiy.cursedworld.registry.Skills;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
@@ -11,6 +14,10 @@ import java.util.List;
 public class RoundDeerEntity extends Shikigami{
     public RoundDeerEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    public RoundDeerEntity(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, Player owner) {
+        super(pEntityType, pLevel, owner);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -36,5 +43,10 @@ public class RoundDeerEntity extends Shikigami{
 
             for (LivingEntity entity : entities) entity.heal(1);
         }
+    }
+
+    @Override
+    protected Skill getCorrespondingSkill() {
+        return Skills.ROUND_DEER.get();
     }
 }
