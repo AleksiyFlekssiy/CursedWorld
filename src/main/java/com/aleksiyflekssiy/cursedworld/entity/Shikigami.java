@@ -4,25 +4,21 @@ import com.aleksiyflekssiy.cursedworld.capability.CursedTechniqueCapability;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.CursedTechnique;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.ShikigamiSkill;
 import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.Skill;
-import com.aleksiyflekssiy.cursedworld.registry.Skills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
-public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
+public abstract class Shikigami extends PathfinderMob {
     protected Player owner;
-    protected UUID ownerUUID;
     protected boolean isTamed = false;
     protected ShikigamiOrder currentOrder = ShikigamiOrder.NONE;
     protected boolean requiresBinding = false;
@@ -30,13 +26,11 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     public Shikigami(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.owner = null;
-        this.ownerUUID = null;
     }
 
     public Shikigami(EntityType<? extends PathfinderMob> pEntityType, Level pLevel, Player owner) {
         super(pEntityType, pLevel);
         this.owner = owner;
-        this.ownerUUID = owner.getUUID();
     }
 
     public void tame(Player owner){
@@ -47,12 +41,6 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
         return isTamed;
     }
 
-    @Override
-    public UUID getOwnerUUID() {
-        return ownerUUID;
-    }
-
-    @Override
     public Player getOwner() {
         return owner;
     }
@@ -94,9 +82,9 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        if (getOwner() != null && getOwnerUUID() != null) {
-            tag.putUUID("ownerUUID", this.getOwnerUUID());
-            System.out.println("UUID: " + this.getOwnerUUID());
+        if (getOwner() != null) {
+            tag.putUUID("ownerUUID", owner.getUUID());
+            System.out.println("UUID: " + owner.getUUID());
         }
     }
 
@@ -104,11 +92,10 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         if (tag.contains("ownerUUID")) {
-            this.ownerUUID = tag.getUUID("ownerUUID");
-            this.owner = level().getPlayerByUUID(ownerUUID);
+            UUID ownerUUID = tag.getUUID("ownerUUID");
+            owner = level().getPlayerByUUID(ownerUUID);
         }
         if (owner != null){
-            tame(owner);
             requiresBinding = true;
         }
     }
@@ -127,8 +114,9 @@ public abstract class Shikigami extends PathfinderMob implements OwnableEntity {
         owner.getCapability(CursedTechniqueCapability.CURSED_TECHNIQUE).ifPresent(capability -> {
             CursedTechnique technique = capability.getTechnique();
             for (Skill skill : technique.getSkillSet()){
-                if (skill.equals(this.getCorrespondingSkill())){
+                if (skill.equals(getCorrespondingSkill())){
                     ShikigamiSkill shikigamiSkill = (ShikigamiSkill) skill;
+                    if (shikigamiSkill.isTamed()) tame(owner);
                     shikigamiSkill.setShikigami(List.of(this));
                     System.out.println(shikigamiSkill.getName() + " was initialized");
                 }

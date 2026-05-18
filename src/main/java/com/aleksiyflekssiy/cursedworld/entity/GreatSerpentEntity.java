@@ -326,7 +326,6 @@ public class GreatSerpentEntity extends Shikigami {
     public boolean followOrder(LivingEntity target, BlockPos blockPos, ShikigamiOrder order) {
         if (super.followOrder(target, blockPos, order)) {
             this.getBrain().stopAll((ServerLevel) this.level(), this);
-            segments.forEach(segment -> segment.getBrain().stopAll((ServerLevel) level(), segment));
             if (order == ShikigamiOrder.MOVE) this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, 1, 1));
             else if (order == ShikigamiOrder.CATCH) {
                 if (!this.isAddedToWorld()) {
@@ -411,9 +410,6 @@ public class GreatSerpentEntity extends Shikigami {
         this.setOrder(ShikigamiOrder.NONE);
         this.getBrain().stopAll((ServerLevel) this.level(), this);
         getBrain().eraseMemory(CustomMemoryModuleTypes.ORDER.get());
-        segments.forEach(segment -> {
-            segment.getBrain().stopAll((ServerLevel) level(), segment);
-        });
     }
 
     @Override

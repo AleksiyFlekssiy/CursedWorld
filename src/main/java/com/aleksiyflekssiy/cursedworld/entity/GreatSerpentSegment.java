@@ -128,8 +128,10 @@ public class GreatSerpentSegment extends PathfinderMob {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        if (parent != null){
         tag.putInt("index", index);
         tag.putUUID("parentUUID", parent.getUUID());
+        }
     }
 
     @Override
@@ -139,30 +141,4 @@ public class GreatSerpentSegment extends PathfinderMob {
         this.parentUUID = tag.getUUID("parentUUID");
     }
 
-    @Override
-    protected Brain.Provider<GreatSerpentSegment> brainProvider() {
-        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
-    }
-
-    @Override
-    protected Brain<?> makeBrain(Dynamic<?> pDynamic) {
-        Brain<GreatSerpentSegment> brain = this.brainProvider().makeBrain(pDynamic);
-        return GreatSerpentAI.makeSegmentBrain(brain);
-    }
-
-    @Override
-    public Brain<GreatSerpentSegment> getBrain() {
-        return (Brain<GreatSerpentSegment>) super.getBrain();
-    }
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-    }
-
-    @Override
-    protected void customServerAiStep() {
-        this.getBrain().tick((ServerLevel)this.level(), this);
-        super.customServerAiStep();
-    }
 }
