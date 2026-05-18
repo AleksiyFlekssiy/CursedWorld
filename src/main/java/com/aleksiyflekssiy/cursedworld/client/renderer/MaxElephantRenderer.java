@@ -23,6 +23,7 @@ public class MaxElephantRenderer extends MobRenderer<MaxElephantEntity, MaxEleph
     @Override
     public void render(MaxElephantEntity entity, float pEntityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
+        poseStack.scale(2,2,2);
         super.render(entity, pEntityYaw, partialTicks, poseStack, buffer, packedLight);
         poseStack.popPose();
     }

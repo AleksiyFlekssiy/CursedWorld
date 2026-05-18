@@ -6,6 +6,7 @@ import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.limitless.HollowPu
 import com.aleksiyflekssiy.cursedworld.cursed_technique.skill.limitless.Red;
 import com.aleksiyflekssiy.cursedworld.damage.ModDamageSources;
 import com.aleksiyflekssiy.cursedworld.event.SkillEvent;
+import com.aleksiyflekssiy.cursedworld.phys.DestructionManager;
 import com.aleksiyflekssiy.cursedworld.sound.ModSoundEvents;
 import com.aleksiyflekssiy.cursedworld.util.CustomExplosion;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -300,6 +301,7 @@ public class RedEntity extends Projectile {
                 if (canHitEntity(hitEntity)) {
                     hitEntity.hurt(ModDamageSources.red(this, this.owner), speed * explosionPower);
                     hitEntity.setDeltaMovement(this.getDeltaMovement().scale(speed));
+                    DestructionManager.trackEntity(hitEntity);
                     if (hitEntity instanceof LivingEntity livingEntity) {
                         SkillEvent.Hit hitEvent = new SkillEvent.Hit(this.owner, getSkill(), livingEntity);
                         MinecraftForge.EVENT_BUS.post(hitEvent);

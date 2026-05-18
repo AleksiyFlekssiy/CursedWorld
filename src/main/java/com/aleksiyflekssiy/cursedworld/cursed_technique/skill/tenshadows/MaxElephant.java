@@ -7,6 +7,7 @@ import com.aleksiyflekssiy.cursedworld.entity.MaxElephantEntity;
 import com.aleksiyflekssiy.cursedworld.entity.ModEntities;
 import com.aleksiyflekssiy.cursedworld.entity.Shikigami;
 import com.aleksiyflekssiy.cursedworld.entity.ShikigamiOrder;
+import com.aleksiyflekssiy.cursedworld.phys.DestructionManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,6 +30,7 @@ public class MaxElephant extends ShikigamiSkill {
                 shikigamiUUIDList.add(maxElephant.getUUID());
                 shikigamiList.add(maxElephant);
                 entity.level().addFreshEntity(maxElephant);
+                DestructionManager.trackEntity(maxElephant);
 
                 if (isTamed){
                     maxElephant.tame((Player) entity);

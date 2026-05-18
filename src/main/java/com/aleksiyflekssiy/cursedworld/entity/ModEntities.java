@@ -90,7 +90,7 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<MaxElephantEntity>> MAX_ELEPHANT = ENTITIES.register("max_elephant",
             () -> EntityType.Builder.<MaxElephantEntity>of(MaxElephantEntity::new, MobCategory.CREATURE)
-                    .sized(2f, 3.5f)
+                    .sized(4f, 4f)
                     .setUpdateInterval(1)
                     .setShouldReceiveVelocityUpdates(true)
                     .clientTrackingRange(20)
